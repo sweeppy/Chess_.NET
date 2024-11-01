@@ -1,15 +1,16 @@
 const Welcome = () => {
   return (
-    <main data-center>
-      <div className="even-colums">
-        <div>
+    <main className="main">
+      <div data-column className="flex-center flow">
+        <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
+        <div className="img-container">
           <img
             height={300}
-            src="/public/assets/boards/plain_01.svg"
+            src="/public/web_design/images/welcome_board.svg"
             alt="chess_board"
           />
         </div>
-        <div>text</div>
+        <button className="primary-button">Start Chess Jorney</button>
       </div>
     </main>
   );

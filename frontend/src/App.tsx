@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Welcome from "./Components/Home/Welcome";
+import WholeHome from "./Components/Home/WholeHome";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="" element={<Welcome />}></Route>
+        <Route path="" element={<WholeHome />}></Route>
       </Routes>
     </Router>
   );

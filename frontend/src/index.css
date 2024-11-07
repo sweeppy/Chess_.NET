@@ -23,8 +23,8 @@
   --fs-secondary-heading: var(--fs-500);
   --fs-body: var(--fs-400);
 
-  --fs-common-button: 0.85rem;
-  --fs-button: var(var(--fs-300));
+  --fs-button: 0.9rem;
+  --fs-primary-button: var(--fs-300);
 
   --fw-regular: 400;
   --fw-semi-bold: 500;
@@ -32,7 +32,7 @@
   --fw-x-bold: 800;
 
   --size-100: 0.25rem;
-  --size-150: 0.3rem;
+  --size-150: 0.4rem;
   --size-200: 0.5rem;
   --size-300: 0.75rem;
   --size-400: 1rem;
@@ -158,6 +158,17 @@ picture {
   }
 }
 
+/* For button with icon inside */
+button[data-icon] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+button[data-icon] img {
+  width: 18px;
+  height: 18px;
+}
+
 /* Utitility classes */
 
 .max-width {
@@ -272,7 +283,7 @@ picture {
   padding: 0px;
 }
 
-.auth-container {
+.column-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,7 +318,7 @@ picture {
 .primary-button {
   border-radius: var(--size-200);
   background-color: var(--clr-button);
-  font-size: var(--fs-button);
+  font-size: var(--fs-primary-button);
   color: var(--clr-text);
   border: none;
   padding: var(--size-300);
@@ -315,23 +326,24 @@ picture {
   transition: all 0.3s;
   color: var(--clr-button-text);
 }
+
 .primary-button:hover {
   scale: 1.03;
 }
 
-.common-button {
+.button {
   border-radius: var(--size-100);
   background-color: var(--clr-button);
-  font-size: var(--fs-common-button);
+  font-size: var(--fs-button);
   color: var(--clr-text);
   border: none;
-  padding: var(--size-150);
+  padding-block: var(--size-150);
   padding-inline: var(--size-300);
   transition: all 0.3s;
   color: var(--clr-button-text);
 }
-.common-button:hover {
-  scale: 1.01;
+.button:hover {
+  scale: 1.02;
 }
 
 .flex-center {

@@ -14,10 +14,10 @@ const Sidebar = ({
       className="sidebar inline-padding padding-block flex-center"
     >
       <h2 className="inline-padding padding-block-600">
-        Get better with pixel chess online!
+        To start playing you need to log in
       </h2>
       <button className="primary-button max-width" onClick={handleLoginClick}>
-        Sign in
+        Login
       </button>
       <div data-column className="flex-center padding-block-600">
         <h2>Socials</h2>

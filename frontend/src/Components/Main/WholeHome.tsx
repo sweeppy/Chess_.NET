@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Welcome from "./Welcome";
 
-const WholeHome = () => {
+const MainPage = () => {
   // Use navigate
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ const WholeHome = () => {
   };
   // Telegram
   const handelTelegramIconClick = () => {
-    window.open("/https://t.me/sweeppy");
+    window.open("https://t.me/sweeppy");
   };
   return (
     <div className="even-columns no-scroll">
@@ -31,4 +31,4 @@ const WholeHome = () => {
   );
 };
 
-export default WholeHome;
+export default MainPage;

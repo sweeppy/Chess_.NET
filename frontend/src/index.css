@@ -405,3 +405,12 @@ button[data-icon] img {
   cursor: pointer;
   scale: 1.03;
 }
+
+@media (min-width: 50em) {
+  .primary-nav {
+    position: fixed;
+    height: 100vh;
+    width: 20%;
+    background-color: var(--clr-accent-100);
+  }
+}

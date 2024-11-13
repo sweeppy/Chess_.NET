@@ -8,7 +8,7 @@ const Welcome = ({ handleLoginClick }: Props) => {
         <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
         <img
           height={300}
-          src="/public/web_design/images/welcome_board.svg"
+          src="/public/game/welcome_board.svg"
           alt="chess_board"
         />
         <button className="primary-button" onClick={handleLoginClick}>

@@ -20,13 +20,15 @@ const MainPage = () => {
     window.open("https://t.me/sweeppy");
   };
   return (
-    <div className="even-columns no-scroll">
-      <Welcome handleLoginClick={handleLoginClick} />
-      <Sidebar
-        handleLoginClick={handleLoginClick}
-        handleGithubIconClick={handleGithubIconClick}
-        handleTelegramIconClick={handelTelegramIconClick}
-      />
+    <div className="container">
+      <div className="even-columns no-scroll">
+        <Welcome handleLoginClick={handleLoginClick} />
+        <Sidebar
+          handleLoginClick={handleLoginClick}
+          handleGithubIconClick={handleGithubIconClick}
+          handleTelegramIconClick={handelTelegramIconClick}
+        />
+      </div>
     </div>
   );
 };

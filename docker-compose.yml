@@ -5,12 +5,14 @@ networks:
 services:
   usersdb:
     image: postgres:latest
-    container_name: usersdb
+    container_name: chess_usersdb
     environment:
       - POSTGRES_DB=usersdb
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports: -5433:5433
-    networks: -dev
+    ports:
+      - 5433:5432
+    networks:
+      - dev
     volumes:
       - ./.containers/usersdb:/var/lib/postgresql/data

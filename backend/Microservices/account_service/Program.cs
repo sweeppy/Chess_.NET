@@ -1,9 +1,12 @@
+using account_service.Data;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
 builder.Services.AddControllers();
+
+// Dependences
+builder.Services.AddScoped<UserDbContext>();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Account_Chess API", Version = "v1.0.0" });

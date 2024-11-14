@@ -16,15 +16,15 @@ const Home = () => {
           <h3 data-scaleble>History</h3>
         </div>
       </nav>
-      <div className="home padding-block-1000">
-        <div className="flex-center">
+      <div className="home even-columns padding-block-400">
+        <div className="board">
           <img
-            height={500}
+            width={"100%"}
             src="/public/game/home_board.svg"
             alt="chess_board"
           />
         </div>
-        <div className="play-menu padding-block-400">
+        <div className="play-menu padding-block-400 inline-padding">
           <h1 className="fs-primary-heading">Play chess</h1>
 
           <div className="item fs-small inline-padding fw-bold">

@@ -1,0 +1,16 @@
+networks:
+  dev:
+    driver: bridge
+
+services:
+  usersdb:
+    image: postgres:latest
+    container_name: usersdb
+    environment:
+      - POSTGRES_DB=usersdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports: -5433:5433
+    networks: -dev
+    volumes:
+      - ./.containers/usersdb:/var/lib/postgresql/data

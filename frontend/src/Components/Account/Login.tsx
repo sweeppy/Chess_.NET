@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { AlternativeLogin } from "./AlternativeLogin";
+import { isUserExistsRequestAsync } from "../../Requests/Auth/IsUserExists";
 
 const Login = () => {
   // When user is not registered - verificatiion section
@@ -8,6 +9,23 @@ const Login = () => {
   // When user is registered - password section
   const [isPasswordSectionVisible, setIsPasswordSectionVisible] =
     useState(false);
+
+  // Email input
+  const [emailText, setEmailText] = useState("");
+  const handleEmailTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmailText(e.target.value);
+    if (isVerificationSectionVisible || isPasswordSectionVisible) {
+      setIsVerificationSectionVisible(false);
+      setIsPasswordSectionVisible(false);
+    }
+  };
+
+  // After email input
+  const handleEmailContinueClick = async () => {
+    if (await isUserExistsRequestAsync(emailText)) {
+      setIsPasswordSectionVisible(true);
+    } else setIsVerificationSectionVisible(true); //TODO there must be check error function
+  };
   return (
     <div className="container column-container">
       <h2 className="fs-xl fw-bold padding-block-900">Log in</h2>
@@ -21,10 +39,14 @@ const Login = () => {
             className="input"
             type="email"
             placeholder="Enter you email..."
+            value={emailText}
+            onChange={handleEmailTextChange}
           />
         </div>
       </div>
-      <button className="button max-width">Continue</button>
+      <button className="button max-width" onClick={handleEmailContinueClick}>
+        Continue
+      </button>
       {isVerificationSectionVisible && (
         <>
           <div className="max-width padding-block-600">

@@ -1,8 +1,4 @@
-
-using System.Runtime.CompilerServices;
 using account_service.AccountActions;
-using account_service.Contracts;
-using account_service.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace account_service.API_controllers
@@ -26,13 +22,18 @@ namespace account_service.API_controllers
         //     return NoContent();
         // }
 
-        [HttpPost("IsUserExists")]
-        public async Task<IActionResult> IsUserRegistered([FromBody]string email)
+        [HttpPost("EmailLogin")]
+        public async Task<IActionResult> LoginByEmail([FromBody]string email)
         {
             try
             {
+                // Chech user in db
                 bool result = await _userService.IsUserExists(email);
-                return Ok(result);
+                if (!result)
+                {
+                    
+                }
+                return NoContent();
             }
             catch (Exception ex)
             {

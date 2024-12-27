@@ -7,5 +7,7 @@ namespace account_service.Models
         public string Password { get; set; }
         public string Username { get; set; }
         public string ImagePath { get; set; }
+
+        public string VerifyCode { get; set; }
     }
 }

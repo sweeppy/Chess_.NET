@@ -18,10 +18,11 @@ namespace account_service.AccountServices
         {
             throw new NotImplementedException();
         }
-
+        // Send by Twilio
         public async Task<BaseResponse> SendEmailConfirmation(string email)
         {
-            throw new NotImplementedException();
+            var accountSid = "";
+            throw new   NotImplementedException();
         }
 
         public async Task<BaseResponse> VerifyConfirmationCode(string email, string verificationCode)

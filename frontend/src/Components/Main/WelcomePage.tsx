@@ -19,34 +19,29 @@ const WelcomePage = () => {
   };
   return (
     <div className="container">
-      <div className="even-columns no-scroll">
-        <main className="main">
-          <div data-column className="flex-center flow">
-            <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
-            <img
-              height={300}
-              src="/design/game/assets/boards/persp_04.svg"
-              alt="chess_board"
-            />
-            <button className="primary-button" onClick={handleLoginClick}>
-              Start Chess Jorney
-            </button>
-          </div>
-        </main>
-        <div
-          data-column
-          className="sidebar inline-padding padding-block flex-center"
-        >
+      <div className="even-columns no-scroll max-height">
+        <div className="flex-column flex-center flow">
+          <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
+          <img
+            height={300}
+            src="/design/game/assets/boards/persp_04.svg"
+            alt="chess_board"
+          />
+          <button className="button button-accent" onClick={handleLoginClick}>
+            Start Chess Jorney
+          </button>
+        </div>
+        <div className="flex-column flex-center">
           <h2 className="inline-padding padding-block-600">
             To start playing you need to log in
           </h2>
           <button
-            className="primary-button max-width"
+            className="button button-accent max-width"
             onClick={handleLoginClick}
           >
             Login
           </button>
-          <div data-column className="flex-center padding-block-600">
+          <div className="flex-center flex-column padding-block-600">
             <h2>Socials</h2>
             <div className="row-group">
               <div className="img-container">

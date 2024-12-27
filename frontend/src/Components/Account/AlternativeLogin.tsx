@@ -4,7 +4,7 @@ interface Props {
 export const AlternativeLogin = ({ className }: Props) => {
   return (
     <div className={`max-width ${className}`}>
-      <button data-icon className="primary-button max-width">
+      <button data-icon className="button max-width">
         <img src="/design/web/icons/auth/google_icon.svg" alt="Google icon" />
         <div>Continue with Google</div>
       </button>

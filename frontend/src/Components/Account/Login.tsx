@@ -27,7 +27,7 @@ const Login = () => {
     } else setIsVerificationSectionVisible(true); //TODO there must be check error function
   };
   return (
-    <div className="container column-container">
+    <div className="container auth-container">
       <h2 className="fs-xl fw-bold padding-block-900">Log in</h2>
       <AlternativeLogin />
       <div className="max-width padding-block-600">

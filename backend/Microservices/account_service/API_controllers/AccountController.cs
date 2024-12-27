@@ -11,10 +11,10 @@ namespace account_service.API_controllers
     [Route("api/Account")]
     public class AccountController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IAccountService _userService;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IUserService userService, ILogger<AccountController> logger)
+        public AccountController(IAccountService userService, ILogger<AccountController> logger)
         {
             _userService = userService;
             _logger = logger;

@@ -12,9 +12,9 @@ builder.Services.AddScoped<UserDbContext>();
 
 // Add jwt configuration
 CustomJwtConfiguration.AddCustomJwtAuthentication(builder.Services, builder.Configuration);
-
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+// For actions with authentication
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddSwaggerGen(options =>
 {

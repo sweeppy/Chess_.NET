@@ -18,11 +18,7 @@ const Home = () => {
       </nav>
       <div className="home even-columns padding-block-400">
         <div className="board">
-          <img
-            width={"100%"}
-            src="/public/game/home_board.svg"
-            alt="chess_board"
-          />
+          <img width={"100%"} src="/game/home_board.svg" alt="chess_board" />
         </div>
         <div className="play-menu padding-block-400 inline-padding">
           <h1 className="fs-primary-heading">Play chess</h1>
@@ -30,7 +26,7 @@ const Home = () => {
           <div className="item fs-small inline-padding fw-bold">
             <div className="img-container">
               <img
-                src="/public/web_design/icons/play/lightning_icon.svg"
+                src="/web/icons/play/lightning_icon.svg"
                 alt="lighting_icon"
               />
             </div>
@@ -39,10 +35,7 @@ const Home = () => {
 
           <div className="item fs-small inline-padding fw-bold">
             <div className="img-container">
-              <img
-                src="/public/web_design/icons/play/user_icon.svg"
-                alt="friend_icon"
-              />
+              <img src="/web/icons/play/user_icon.svg" alt="friend_icon" />
             </div>
             <div className="text-center">Play with friend</div>
           </div>
@@ -50,7 +43,7 @@ const Home = () => {
           <div className="item fs-small inline-padding fw-bold">
             <div className="img-container">
               <img
-                src="/public/web_design/icons/play/computer_icon.svg"
+                src="/web/icons/play/computer_icon.svg"
                 alt="computer_icon"
               />
             </div>

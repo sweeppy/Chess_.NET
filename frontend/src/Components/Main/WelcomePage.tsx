@@ -24,7 +24,7 @@ const WelcomePage = () => {
           <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
           <img
             height={300}
-            src="/design/game/assets/boards/persp_04.svg"
+            src="/design/game/welcome_board.svg"
             alt="chess_board"
           />
           <button className="button button-accent" onClick={handleLoginClick}>

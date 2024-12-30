@@ -1,10 +1,12 @@
+import { useState } from "react";
 import Nav from "../../Main/Nav";
-import { initialPieces } from "./Pieces";
+import { initialPieces } from "./GameScripts/Pieces";
 
 const Computer = () => {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
+  const [peices, setPieces] = useState(initialPieces);
   const pieces = initialPieces;
 
   const getIndexFromPosition = (position: string): number => {

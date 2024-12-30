@@ -1,4 +1,4 @@
-interface ChessPiece {
+export interface ChessPiece {
   type: string;
   color: string;
   position: string;

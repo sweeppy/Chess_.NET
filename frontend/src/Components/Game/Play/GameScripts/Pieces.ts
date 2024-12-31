@@ -1,6 +1,6 @@
 export interface ChessPiece {
-  type: string;
-  color: string;
+  type: "rook" | "knight" | "bishop" | "queen" | "king" | "pawn";
+  color: "black" | "white";
   position: string;
   svg: string;
 }
@@ -58,12 +58,14 @@ export const initialPieces: ChessPiece[] = [
 
   ...Array(8)
     .fill(null)
-    .map((_, i) => ({
-      type: "pawn",
-      color: "black",
-      position: `${String.fromCharCode(65 + i)}7`,
-      svg: "/design/game/assets/chess_pieces/B_Pawn.svg",
-    })),
+    .map(
+      (_, i): ChessPiece => ({
+        type: "pawn",
+        color: "black",
+        position: `${String.fromCharCode(65 + i)}7`,
+        svg: "/design/game/assets/chess_pieces/B_Pawn.svg",
+      })
+    ),
 
   // White pieces
   {
@@ -117,10 +119,12 @@ export const initialPieces: ChessPiece[] = [
 
   ...Array(8)
     .fill(null)
-    .map((_, i) => ({
-      type: "pawn",
-      color: "white",
-      position: `${String.fromCharCode(65 + i)}2`,
-      svg: "/design/game/assets/chess_pieces/W_Pawn.svg",
-    })),
+    .map(
+      (_, i): ChessPiece => ({
+        type: "pawn",
+        color: "white",
+        position: `${String.fromCharCode(65 + i)}2`,
+        svg: "/design/game/assets/chess_pieces/W_Pawn.svg",
+      })
+    ),
 ];

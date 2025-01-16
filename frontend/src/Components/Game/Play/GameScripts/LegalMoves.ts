@@ -11,32 +11,81 @@ const getLegalMoves = (
   const rowIndex = numbers.indexOf(piece.position[1]);
   switch (piece.type) {
     case "rook":
+      return rookLegalMoves(piece, alivePieces);
       break;
     case "knight":
+      return kingLegalMoves(piece, alivePieces);
       break;
     case "bishop":
+      return kingLegalMoves(piece, alivePieces);
       break;
     case "queen":
+      return kingLegalMoves(piece, alivePieces);
       break;
     case "king":
       return kingLegalMoves(piece, alivePieces);
       break;
     case "pawn":
-      break;
-
-    default:
+      return kingLegalMoves(piece, alivePieces);
       break;
   }
 };
 
 // Check the position(must be <=8 and <= H)
-const isValidPosition = (columnIndex: number, rowIndex: number) => {
+const isValidPosition = (columnIndex: number, rowIndex: number): boolean => {
   return (
     letters.includes(letters[columnIndex]) &&
     numbers.includes(numbers[rowIndex])
   );
 };
 
+// return string[] with legal moves for rook
+const rookLegalMoves = (
+  rook: ChessPiece,
+  alivePieces: ChessPiece[]
+): string[] => {
+  const columnIndex = letters.indexOf(rook.position[0]);
+  const rowIndex = numbers.indexOf(rook.position[1]);
+
+  const directions = [
+    [0, 1], // up
+    [0, -1], // down
+    [1, 0], // right
+    [-1, 0], // left
+  ];
+  const legalMoves: string[] = [];
+
+  directions.forEach(([dx, dy]) => {
+    let newColumnIndex = columnIndex;
+    let newRowIndex = rowIndex;
+
+    while (true) {
+      newColumnIndex += dx;
+      newRowIndex += dy;
+
+      if (!isValidPosition(newColumnIndex, newRowIndex)) break; // check indexes
+
+      const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+
+      if (!isKingInSafe(rook.color, rook.position, newPosition, alivePieces))
+        break; // if king will not in safe after THIS move
+
+      const pieceOnNewPosition = alivePieces.find(
+        (piece) => piece.position === newPosition
+      ); // get piece on new rook position (if exists)
+
+      if (pieceOnNewPosition) {
+        if (pieceOnNewPosition.color !== rook.color)
+          legalMoves.push(newPosition); // rook can take the piece
+        else break;
+      } else legalMoves.push(newPosition);
+    }
+  });
+
+  return legalMoves;
+};
+
+// return string[] with legal moves for king
 const kingLegalMoves = (
   king: ChessPiece,
   alivePieces: ChessPiece[]
@@ -93,6 +142,7 @@ const kingLegalMoves = (
   return legalMoves;
 };
 
+// return string[] with attacked positions
 const getAttackedSquares = (
   alivePieces: ChessPiece[],
   color: "black" | "white" // color of the player, whose turn
@@ -107,4 +157,29 @@ const getAttackedSquares = (
       attackedSquares.push(...pieceMoves);
     });
   return attackedSquares;
+};
+
+// return boolean, that shows will be king in safe
+// after move by selected piece or not
+const isKingInSafe = (
+  playerColor: string,
+  oldPiecePosition: string,
+  newPiecePosition: string,
+  alivePieces: ChessPiece[]
+): boolean => {
+  const simulatePieces = alivePieces.map((p) =>
+    // move selected piece
+    p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
+  );
+  const king = simulatePieces.find((p) => {
+    p.type === "king" && p.color === playerColor;
+  });
+  if (!king) {
+    console.error("An error occurred, while calculating the king's safety.");
+    throw new Error(`King of color ${playerColor} was not found.`);
+  }
+
+  const attackedSquares = getAttackedSquares(simulatePieces, king.color);
+
+  return !attackedSquares.includes(king.position);
 };

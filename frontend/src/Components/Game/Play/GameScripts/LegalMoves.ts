@@ -14,7 +14,7 @@ const getLegalMoves = (
       return rookLegalMoves(piece, alivePieces);
       break;
     case "knight":
-      return kingLegalMoves(piece, alivePieces);
+      return knightLegalMoves(piece, alivePieces);
       break;
     case "bishop":
       return kingLegalMoves(piece, alivePieces);
@@ -82,6 +82,48 @@ const rookLegalMoves = (
     }
   });
 
+  return legalMoves;
+};
+
+const knightLegalMoves = (
+  knight: ChessPiece,
+  alivePieces: ChessPiece[]
+): string[] => {
+  const legalMoves: string[] = [];
+  const directions = [
+    [1, 2],
+    [1, -2],
+    [-1, -2],
+    [-1, 2],
+    [2, 1],
+    [2, -1],
+    [-2, -1],
+    [-2, 1],
+  ];
+  const oldColumnIndex = letters.indexOf(knight.position[0]);
+  const oldRowIndex = numbers.indexOf(knight.position[1]);
+  directions.forEach(([dx, dy]) => {
+    const newColumnIndex = oldColumnIndex + dx;
+    const newRowIndex = oldRowIndex + dy;
+    if (isValidPosition(newColumnIndex, newRowIndex)) {
+      // create new probable position
+      const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+
+      // get piece on new position (if exists)
+      const pieceOnNewPosition = alivePieces.find(
+        (piece) => piece.position === newPosition
+      );
+
+      // if king will be in safe and on new position and
+      // there is no allied piece there
+      if (
+        isKingInSafe(knight.color, knight.position, newPosition, alivePieces) &&
+        pieceOnNewPosition?.color !== knight.color
+      ) {
+        legalMoves.push(newPosition);
+      }
+    }
+  });
   return legalMoves;
 };
 

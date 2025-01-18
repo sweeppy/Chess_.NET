@@ -11,22 +11,22 @@ const getLegalMoves = (
   const rowIndex = numbers.indexOf(piece.position[1]);
   switch (piece.type) {
     case "rook":
-      return rookLegalMoves(piece, alivePieces);
+      return getRookLegalMoves(piece, alivePieces);
       break;
     case "knight":
-      return knightLegalMoves(piece, alivePieces);
+      return getKnightLegalMoves(piece, alivePieces);
       break;
     case "bishop":
-      return kingLegalMoves(piece, alivePieces);
+      return getBishopLegalMoves(piece, alivePieces);
       break;
     case "queen":
-      return kingLegalMoves(piece, alivePieces);
+      return getQueenLegalMoves(piece, alivePieces);
       break;
     case "king":
-      return kingLegalMoves(piece, alivePieces);
+      return getKingLegalMoves(piece, alivePieces);
       break;
     case "pawn":
-      return kingLegalMoves(piece, alivePieces);
+      return getPawnLegalMoves(piece, alivePieces);
       break;
   }
 };
@@ -34,13 +34,12 @@ const getLegalMoves = (
 // Check the position(must be <=8 and <= H)
 const isValidPosition = (columnIndex: number, rowIndex: number): boolean => {
   return (
-    letters.includes(letters[columnIndex]) &&
-    numbers.includes(numbers[rowIndex])
+    letters.includes(letters[columnIndex]) && numbers.includes(numbers[rowIndex])
   );
 };
 
 // return string[] with legal moves for rook
-const rookLegalMoves = (
+const getRookLegalMoves = (
   rook: ChessPiece,
   alivePieces: ChessPiece[]
 ): string[] => {
@@ -55,7 +54,7 @@ const rookLegalMoves = (
   ];
   const legalMoves: string[] = [];
 
-  directions.forEach(([dx, dy]) => {
+  for (const [dx, dy] of directions) {
     let newColumnIndex = columnIndex;
     let newRowIndex = rowIndex;
 
@@ -68,24 +67,26 @@ const rookLegalMoves = (
       const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
 
       if (!isKingInSafe(rook.color, rook.position, newPosition, alivePieces))
-        break; // if king will not in safe after THIS move
+        continue; //skip if the king will be unsafe
 
       const pieceOnNewPosition = alivePieces.find(
         (piece) => piece.position === newPosition
       ); // get piece on new rook position (if exists)
 
       if (pieceOnNewPosition) {
-        if (pieceOnNewPosition.color !== rook.color)
+        if (pieceOnNewPosition.color !== rook.color) {
           legalMoves.push(newPosition); // rook can take the piece
-        else break;
-      } else legalMoves.push(newPosition);
+        }
+        break;
+      }
+      legalMoves.push(newPosition);
     }
-  });
+  }
 
   return legalMoves;
 };
-
-const knightLegalMoves = (
+// return string[] with legal moves for rook
+const getKnightLegalMoves = (
   knight: ChessPiece,
   alivePieces: ChessPiece[]
 ): string[] => {
@@ -127,8 +128,115 @@ const knightLegalMoves = (
   return legalMoves;
 };
 
+// return string[] with legal moves for bishop
+const getBishopLegalMoves = (
+  bishop: ChessPiece,
+  AlivePieces: ChessPiece[]
+): string[] => {
+  const legalMoves: string[] = [];
+
+  const directions = [
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1],
+  ];
+
+  const oldColumnIndex = letters.indexOf(bishop.position[0]);
+  const oldRowIndex = numbers.indexOf(bishop.position[1]);
+
+  for (const [dx, dy] of directions) {
+    let newColumnIndex = oldColumnIndex;
+    let newRowIndex = oldRowIndex;
+    while (true) {
+      newColumnIndex += dx;
+      newRowIndex += dy;
+
+      // not valid square (8x8)
+      if (!isValidPosition(newColumnIndex, newRowIndex)) break;
+
+      const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+
+      // if king will be unsafe after move
+      if (!isKingInSafe(bishop.color, bishop.position, newPosition, AlivePieces))
+        continue; // skip in while iterations
+
+      const pieceOnNewPosition = AlivePieces.find((p) => {
+        p.position === newPosition;
+      });
+
+      if (pieceOnNewPosition) {
+        if (pieceOnNewPosition.color !== bishop.color) {
+          legalMoves.push(newPosition);
+        }
+        break;
+      }
+
+      legalMoves.push(newPosition);
+    }
+  }
+
+  return legalMoves;
+};
+
+// return string[] with legal moves for queen
+const getQueenLegalMoves = (
+  queen: ChessPiece,
+  alivePieces: ChessPiece[]
+): string[] => {
+  const legalMoves: string[] = [];
+
+  const oldColumnIndex = letters.indexOf(queen.position[0]);
+  const oldRowIndex = numbers.indexOf(queen.position[1]);
+
+  const directions = [
+    [1, 1],
+    [1, -1],
+    [-1, 1],
+    [-1, -1],
+    [0, 1], // up
+    [0, -1], // down
+    [1, 0], // right
+    [-1, 0], // left
+  ];
+
+  for (const [dx, dy] of directions) {
+    let newColumnIndex = oldColumnIndex;
+    let newRowIndex = oldRowIndex;
+
+    while (true) {
+      newColumnIndex += dx;
+      newRowIndex += dy;
+
+      // invalid index (8x8)
+      if (!isValidPosition(newColumnIndex, newRowIndex)) break;
+
+      const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+
+      // if king will be unsafe after move
+      if (!isKingInSafe(queen.color, queen.position, newPosition, alivePieces))
+        continue; // skip this move
+
+      const pieceOnNewPosition = alivePieces.find(
+        (p) => p.position === newPosition
+      );
+
+      if (pieceOnNewPosition) {
+        if (pieceOnNewPosition.color !== queen.color) {
+          legalMoves.push(newPosition);
+        }
+        break;
+      }
+
+      legalMoves.push(newPosition);
+    }
+  }
+
+  return legalMoves;
+};
+
 // return string[] with legal moves for king
-const kingLegalMoves = (
+const getKingLegalMoves = (
   king: ChessPiece,
   alivePieces: ChessPiece[]
 ): string[] => {
@@ -181,6 +289,15 @@ const kingLegalMoves = (
     (move) => !squaresUnderAttack.includes(move)
   );
 
+  return legalMoves;
+};
+
+// return string[] with legal moves for pawn
+const getPawnLegalMoves = (
+  pawn: ChessPiece,
+  AlivePieces: ChessPiece[]
+): string[] => {
+  const legalMoves: string[] = [];
   return legalMoves;
 };
 

@@ -21,21 +21,12 @@ const Computer = () => {
   return (
     <>
       <Nav />
-      <div className="flex-center max-height nav-padding">
-        <div className="even-columns padding-block-400">
+      <div className="container nav-padding">
+        <div className="even-columns padding-block-400 max-height">
           <div className="chessboard-wrapper">
-            <div className="numbers">
-              {numbers.map((num) => (
-                <div key={num} className="number">
-                  {num}
-                </div>
-              ))}
-            </div>
             <div className="chessboard">
               {[...Array(64)].map((_, i) => {
-                const position = `${letters[i % 8]}${
-                  numbers[Math.floor(i / 8)]
-                }`;
+                const position = `${letters[i % 8]}${numbers[Math.floor(i / 8)]}`;
                 const piece = pieces.find((p) => p.position === position);
 
                 return (
@@ -45,6 +36,24 @@ const Computer = () => {
                       Math.floor(i / 8) % 2 === i % 2 ? "white" : "black"
                     }`}
                   >
+                    {i % 8 == 0 && (
+                      <span
+                        className={`cell-label row-label ${
+                          Math.floor(i / 8) % 2 === i % 2 ? "black" : "white"
+                        }`}
+                      >
+                        {numbers[Math.floor(i / 8)]}
+                      </span>
+                    )}
+                    {i >= 56 && (
+                      <span
+                        className={`cell-label col-label ${
+                          Math.floor(i / 8) % 2 === i % 2 ? "black" : "white"
+                        }`}
+                      >
+                        {letters[i - 56]}
+                      </span>
+                    )}
                     {piece && (
                       <img
                         src={piece.svg}
@@ -55,13 +64,6 @@ const Computer = () => {
                   </div>
                 );
               })}
-            </div>
-            <div className="letters">
-              {letters.map((letter) => (
-                <div key={letter} className="letter">
-                  {letter}
-                </div>
-              ))}
             </div>
           </div>
           <div className="game-info"></div>

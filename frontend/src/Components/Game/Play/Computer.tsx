@@ -1,23 +1,44 @@
 import { useState } from "react";
 import Nav from "../../Main/Nav";
-import { initialPieces } from "./GameScripts/Pieces";
+import { ChessPiece, initialPieces } from "./GameScripts/Pieces";
+import { getLegalMoves } from "./GameScripts/LegalMoves";
 
 const Computer = () => {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
-  const [peices, setPieces] = useState(initialPieces);
-  const pieces = initialPieces;
+  const [pieces, setPieces] = useState(initialPieces);
+  const [legalMoves, setLegalMoves] = useState<string[] | undefined>();
+  const [selectedPiece, setSelectedPiece] = useState<ChessPiece | undefined>();
 
-  const getIndexFromPosition = (position: string): number => {
-    const column = position[0]; // get a letter
-    const row = position[1]; // get number
-
-    const columnIndex = letters.indexOf(column);
-    const rowIndex = numbers.indexOf(row) - 1;
-
-    return rowIndex * 8 + columnIndex;
+  const handlePieceClick = (piece: ChessPiece | undefined) => {
+    if (piece) {
+      setLegalMoves(getLegalMoves(piece, pieces));
+      setSelectedPiece(piece);
+    }
   };
+
+  const handleLegalMoveClick = (newPosition: string) => {
+    console.log("New Position:", newPosition);
+
+    setPieces((prevPieces) =>
+      prevPieces.map((p) =>
+        p === selectedPiece ? { ...p, position: newPosition } : p
+      )
+    );
+    setSelectedPiece(undefined);
+    setLegalMoves(undefined);
+  };
+
+  // const getIndexFromPosition = (position: string): number => {
+  //   const column = position[0]; // get a letter
+  //   const row = position[1]; // get number
+
+  //   const columnIndex = letters.indexOf(column);
+  //   const rowIndex = numbers.indexOf(row) - 1;
+
+  //   return rowIndex * 8 + columnIndex;
+  // };
   return (
     <>
       <Nav />
@@ -35,6 +56,7 @@ const Computer = () => {
                     className={`cell ${
                       Math.floor(i / 8) % 2 === i % 2 ? "white" : "black"
                     }`}
+                    onClick={() => handlePieceClick(piece)}
                   >
                     {i % 8 == 0 && (
                       <span
@@ -60,6 +82,18 @@ const Computer = () => {
                         alt={`${piece.color} ${piece.type}`}
                         className="chess-piece"
                       />
+                    )}
+                    {legalMoves?.includes(position) && (
+                      <div
+                        onClick={() => handleLegalMoveClick(position)}
+                        className="container-lm"
+                      >
+                        <img
+                          className="img-lm"
+                          src={"/design/game/assets/moves/legal_move.svg"}
+                          alt={"Legal move"}
+                        />
+                      </div>
                     )}
                   </div>
                 );

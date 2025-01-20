@@ -3,7 +3,7 @@ import { ChessPiece } from "./Pieces";
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
-const getLegalMoves = (
+export const getLegalMoves = (
   piece: ChessPiece,
   alivePieces: ChessPiece[]
 ): string[] => {
@@ -63,9 +63,6 @@ const getRookLegalMoves = (
 
       const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
 
-      if (!isKingInSafe(rook.color, rook.position, newPosition, alivePieces))
-        continue; //skip if the king will be unsafe
-
       const pieceOnNewPosition = alivePieces.find(
         (piece) => piece.position === newPosition
       ); // get piece on new rook position (if exists)
@@ -112,12 +109,8 @@ const getKnightLegalMoves = (
         (piece) => piece.position === newPosition
       );
 
-      // if king will be in safe and on new position and
-      // there is no allied piece there
-      if (
-        isKingInSafe(knight.color, knight.position, newPosition, alivePieces) &&
-        pieceOnNewPosition?.color !== knight.color
-      ) {
+      // if there is no allied piece there
+      if (pieceOnNewPosition?.color !== knight.color) {
         legalMoves.push(newPosition);
       }
     }
@@ -154,13 +147,9 @@ const getBishopLegalMoves = (
 
       const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
 
-      // if king will be unsafe after move
-      if (!isKingInSafe(bishop.color, bishop.position, newPosition, AlivePieces))
-        continue; // skip in while iterations
-
-      const pieceOnNewPosition = AlivePieces.find((p) => {
-        p.position === newPosition;
-      });
+      const pieceOnNewPosition = AlivePieces.find(
+        (p) => p.position === newPosition
+      );
 
       if (pieceOnNewPosition) {
         if (pieceOnNewPosition.color !== bishop.color) {
@@ -209,10 +198,6 @@ const getQueenLegalMoves = (
       if (!isValidPosition(newColumnIndex, newRowIndex)) break;
 
       const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
-
-      // if king will be unsafe after move
-      if (!isKingInSafe(queen.color, queen.position, newPosition, alivePieces))
-        continue; // skip this move
 
       const pieceOnNewPosition = alivePieces.find(
         (p) => p.position === newPosition
@@ -309,9 +294,8 @@ const getPawnLegalMoves = (
   const forwardMoves = [1];
   if (pawn.position[1] === initialRow) forwardMoves.push(2);
   forwardMoves.forEach((dy) => {
-    const newRowIndex = oldRowIndex + dy * direction;
+    const newRowIndex = oldRowIndex - dy * direction;
     const newPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
-
     const pieceOnNewPosition = AlivePieces.find(
       (p) => p.position === newPosition
     );
@@ -340,8 +324,9 @@ const getPawnLegalMoves = (
     const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
     const enPassantPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
     AlivePieces.forEach((p) => {
-      p.position === enPassantPosition && p.enPassantable === true;
-      legalMoves.push(newPosition);
+      if (p.position === enPassantPosition && p.enPassantable === true) {
+        legalMoves.push(newPosition);
+      }
     });
   });
 
@@ -373,19 +358,31 @@ const isKingInSafe = (
   newPiecePosition: string,
   alivePieces: ChessPiece[]
 ): boolean => {
+  console.log("Checking king safety:", {
+    playerColor,
+    oldPiecePosition,
+    newPiecePosition,
+  });
+
   const simulatePieces = alivePieces.map((p) =>
-    // move selected piece
     p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
   );
-  const king = simulatePieces.find((p) => {
-    p.type === "king" && p.color === playerColor;
-  });
+
+  const king = simulatePieces.find(
+    (p) => p.type === "king" && p.color === playerColor
+  );
+
   if (!king) {
-    console.error("An error occurred, while calculating the king's safety.");
     throw new Error(`King of color ${playerColor} was not found.`);
   }
 
-  const attackedSquares = getAttackedSquares(simulatePieces, king.color);
+  const otherPieces = simulatePieces.filter(
+    (p) => p.position !== newPiecePosition
+  );
+
+  const attackedSquares = getAttackedSquares(otherPieces, king.color);
+
+  console.log("Attacked squares:", attackedSquares);
 
   return !attackedSquares.includes(king.position);
 };

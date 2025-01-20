@@ -1,4 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.5 100 100" shape-rendering="crispEdges">
-<metadata>Made with Pixels to Svg https://codepen.io/shshaw/pen/XbxvNj</metadata>
-<path stroke="#f5e49c" d="M42 6h3M41 7h1M45 7h1M40 8h1M46 8h1M40 9h1M43 9h1M46 9h1M40 10h1M46 10h1M41 11h1M45 11h1M42 12h3" />
+<svg width="7" height="7" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_522_520)">
+<path d="M2 0.5H5ZM1 1.5H2ZM5 1.5H6ZM0 2.5H1ZM6 2.5H7ZM0 3.5H1ZM3 3.5H4ZM6 3.5H7ZM0 4.5H1ZM6 4.5H7ZM1 5.5H2ZM5 5.5H6ZM2 6.5H5Z" fill="black"/>
+<path d="M2 0.5H5M1 1.5H2M5 1.5H6M0 2.5H1M6 2.5H7M0 3.5H1M3 3.5H4M6 3.5H7M0 4.5H1M6 4.5H7M1 5.5H2M5 5.5H6M2 6.5H5" stroke="#76ABAE"/>
+</g>
+<defs>
+<clipPath id="clip0_522_520">
+<rect width="7" height="7" fill="white"/>
+</clipPath>
+</defs>
 </svg>

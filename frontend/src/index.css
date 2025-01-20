@@ -469,9 +469,11 @@ button[data-icon] img {
 }
 
 .chess-piece {
+  position: relative;
   height: 130%;
   width: 130%;
   padding-bottom: 20%;
+  z-index: 0;
 }
 
 @media (max-width: 50em) {
@@ -484,7 +486,7 @@ button[data-icon] img {
   }
 }
 
-.cell:has(*) {
+.cell:has(.chess-piece) {
   cursor: grab;
 }
 
@@ -518,7 +520,7 @@ button[data-icon] img {
 
 .cell-label.col-label {
   bottom: -5px;
-  right: 2px;
+  right: 3px;
 }
 
 .cell-label.white {
@@ -527,4 +529,21 @@ button[data-icon] img {
 
 .cell-label.black {
   color: #454d5f;
+}
+
+.container-lm {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container-lm .img-lm {
+  width: 30%;
+  height: 30%;
 }

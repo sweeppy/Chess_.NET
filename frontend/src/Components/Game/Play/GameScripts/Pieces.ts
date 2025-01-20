@@ -3,6 +3,7 @@ export interface ChessPiece {
   color: "black" | "white";
   position: string;
   svg: string;
+  enPassantable?: false | true;
 }
 
 export const initialPieces: ChessPiece[] = [
@@ -64,6 +65,7 @@ export const initialPieces: ChessPiece[] = [
         color: "black",
         position: `${String.fromCharCode(65 + i)}7`,
         svg: "/design/game/assets/chess_pieces/B_Pawn.svg",
+        enPassantable: false,
       })
     ),
 
@@ -125,6 +127,7 @@ export const initialPieces: ChessPiece[] = [
         color: "white",
         position: `${String.fromCharCode(65 + i)}2`,
         svg: "/design/game/assets/chess_pieces/W_Pawn.svg",
+        enPassantable: false,
       })
     ),
 ];

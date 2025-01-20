@@ -7,27 +7,24 @@ const getLegalMoves = (
   piece: ChessPiece,
   alivePieces: ChessPiece[]
 ): string[] => {
-  const columnIndex = letters.indexOf(piece.position[0]);
-  const rowIndex = numbers.indexOf(piece.position[1]);
   switch (piece.type) {
     case "rook":
       return getRookLegalMoves(piece, alivePieces);
-      break;
+
     case "knight":
       return getKnightLegalMoves(piece, alivePieces);
-      break;
+
     case "bishop":
       return getBishopLegalMoves(piece, alivePieces);
-      break;
+
     case "queen":
       return getQueenLegalMoves(piece, alivePieces);
-      break;
+
     case "king":
       return getKingLegalMoves(piece, alivePieces);
-      break;
+
     case "pawn":
       return getPawnLegalMoves(piece, alivePieces);
-      break;
   }
 };
 
@@ -298,6 +295,56 @@ const getPawnLegalMoves = (
   AlivePieces: ChessPiece[]
 ): string[] => {
   const legalMoves: string[] = [];
+
+  const isWhite = pawn.color === "white" ? true : false;
+
+  // which direction will the pawn move
+  const direction = isWhite ? 1 : -1;
+  const initialRow = isWhite ? "2" : "7";
+
+  const oldColumnIndex = letters.indexOf(pawn.position[0]);
+  const oldRowIndex = numbers.indexOf(pawn.position[1]);
+
+  // forward moves
+  const forwardMoves = [1];
+  if (pawn.position[1] === initialRow) forwardMoves.push(2);
+  forwardMoves.forEach((dy) => {
+    const newRowIndex = oldRowIndex + dy * direction;
+    const newPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
+
+    const pieceOnNewPosition = AlivePieces.find(
+      (p) => p.position === newPosition
+    );
+    if (!pieceOnNewPosition) legalMoves.push(newPosition);
+  });
+
+  // attack moves
+  const attackOffsets = [-1, 1];
+  attackOffsets.forEach((dx) => {
+    const newRowIndex = oldRowIndex + direction;
+    const newColumnIndex = oldColumnIndex + dx;
+
+    const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+    const pieceOnNewPosition = AlivePieces.find(
+      (p) => p.position === newPosition
+    );
+
+    if (pieceOnNewPosition?.color !== pawn.color) legalMoves.push(newPosition);
+  });
+
+  // en passant moves
+  attackOffsets.forEach((dx) => {
+    const newRowIndex = oldRowIndex + direction;
+    const newColumnIndex = oldColumnIndex + dx;
+
+    const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
+    const enPassantPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
+    AlivePieces.forEach((p) => {
+      p.position === enPassantPosition && p.enPassantable === true;
+      legalMoves.push(newPosition);
+    });
+  });
+
   return legalMoves;
 };
 

@@ -251,7 +251,7 @@ const getKingLegalMoves = (
     [1, 1],
   ]; // all squares around the king
 
-  const probableMoves: string[] = []; // array with all king moves
+  const legalMoves: string[] = []; // array with all king moves
 
   directions.forEach(([dx, dy]) => {
     const newColumnIndex = columnIdex + dx;
@@ -267,24 +267,14 @@ const getKingLegalMoves = (
 
       if (!pieceOnNewPosition) {
         // no pieces on new position
-        probableMoves.push(newPosition);
+        legalMoves.push(newPosition);
       } else if (pieceOnNewPosition.color !== king.color) {
-        // king can capture the figure (will delete this move
-        // later if it's under attack; check <<getAttackedSquares>> function
-        // in the code below)
-        probableMoves.push(newPosition);
+        legalMoves.push(newPosition);
       }
     }
   });
-  // get all squares that are under attack
-  // const squaresUnderAttack = getAttackedSquares(alivePieces, king.color);
 
-  // delete attacked squares from probableMoves
-  // const legalMoves = probableMoves.filter(
-  //   (move) => !squaresUnderAttack.includes(move)
-  // );
-  console.log(`king color: ${king.color}, probable moves: ${probableMoves}`);
-  return probableMoves;
+  return legalMoves;
 };
 
 // return string[] with legal moves for pawn
@@ -332,11 +322,12 @@ const getPawnLegalMoves = (
 
   // en passant moves
   attackOffsets.forEach((dx) => {
-    const newRowIndex = oldRowIndex + direction;
+    const newRowIndex = oldRowIndex - direction;
     const newColumnIndex = oldColumnIndex + dx;
 
     const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
-    const enPassantPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
+    const enPassantPosition = `${letters[newColumnIndex]}${numbers[oldRowIndex]}`;
+
     AlivePieces.forEach((p) => {
       if (p.position === enPassantPosition && p.enPassantable === true) {
         legalMoves.push(newPosition);

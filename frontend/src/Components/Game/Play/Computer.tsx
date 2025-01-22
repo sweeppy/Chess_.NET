@@ -21,11 +21,34 @@ const Computer = () => {
   const handleLegalMoveClick = (newPosition: string) => {
     console.log("New Position:", newPosition);
 
-    setPieces((prevPieces) =>
-      prevPieces.map((p) =>
-        p === selectedPiece ? { ...p, position: newPosition } : p
-      )
-    );
+    const updatedPieces = pieces.map((p) => {
+      // clear all previous enPassantable
+      if (p.type === "pawn" && p !== selectedPiece) {
+        return { ...p, enPassantable: false };
+      }
+
+      if (p === selectedPiece) {
+        if (selectedPiece.type === "pawn") {
+          // if piece type = pawn, get distance and check double step
+          const moveDistance = Math.abs(
+            +newPosition[1] - +selectedPiece.position[1]
+          );
+          const isDoubleStep = moveDistance === 2;
+
+          // if double step, enPassantable = true
+
+          return { ...p, position: newPosition, enPassantable: isDoubleStep };
+        }
+        // not a pawn
+        return { ...p, position: newPosition };
+      }
+      // not selected piece
+      return p;
+    });
+
+    setPieces(updatedPieces);
+
+    // console.log(updatedPieces);
     setSelectedPiece(undefined);
     setLegalMoves(undefined);
   };

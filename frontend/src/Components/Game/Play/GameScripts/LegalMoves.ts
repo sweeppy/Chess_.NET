@@ -296,14 +296,15 @@ const getPawnLegalMoves = (
   // forward moves
   const forwardMoves = [1];
   if (pawn.position[1] === initialRow) forwardMoves.push(2);
-  forwardMoves.forEach((dy) => {
+  for (const dy of forwardMoves) {
     const newRowIndex = oldRowIndex - dy * direction;
     const newPosition = `${letters[oldColumnIndex]}${numbers[newRowIndex]}`;
     const pieceOnNewPosition = AlivePieces.find(
       (p) => p.position === newPosition
     );
     if (!pieceOnNewPosition) legalMoves.push(newPosition);
-  });
+    else break;
+  }
 
   // attack moves
   const attackOffsets = [-1, 1];

@@ -5,27 +5,43 @@ const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
 export const getLegalMoves = (
   piece: ChessPiece,
-  alivePieces: ChessPiece[]
+  alivePieces: ChessPiece[],
+  ignoreKingSafety: boolean
 ): string[] => {
+  let legalMoves: string[] = [];
   switch (piece.type) {
     case "rook":
-      return getRookLegalMoves(piece, alivePieces);
-
+      legalMoves = getRookLegalMoves(piece, alivePieces);
+      break;
     case "knight":
-      return getKnightLegalMoves(piece, alivePieces);
-
+      legalMoves = getKnightLegalMoves(piece, alivePieces);
+      break;
     case "bishop":
-      return getBishopLegalMoves(piece, alivePieces);
-
+      legalMoves = getBishopLegalMoves(piece, alivePieces);
+      break;
     case "queen":
-      return getQueenLegalMoves(piece, alivePieces);
-
+      legalMoves = getQueenLegalMoves(piece, alivePieces);
+      break;
     case "king":
-      return getKingLegalMoves(piece, alivePieces);
-
+      legalMoves = getKingLegalMoves(piece, alivePieces);
+      break;
     case "pawn":
-      return getPawnLegalMoves(piece, alivePieces);
+      legalMoves = getPawnLegalMoves(piece, alivePieces);
+      break;
+    default:
+      return [];
   }
+
+  // Check king safety only if ignoreKingSafety is false
+  if (!ignoreKingSafety) {
+    legalMoves = isKingInSafe(
+      piece.color,
+      piece.position,
+      legalMoves,
+      alivePieces
+    );
+  }
+  return legalMoves;
 };
 
 // Check the position(must be <=8 and <= H)
@@ -213,7 +229,6 @@ const getQueenLegalMoves = (
       legalMoves.push(newPosition);
     }
   }
-
   return legalMoves;
 };
 
@@ -226,8 +241,6 @@ const getKingLegalMoves = (
   const rowIndex = numbers.indexOf(king.position[1]); // now row
 
   const directions = [
-    // First number - column, second - row
-
     [-1, -1],
     [-1, 0],
     [-1, 1],
@@ -245,7 +258,7 @@ const getKingLegalMoves = (
     const newRowIndex = rowIndex + dy;
 
     if (isValidPosition(newColumnIndex, newRowIndex)) {
-      // create new position coordinates
+      // create new position
       const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
 
       const pieceOnNewPosition = alivePieces.find(
@@ -264,14 +277,14 @@ const getKingLegalMoves = (
     }
   });
   // get all squares that are under attack
-  const squaresUnderAttack = getAttackedSquares(alivePieces, king.color);
+  // const squaresUnderAttack = getAttackedSquares(alivePieces, king.color);
 
   // delete attacked squares from probableMoves
-  const legalMoves = probableMoves.filter(
-    (move) => !squaresUnderAttack.includes(move)
-  );
-
-  return legalMoves;
+  // const legalMoves = probableMoves.filter(
+  //   (move) => !squaresUnderAttack.includes(move)
+  // );
+  console.log(`king color: ${king.color}, probable moves: ${probableMoves}`);
+  return probableMoves;
 };
 
 // return string[] with legal moves for pawn
@@ -305,15 +318,16 @@ const getPawnLegalMoves = (
   // attack moves
   const attackOffsets = [-1, 1];
   attackOffsets.forEach((dx) => {
-    const newRowIndex = oldRowIndex + direction;
+    const newRowIndex = oldRowIndex - direction;
     const newColumnIndex = oldColumnIndex + dx;
 
     const newPosition = `${letters[newColumnIndex]}${numbers[newRowIndex]}`;
     const pieceOnNewPosition = AlivePieces.find(
       (p) => p.position === newPosition
     );
-
-    if (pieceOnNewPosition?.color !== pawn.color) legalMoves.push(newPosition);
+    if (pieceOnNewPosition) {
+      if (pieceOnNewPosition?.color !== pawn.color) legalMoves.push(newPosition);
+    }
   });
 
   // en passant moves
@@ -343,46 +357,45 @@ const getAttackedSquares = (
   alivePieces
     .filter((piece) => piece.color !== color)
     .forEach((piece) => {
-      const pieceMoves = getLegalMoves(piece, alivePieces);
+      const pieceMoves = getLegalMoves(piece, alivePieces, true);
 
       attackedSquares.push(...pieceMoves);
     });
   return attackedSquares;
 };
 
-// return boolean, that shows will be king in safe
-// after move by selected piece or not
+// return string[] with final legal moves
 const isKingInSafe = (
-  playerColor: string,
+  playerColor: "white" | "black",
   oldPiecePosition: string,
-  newPiecePosition: string,
+  legalMoves: string[],
   alivePieces: ChessPiece[]
-): boolean => {
-  console.log("Checking king safety:", {
-    playerColor,
-    oldPiecePosition,
-    newPiecePosition,
+): string[] => {
+  // moves that will show to player
+  const finalLegalMoves: string[] = [];
+
+  // check each move on king safety
+  legalMoves.forEach((newPiecePosition) => {
+    const simulatePieces = alivePieces.map((p) =>
+      p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
+    );
+    // get the player's king
+    const king = simulatePieces.find(
+      (p) => p.type === "king" && p.color === playerColor
+    );
+
+    if (!king) {
+      throw new Error(`King of color ${playerColor} was not found.`);
+    }
+    // get attack squares if piece will be on new position
+    const attackedSquares = getAttackedSquares(simulatePieces, playerColor);
+
+    /* 
+      if king will be in safe, push probable legal move to
+      final_legal_moves array
+    */
+    if (!attackedSquares.includes(king.position))
+      finalLegalMoves.push(newPiecePosition);
   });
-
-  const simulatePieces = alivePieces.map((p) =>
-    p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
-  );
-
-  const king = simulatePieces.find(
-    (p) => p.type === "king" && p.color === playerColor
-  );
-
-  if (!king) {
-    throw new Error(`King of color ${playerColor} was not found.`);
-  }
-
-  const otherPieces = simulatePieces.filter(
-    (p) => p.position !== newPiecePosition
-  );
-
-  const attackedSquares = getAttackedSquares(otherPieces, king.color);
-
-  console.log("Attacked squares:", attackedSquares);
-
-  return !attackedSquares.includes(king.position);
+  return finalLegalMoves;
 };

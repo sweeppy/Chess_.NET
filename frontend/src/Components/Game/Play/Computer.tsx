@@ -13,7 +13,7 @@ const Computer = () => {
 
   const handlePieceClick = (piece: ChessPiece | undefined) => {
     if (piece) {
-      setLegalMoves(getLegalMoves(piece, pieces));
+      setLegalMoves(getLegalMoves(piece, pieces, false));
       setSelectedPiece(piece);
     }
   };

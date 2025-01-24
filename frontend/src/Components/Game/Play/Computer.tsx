@@ -18,53 +18,77 @@ const Computer = () => {
     }
   };
 
-  const handleLegalMoveClick = (newPosition: string) => {
-    console.log("New Position:", newPosition);
+  const clearPrevEnPassantable = (pieces: ChessPiece[]): ChessPiece[] => {
+    const clearedPieces = pieces.map((p) => {
+      if (p.type === "pawn") return { ...p, enPassantable: false };
+      else return p;
+    });
+    return clearedPieces;
+  };
 
-    let RookQueenCastleOptions = { oldRookPosition: "", newRookPosition: "" };
-    let RookKingCastleOptions = { oldRookPosition: "", newRookPosition: "" };
+  const handlePawnMove = (pawn: ChessPiece, newPosition: string): ChessPiece => {
+    const moveDistance = Math.abs(+newPosition[1] - +pawn.position[1]);
+    console.log(`pawn on ${pawn.position} have moveDistance: ${moveDistance}`);
+    const isDoubleStep = moveDistance === 2;
 
-    let updatedPieces = pieces.map((p) => {
-      // clear all previous enPassantable
-      if (p.type === "pawn" && p !== selectedPiece) {
-        return { ...p, enPassantable: false };
+    // if double step, enPassantable = true
+    return { ...pawn, position: newPosition, enPassantable: isDoubleStep };
+  };
+
+  const getCastlingRookPositions = (
+    king: ChessPiece,
+    offset: number
+  ): { oldPos: string; newPos: string } => {
+    const isKingCastle = offset > 0;
+    return isKingCastle
+      ? { oldPos: `H${king.position[1]}`, newPos: `F${king.position[1]}` }
+      : { oldPos: `A${king.position[1]}`, newPos: `D${king.position[1]}` };
+  };
+
+  const handleRookCastling = (
+    oldPos: string,
+    newPos: string,
+    pieces: ChessPiece[]
+  ): ChessPiece[] => {
+    const updatedPieces = pieces.map((p) => {
+      if (p.type === "rook" && p.position === oldPos) {
+        return { ...p, position: newPos };
       }
+      return p;
+    });
+    return updatedPieces;
+  };
 
-      if (p === selectedPiece) {
+  const handleLegalMoveClick = (newPosition: string) => {
+    // console.log("New Position:", newPosition);
+
+    // clear all previous enPassantable
+    let updatedPieces = clearPrevEnPassantable(pieces);
+
+    let castlingRookPositions: { oldPos: string; newPos: string } | undefined;
+
+    updatedPieces = updatedPieces.map((p) => {
+      if (p.position === selectedPiece?.position) {
+        console.log("asdf");
         if (selectedPiece.type === "pawn") {
-          // if piece type = pawn, get distance and check double step
-          const moveDistance = Math.abs(
-            +newPosition[1] - +selectedPiece.position[1]
-          );
-          const isDoubleStep = moveDistance === 2;
-
-          // if double step, enPassantable = true
-
-          return { ...p, position: newPosition, enPassantable: isDoubleStep };
+          // return pawn on new position with enPassant option
+          return handlePawnMove(p, newPosition);
         }
+
         // set 'hasMoves' for rook(important for castling)
         if (p.type === "rook")
           return { ...p, position: newPosition, hasMoved: true };
+
         // castling king logic
         if (p.type === "king") {
           // calculation offset of the king's position
           const offset =
             letters.indexOf(newPosition[0]) - letters.indexOf(p.position[0]);
-          // not castling move
-          if (Math.abs(offset) !== 2) {
-            return { ...p, position: newPosition, hasMoved: true };
+          if (Math.abs(offset) > 1) {
+            castlingRookPositions = getCastlingRookPositions(p, offset);
           }
-          // on which side castle
-          if (offset > 0)
-            RookKingCastleOptions = {
-              oldRookPosition: `H${p.position[1]}`,
-              newRookPosition: `F${p.position[1]}`,
-            };
-          else
-            RookQueenCastleOptions = {
-              oldRookPosition: `A${p.position[1]}`,
-              newRookPosition: `D${p.position[1]}`,
-            };
+          // add to king on new position 'hasMoved' = true
+          else return { ...p, position: newPosition, hasMoved: true };
         }
         // default piece, that moved
         return { ...p, position: newPosition };
@@ -73,24 +97,12 @@ const Computer = () => {
       return p;
     });
 
-    if (RookKingCastleOptions.oldRookPosition !== "") {
-      updatedPieces = updatedPieces.map((p) => {
-        if (
-          p.type === "rook" &&
-          p.position === RookKingCastleOptions.oldRookPosition
-        )
-          return { ...p, position: RookKingCastleOptions.newRookPosition };
-        else return p;
-      });
-    } else if (RookQueenCastleOptions.oldRookPosition !== "") {
-      updatedPieces = updatedPieces.map((p) => {
-        if (
-          p.type === "rook" &&
-          p.position === RookQueenCastleOptions.oldRookPosition
-        )
-          return { ...p, position: RookQueenCastleOptions.newRookPosition };
-        else return p;
-      });
+    if (castlingRookPositions !== undefined) {
+      updatedPieces = handleRookCastling(
+        castlingRookPositions.oldPos,
+        castlingRookPositions.newPos,
+        updatedPieces
+      );
     }
 
     setPieces(updatedPieces);
@@ -99,15 +111,6 @@ const Computer = () => {
     setLegalMoves(undefined);
   };
 
-  // const getIndexFromPosition = (position: string): number => {
-  //   const column = position[0]; // get a letter
-  //   const row = position[1]; // get number
-
-  //   const columnIndex = letters.indexOf(column);
-  //   const rowIndex = numbers.indexOf(row) - 1;
-
-  //   return rowIndex * 8 + columnIndex;
-  // };
   return (
     <>
       <Nav />

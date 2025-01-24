@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChessPiece } from "./Pieces";
 
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -6,7 +7,8 @@ const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 export const getLegalMoves = (
   piece: ChessPiece,
   alivePieces: ChessPiece[],
-  ignoreKingSafety: boolean
+  ignoreKingSafety: boolean,
+  canCastle: boolean = true
 ): string[] => {
   let legalMoves: string[] = [];
   switch (piece.type) {
@@ -23,7 +25,7 @@ export const getLegalMoves = (
       legalMoves = getQueenLegalMoves(piece, alivePieces);
       break;
     case "king":
-      legalMoves = getKingLegalMoves(piece, alivePieces);
+      legalMoves = getKingLegalMoves(piece, alivePieces, canCastle);
       break;
     case "pawn":
       legalMoves = getPawnLegalMoves(piece, alivePieces);
@@ -235,7 +237,8 @@ const getQueenLegalMoves = (
 // return string[] with legal moves for king
 const getKingLegalMoves = (
   king: ChessPiece,
-  alivePieces: ChessPiece[]
+  alivePieces: ChessPiece[],
+  canCastle: boolean
 ): string[] => {
   const columnIdex = letters.indexOf(king.position[0]); // now column
   const rowIndex = numbers.indexOf(king.position[1]); // now row
@@ -274,6 +277,50 @@ const getKingLegalMoves = (
     }
   });
 
+  const castlingOptions = [
+    { side: "king", rookOffset: 3, kingPath: [1, 2], checkPath: [0, 1, 2] },
+    { side: "queen", rookOffset: -4, kingPath: [-1, -2], checkPath: [0, -1, -2] },
+  ];
+
+  if (!king.hasMoved && canCastle) {
+    castlingOptions.forEach(({ rookOffset, kingPath, checkPath }) => {
+      const rookPosition = `${letters[columnIdex + rookOffset]}${
+        numbers[rowIndex]
+      }`;
+      const rook = alivePieces.find(
+        (piece) =>
+          piece.type === "rook" &&
+          piece.color === king.color &&
+          piece.position === rookPosition &&
+          piece.hasMoved === false
+      );
+      if (rook) {
+        // squares for king castling path
+        const kingPositions: string[] = [];
+        kingPath.forEach((dx) => {
+          kingPositions.push(`${letters[columnIdex + dx]}${numbers[rowIndex]}`);
+        });
+
+        const isPieceOnPath = alivePieces.some((piece) =>
+          kingPositions.some((pos) => pos === piece.position)
+        );
+
+        const attackedSquares = getAttackedSquares(alivePieces, king.color);
+
+        // add to king's movement his own now position
+        kingPositions.push(king.position);
+        const isPathAttacked = attackedSquares.some((square) =>
+          kingPositions.some((pos) => pos === square)
+        );
+        if (!isPieceOnPath && !isPathAttacked) {
+          const castleKingPosition = `${letters[columnIdex + kingPath[1]]}${
+            numbers[rowIndex]
+          }`;
+          legalMoves.push(castleKingPosition);
+        }
+      }
+    });
+  }
   return legalMoves;
 };
 
@@ -349,7 +396,7 @@ const getAttackedSquares = (
   alivePieces
     .filter((piece) => piece.color !== color)
     .forEach((piece) => {
-      const pieceMoves = getLegalMoves(piece, alivePieces, true);
+      const pieceMoves = getLegalMoves(piece, alivePieces, true, false);
 
       attackedSquares.push(...pieceMoves);
     });

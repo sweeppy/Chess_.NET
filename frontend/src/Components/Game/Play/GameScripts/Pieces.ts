@@ -3,6 +3,7 @@ export interface ChessPiece {
   color: "black" | "white";
   position: string;
   svg: string;
+  hasMoved?: boolean;
   enPassantable?: false | true;
 }
 
@@ -12,6 +13,7 @@ export const initialPieces: ChessPiece[] = [
     type: "rook",
     color: "black",
     position: "A8",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/B_Rook.svg",
   },
   {
@@ -36,6 +38,7 @@ export const initialPieces: ChessPiece[] = [
     type: "king",
     color: "black",
     position: "E8",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/B_King.svg",
   },
   {
@@ -54,6 +57,7 @@ export const initialPieces: ChessPiece[] = [
     type: "rook",
     color: "black",
     position: "H8",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/B_Rook.svg",
   },
 
@@ -74,6 +78,7 @@ export const initialPieces: ChessPiece[] = [
     type: "rook",
     color: "white",
     position: "A1",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/W_Rook.svg",
   },
   {
@@ -98,6 +103,7 @@ export const initialPieces: ChessPiece[] = [
     type: "king",
     color: "white",
     position: "E1",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/W_King.svg",
   },
   {
@@ -116,6 +122,7 @@ export const initialPieces: ChessPiece[] = [
     type: "rook",
     color: "white",
     position: "H1",
+    hasMoved: false,
     svg: "/design/game/assets/chess_pieces/W_Rook.svg",
   },
 

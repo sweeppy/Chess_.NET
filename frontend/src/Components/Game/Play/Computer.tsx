@@ -21,7 +21,10 @@ const Computer = () => {
   const handleLegalMoveClick = (newPosition: string) => {
     console.log("New Position:", newPosition);
 
-    const updatedPieces = pieces.map((p) => {
+    let RookQueenCastleOptions = { oldRookPosition: "", newRookPosition: "" };
+    let RookKingCastleOptions = { oldRookPosition: "", newRookPosition: "" };
+
+    let updatedPieces = pieces.map((p) => {
       // clear all previous enPassantable
       if (p.type === "pawn" && p !== selectedPiece) {
         return { ...p, enPassantable: false };
@@ -39,16 +42,59 @@ const Computer = () => {
 
           return { ...p, position: newPosition, enPassantable: isDoubleStep };
         }
-        // not a pawn
+        // set 'hasMoves' for rook(important for castling)
+        if (p.type === "rook")
+          return { ...p, position: newPosition, hasMoved: true };
+        // castling king logic
+        if (p.type === "king") {
+          // calculation offset of the king's position
+          const offset =
+            letters.indexOf(newPosition[0]) - letters.indexOf(p.position[0]);
+          // not castling move
+          if (Math.abs(offset) !== 2) {
+            return { ...p, position: newPosition, hasMoved: true };
+          }
+          // on which side castle
+          if (offset > 0)
+            RookKingCastleOptions = {
+              oldRookPosition: `H${p.position[1]}`,
+              newRookPosition: `F${p.position[1]}`,
+            };
+          else
+            RookQueenCastleOptions = {
+              oldRookPosition: `A${p.position[1]}`,
+              newRookPosition: `D${p.position[1]}`,
+            };
+        }
+        // default piece, that moved
         return { ...p, position: newPosition };
       }
       // not selected piece
       return p;
     });
 
+    if (RookKingCastleOptions.oldRookPosition !== "") {
+      updatedPieces = updatedPieces.map((p) => {
+        if (
+          p.type === "rook" &&
+          p.position === RookKingCastleOptions.oldRookPosition
+        )
+          return { ...p, position: RookKingCastleOptions.newRookPosition };
+        else return p;
+      });
+    } else if (RookQueenCastleOptions.oldRookPosition !== "") {
+      updatedPieces = updatedPieces.map((p) => {
+        if (
+          p.type === "rook" &&
+          p.position === RookQueenCastleOptions.oldRookPosition
+        )
+          return { ...p, position: RookQueenCastleOptions.newRookPosition };
+        else return p;
+      });
+    }
+
     setPieces(updatedPieces);
 
-    // console.log(updatedPieces);
     setSelectedPiece(undefined);
     setLegalMoves(undefined);
   };

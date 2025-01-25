@@ -2,10 +2,14 @@ import { useState } from "react";
 import Nav from "../../Main/Nav";
 import { ChessPiece, initialPieces } from "./GameScripts/Pieces";
 import { getLegalMoves } from "./GameScripts/LegalMoves";
+import GameOptions from "./GameOptions";
+import GameHistory from "./GameHistory";
 
 const Computer = () => {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
+
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
   const [pieces, setPieces] = useState(initialPieces);
   const [legalMoves, setLegalMoves] = useState<string[] | undefined>();
@@ -59,11 +63,20 @@ const Computer = () => {
     return updatedPieces;
   };
 
+  const handleAttackPiece = (
+    pieces: ChessPiece[],
+    newPosition: string
+  ): ChessPiece[] => {
+    return pieces.filter((piece) => piece.position !== newPosition);
+  };
+
   const handleLegalMoveClick = (newPosition: string) => {
     // console.log("New Position:", newPosition);
 
     // clear all previous enPassantable
     let updatedPieces = clearPrevEnPassantable(pieces);
+
+    updatedPieces = handleAttackPiece(updatedPieces, newPosition);
 
     let castlingRookPositions: { oldPos: string; newPos: string } | undefined;
 
@@ -172,7 +185,7 @@ const Computer = () => {
               })}
             </div>
           </div>
-          <div className="game-info"></div>
+          {isGameStarted ? <GameHistory /> : <GameOptions />}
         </div>
       </div>
     </>

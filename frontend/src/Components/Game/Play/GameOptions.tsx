@@ -42,7 +42,7 @@ const GameOptions: React.FC<GameOptionsProps> = ({
 
   return (
     <>
-      <div className="flex-column game-options padding-block-400 inline-padding">
+      <div className="flex-column game-info padding-block-400 inline-padding">
         <h2 className="fs-secondary-heading fw-semi-bold">Choose color</h2>
         <div className="padding-block-600 choice-wrapper">
           <div

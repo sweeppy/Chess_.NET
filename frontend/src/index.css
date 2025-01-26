@@ -267,6 +267,7 @@ button[data-icon] img {
   background-color: var(--clr-accent-100);
   width: 100vw;
   border-bottom: 3px solid var(--clr-accent-200);
+  z-index: 5000;
 }
 .primary-nav ul {
   list-style: none;
@@ -369,7 +370,6 @@ button[data-icon] img {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   text-align: center;
   gap: var(--size-400);
 }
@@ -566,7 +566,7 @@ button[data-icon] img {
   height: 30%;
 }
 
-.game-options {
+.game-info {
   background-color: var(--clr-accent-100);
   width: 100%;
   border-radius: 10px;

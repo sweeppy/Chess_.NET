@@ -47,6 +47,7 @@ const Computer = () => {
     return { ...pawn, position: newPosition, enPassantable: isDoubleStep };
   };
 
+  // get the new position for rook, while castling
   const getCastlingRookPositions = (
     king: ChessPiece,
     offset: number
@@ -57,6 +58,7 @@ const Computer = () => {
       : { oldPos: `A${king.position[1]}`, newPos: `D${king.position[1]}` };
   };
 
+  // return pieces with new position for rook(rook after castling)
   const handleRookCastling = (
     oldPos: string,
     newPos: string,
@@ -71,6 +73,7 @@ const Computer = () => {
     return updatedPieces;
   };
 
+  // delete enemy piece and return remaining pieces
   const handleAttackPiece = (
     pieces: ChessPiece[],
     newPosition: string
@@ -84,6 +87,7 @@ const Computer = () => {
     // clear all previous enPassantable
     let updatedPieces = clearPrevEnPassantable(pieces);
 
+    // click on square, where the enemy piece is located (delete enemy piece)
     updatedPieces = handleAttackPiece(updatedPieces, newPosition);
 
     let castlingRookPositions: { oldPos: string; newPos: string } | undefined;

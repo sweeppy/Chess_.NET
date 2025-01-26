@@ -415,9 +415,11 @@ const isKingInSafe = (
 
   // check each move on king safety
   legalMoves.forEach((newPiecePosition) => {
-    const simulatePieces = alivePieces.map((p) =>
-      p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
-    );
+    const simulatePieces = alivePieces
+      .filter((p) => p.position !== newPiecePosition)
+      .map((p) =>
+        p.position === oldPiecePosition ? { ...p, position: newPiecePosition } : p
+      );
     // get the player's king
     const king = simulatePieces.find(
       (p) => p.type === "king" && p.color === playerColor

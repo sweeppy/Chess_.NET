@@ -11,12 +11,20 @@ const Computer = () => {
 
   const [isGameStarted, setIsGameStarted] = useState(false);
 
+  const [playerColor, setPlayerColor] = useState<"white" | "black">("white");
+  const [playerTurn, setPlayerTurn] = useState<"white" | "black">("white");
+
   const [pieces, setPieces] = useState(initialPieces);
   const [legalMoves, setLegalMoves] = useState<string[] | undefined>();
   const [selectedPiece, setSelectedPiece] = useState<ChessPiece | undefined>();
 
   const handlePieceClick = (piece: ChessPiece | undefined) => {
-    if (piece) {
+    if (
+      piece &&
+      isGameStarted &&
+      piece.color === playerColor &&
+      playerColor === playerTurn
+    ) {
       setLegalMoves(getLegalMoves(piece, pieces, false));
       setSelectedPiece(piece);
     }
@@ -122,6 +130,16 @@ const Computer = () => {
 
     setSelectedPiece(undefined);
     setLegalMoves(undefined);
+    setPlayerTurn(playerTurn === "white" ? "black" : "white");
+  };
+
+  // after game starts changing player color
+  const handleColorChange = (color: "white" | "black") => {
+    setPlayerColor(color);
+  };
+
+  const handleGameStart = () => {
+    setIsGameStarted(true);
   };
 
   return (
@@ -132,7 +150,12 @@ const Computer = () => {
           <div className="chessboard-wrapper">
             <div className="chessboard">
               {[...Array(64)].map((_, i) => {
-                const position = `${letters[i % 8]}${numbers[Math.floor(i / 8)]}`;
+                const columnIndex = playerColor === "white" ? i % 8 : 7 - (i % 8);
+                const rowIndex =
+                  playerColor === "white"
+                    ? Math.floor(i / 8)
+                    : 7 - Math.floor(i / 8);
+                const position = `${letters[columnIndex]}${numbers[rowIndex]}`;
                 const piece = pieces.find((p) => p.position === position);
 
                 return (
@@ -149,7 +172,9 @@ const Computer = () => {
                           Math.floor(i / 8) % 2 === i % 2 ? "black" : "white"
                         }`}
                       >
-                        {numbers[Math.floor(i / 8)]}
+                        {playerColor === "white"
+                          ? numbers[Math.floor(i / 8)]
+                          : numbers[Math.floor(7 - i / 8)]}
                       </span>
                     )}
                     {i >= 56 && (
@@ -158,7 +183,9 @@ const Computer = () => {
                           Math.floor(i / 8) % 2 === i % 2 ? "black" : "white"
                         }`}
                       >
-                        {letters[i - 56]}
+                        {playerColor === "white"
+                          ? letters[i - 56]
+                          : letters[63 - i]}
                       </span>
                     )}
                     {piece && (
@@ -185,7 +212,14 @@ const Computer = () => {
               })}
             </div>
           </div>
-          {isGameStarted ? <GameHistory /> : <GameOptions />}
+          {isGameStarted ? (
+            <GameHistory />
+          ) : (
+            <GameOptions
+              OnColorChange={handleColorChange}
+              OnGameStart={handleGameStart}
+            />
+          )}
         </div>
       </div>
     </>

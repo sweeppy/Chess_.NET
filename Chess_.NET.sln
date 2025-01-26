@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "account_service", "backend\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game_service", "backend\Microservices\game_service\game_service.csproj", "{B9C96111-CDC6-40D4-948D-268098A1F98C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessBots", "backend\Microservices\ChessBots\ChessBots.csproj", "{599E90B9-025C-40B3-ACE8-AB9BF452D6B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{B9C96111-CDC6-40D4-948D-268098A1F98C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9C96111-CDC6-40D4-948D-268098A1F98C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9C96111-CDC6-40D4-948D-268098A1F98C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{599E90B9-025C-40B3-ACE8-AB9BF452D6B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{599E90B9-025C-40B3-ACE8-AB9BF452D6B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{599E90B9-025C-40B3-ACE8-AB9BF452D6B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{599E90B9-025C-40B3-ACE8-AB9BF452D6B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,5 +42,6 @@ Global
 		{0E835736-97F2-47FC-8923-3F32A1B49C6E} = {731B8387-9AD4-43EF-B40B-EDA9937A89D4}
 		{F4619F2D-E31B-4508-954F-DCF72D5CEFCA} = {0E835736-97F2-47FC-8923-3F32A1B49C6E}
 		{B9C96111-CDC6-40D4-948D-268098A1F98C} = {0E835736-97F2-47FC-8923-3F32A1B49C6E}
+		{599E90B9-025C-40B3-ACE8-AB9BF452D6B5} = {0E835736-97F2-47FC-8923-3F32A1B49C6E}
 	EndGlobalSection
 EndGlobal

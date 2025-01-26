@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
-// Dependences
+// Dependencies
 builder.Services.AddScoped<UserDbContext>();
 
 // Add jwt configuration

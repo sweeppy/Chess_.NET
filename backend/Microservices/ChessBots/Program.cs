@@ -9,6 +9,10 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Chess_bots API", Version = "v1.0" });
 });
 
+// Register dependencies
+
+
+
 // Add cors
 builder.Services.AddCors(options =>
 {

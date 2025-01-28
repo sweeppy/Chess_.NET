@@ -24,7 +24,7 @@ namespace Account.Data
             .HasMany(p => p.Tournaments)
             .WithMany(t => t.Players);
 
-            modelBuilder.Entity<Player>() // Plaeyer-Friends relations
+            modelBuilder.Entity<Player>() // Player-Friends relations
             .HasMany(p => p.Friends)
             .WithMany()
             .UsingEntity(j => j.ToTable("PlayerFriends"));

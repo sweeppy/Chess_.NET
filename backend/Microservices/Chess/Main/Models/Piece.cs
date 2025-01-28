@@ -39,7 +39,7 @@ namespace Chess.Main.Models
 
         public static int PieceType(int piece) => piece & typeMask;
 
-        public static int pieceColor(int piece) => piece & colorMask;
+        public static int PieceColor(int piece) => piece & colorMask;
 
         // if piece is none always return false
         public static bool isColor(int piece, int color) => (piece & colorMask) == color && piece != 0;

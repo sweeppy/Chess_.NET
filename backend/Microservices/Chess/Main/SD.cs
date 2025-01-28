@@ -9,11 +9,9 @@ namespace Chess.Main
             ['k'] = Piece.King,
             ['n'] = Piece.Knight,
             ['b'] = Piece.Bishop,
-            ['q'] = Piece.Rook,
+            ['r'] = Piece.Rook,
             ['q'] = Piece.Queen,
             ['p'] = Piece.Pawn
         };
-
-        public static readonly string fenStart = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     }
 }

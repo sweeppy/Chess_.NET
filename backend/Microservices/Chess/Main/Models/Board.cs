@@ -3,19 +3,19 @@ namespace Chess.Main.Models
     public sealed class Board
     {
         // Bitboards
-        public ulong WhitePawns  { get; set; }
-        public ulong WhiteKnights { get; set; }
-        public ulong WhiteBishops { get; set; }
-        public ulong WhiteRooks { get; set; }
-        public ulong WhiteQueens { get; set; }
-        public ulong WhiteKings { get; set; }
+        public ulong WhitePawns  { get; private set; }
+        public ulong WhiteKnights { get; private set; }
+        public ulong WhiteBishops { get; private set; }
+        public ulong WhiteRooks { get; private set; }
+        public ulong WhiteQueens { get; private set; }
+        public ulong WhiteKings { get; private set; }
 
-        public ulong BlackPawns  { get; set; }
-        public ulong BlackKnights { get; set; }
-        public ulong BlackBishops { get; set; }
-        public ulong BlackRooks { get; set; }
-        public ulong BlackQueens { get; set; }
-        public ulong BlackKings { get; set; }
+        public ulong BlackPawns  { get; private set; }
+        public ulong BlackKnights { get; private set; }
+        public ulong BlackBishops { get; private set; }
+        public ulong BlackRooks { get; private set; }
+        public ulong BlackQueens { get; private set; }
+        public ulong BlackKings { get; private set; }
 
         // Initial position
         public void InitializeBoard()
@@ -39,8 +39,20 @@ namespace Chess.Main.Models
 
 // HOW BITBOARDS WORKS
 
-// INDEXES OF THE BOARD
 
+// CHESS BOARD
+/*
+        a8 b8 c8 d8 e8 f8 g8 h8
+        a7 b7 c7 d7 e7 f7 g7 h7
+        a6 b6 c6 d6 e6 f6 g6 h6
+        a5 b5 c5 d5 e5 f5 g5 h5
+        a4 b4 c4 d4 e4 f4 g4 h4
+        a3 b3 c3 d3 e3 f3 g3 h3
+        a2 b2 c2 d2 e2 f2 g2 h2
+        a1 b1 c1 d1 e1 f1 g1 h1
+*/
+
+// INDEXES OF THE BOARD
 /*
         56 57 58 59 60 61 62 63
         48 49 50 51 52 53 54 55
@@ -53,8 +65,10 @@ namespace Chess.Main.Models
  */
 
 
-// Each byte describes one rank of the board,
-// for example
+// Each byte describes one rank of the board.
+
+// Examples for all pieces:
+
 //      White Pawns                         Black Pawns
 /*
         0 0 0 0  0 0 0 0 : 00               0 0 0 0  0 0 0 0 : 00

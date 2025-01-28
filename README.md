@@ -8,5 +8,5 @@ This is a web-based chess game for my personal improvement built with .NET for t
 
 ## Useful information, that I have used:
 - **Bitboards**: [More on Bitboards](https://www.chessprogramming.org/Bitboards).
-- **Knight Moves**: [Learn More about Knight's Move Patterns](https://www.chessprogramming.org/Knight_Pattern). Addiction: [OneStepOnly](https://www.chessprogramming.org/General_Setwise_Operations#OneStepOnly)
+- **Knight Moves**: [Learn More about Knight's Move Patterns](https://www.chessprogramming.org/Knight_Pattern). Addition: [OneStepOnly](https://www.chessprogramming.org/General_Setwise_Operations#OneStepOnly)
 - **FEN (Forsyth-Edwards Notation)**: [More about FEN](https://ru.wikipedia.org/wiki/).

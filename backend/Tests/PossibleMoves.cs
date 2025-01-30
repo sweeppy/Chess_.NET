@@ -15,22 +15,30 @@ public class PossibleMoves
     [Fact]
     public void KnightMovement_Check()
     {
-        ulong AlliedPieces = 0UL;
+        ulong AlliedPieces = 0UL; // no allied pieces
+
         for (int i = 0; i < 64; i++)
         {
+
+            // 100% correct moves
             ulong expectedMoves = KnightMoveTable.Moves[i];
+
             ulong pos = 1UL << i;
+            // bitboards calc
             ulong result = KnightMovement.Generate(pos, AlliedPieces);
 
-            string expectedBinary = Convert.ToString((long)expectedMoves, 2).PadLeft(64, '0');
-            string resultBinary = Convert.ToString((long)result, 2).PadLeft(64, '0');
-            string pos2bit = InsertUnderscoresEvery8Bits(Convert.ToString((long)pos, 2).PadLeft(64, '0'));
-            expectedBinary = InsertUnderscoresEvery8Bits(expectedBinary);
-            resultBinary = InsertUnderscoresEvery8Bits(resultBinary);
+            // For Debug
+            // string expectedBinary = Convert.ToString((long)expectedMoves, 2).PadLeft(64, '0');
+            // string resultBinary = Convert.ToString((long)result, 2).PadLeft(64, '0');
+            // string pos2bit = InsertUnderscoresEvery8Bits(Convert.ToString((long)pos, 2).PadLeft(64, '0'));
+            // expectedBinary = InsertUnderscoresEvery8Bits(expectedBinary);
+            // resultBinary = InsertUnderscoresEvery8Bits(resultBinary);
 
-            _output.WriteLine($"Index: {i}, Expected: {expectedBinary},\n \t      Actual: {resultBinary}, \n pos: {pos2bit}");
+            // _output.WriteLine($"Index: {i}, Expected: {expectedBinary},\n \t      Actual: {resultBinary}, \n pos: {pos2bit}");
             Assert.Equal(expectedMoves, result);
         }
+
+
     }
 
     // For better reading

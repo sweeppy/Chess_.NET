@@ -1,3 +1,4 @@
+using Chess.Main.Core.Helpers.MagicBitboards;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.Services.AddSwaggerGen(options =>
 // Register dependencies
 
 
+// Initialize magic numbers
+new MagicsStore();
 
 // Add cors
 builder.Services.AddCors(options =>

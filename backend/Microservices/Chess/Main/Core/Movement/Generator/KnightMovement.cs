@@ -2,7 +2,7 @@ using Chess.Main.Core.Helpers;
 
 namespace Chess.Main.Core.Movement.Generator
 {
-    public class KnightMovement
+    public static class KnightMovement
     {
         // Knight moves (just for better understanding)
         /*

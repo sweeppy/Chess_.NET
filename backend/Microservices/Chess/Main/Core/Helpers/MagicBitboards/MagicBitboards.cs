@@ -4,6 +4,72 @@ namespace Chess.Main.Core.Helpers.MagicBitboards
 {
     public static class MagicBitboards
     {
+
+        public struct MagicLookUpTable
+        {
+            public ulong MagicNumber;
+            public ulong Mask;
+            public int RelevantBits;
+            public ulong[] AttackTable;
+        }
+        public static readonly MagicLookUpTable[] MagicBishopTable = new MagicLookUpTable[64];
+        public static readonly MagicLookUpTable[] MagicRookTable = new MagicLookUpTable[64];
+
+        static MagicBitboards()
+        {
+            for (int sq = 0; sq < 64; sq++)
+            {
+                // Initialize bishop lookup table
+                ulong mask = GenerateBishopMask(sq);
+                int relevantBits = BitHelper.BitsCount(mask);
+                ulong magic = MagicsStore.GetMagicNumberValue(sq, false);
+
+                int attackTableSize = 1 << relevantBits;
+                ulong[] attackTable = new ulong[attackTableSize];
+
+                ulong[] blockers = GenerateAllBlockerCombinations(mask);
+
+                for (int i = 0; i < blockers.Length; i++)
+                {
+                    ulong attackIndex = (blockers[i] * magic) >> (64 - relevantBits);
+                    ulong attacks = GenerateBishopAttacks(sq, blockers[i]);
+                    attackTable[attackIndex] = attacks;
+                }
+
+                MagicBishopTable[sq] = new MagicLookUpTable
+                {
+                    MagicNumber = magic,
+                    Mask = mask,
+                    RelevantBits = relevantBits,
+                    AttackTable = attackTable
+                };
+
+                // Initialize rook lookup table
+                mask = GenerateRookMask(sq);
+                relevantBits = BitHelper.BitsCount(mask);
+                magic = MagicsStore.GetMagicNumberValue(sq, true);
+
+                attackTableSize = 1 << relevantBits;
+                attackTable = new ulong[attackTableSize];
+
+                blockers = GenerateAllBlockerCombinations(mask);
+
+                for (int i = 0; i < blockers.Length; i++)
+                {
+                    ulong attackIndex = (blockers[i] * magic) >> (64 - relevantBits);
+                    attackTable[attackIndex] = GenerateRookAttacks(sq, blockers[i]);
+                }
+
+                MagicRookTable[sq] = new MagicLookUpTable
+                {
+                    MagicNumber = magic,
+                    Mask = mask,
+                    RelevantBits = relevantBits,
+                    AttackTable = attackTable
+                };
+            }
+        }
+
         public static ulong[] GenerateAllBlockerCombinations(ulong mask)
         {
             int bitsInMask = BitHelper.BitsCount(mask);
@@ -99,28 +165,28 @@ namespace Chess.Main.Core.Helpers.MagicBitboards
             for (int r = rank + 1, f = file + 1; r < 8 && f < 8; r++, f++)
             {
                 attack |= 1UL << (r * 8 + f);
-                if ((blocker & (1UL << (r * 8 + file))) != 0) break; // blocker on target square
+                if ((blocker & (1UL << (r * 8 + f))) != 0) break; // blocker on target square
             }
 
             // (↗)
             for (int r = rank + 1, f = file - 1; r < 8 && f >= 0; r++, f--)
             {
                 attack |= 1UL << (r * 8 + f);
-                if ((blocker & (1UL << (r * 8 + file))) != 0) break; // blocker on target square
+                if ((blocker & (1UL << (r * 8 + f))) != 0) break; // blocker on target square
             }
 
             // (↙)
             for (int r = rank - 1, f = file + 1; r >= 0 && f < 8; r--, f++)
             {
                 attack |= 1UL << (r * 8 + f);
-                if ((blocker & (1UL << (r * 8 + file))) != 0) break; // blocker on target square
+                if ((blocker & (1UL << (r * 8 + f))) != 0) break; // blocker on target square
             }
 
             // (↘)
             for (int r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--)
             {
                 attack |= 1UL << (r * 8 + f);
-                if ((blocker & (1UL << (r * 8 + file))) != 0) break; // blocker on target square
+                if ((blocker & (1UL << (r * 8 + f))) != 0) break; // blocker on target square
             }
 
             return attack;

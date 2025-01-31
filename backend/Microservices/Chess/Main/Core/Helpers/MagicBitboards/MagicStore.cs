@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Chess.Main.Core.Helpers.MagicBitboards
 {
-    public class MagicsStore
+    public static class MagicsStore
     {
         private static readonly string filePathBishop = "magic_numbers_bishop.json";
         private static readonly string filePathRook = "magic_numbers_rook.json";

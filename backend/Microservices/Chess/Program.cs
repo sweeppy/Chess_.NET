@@ -14,7 +14,6 @@ builder.Services.AddSwaggerGen(options =>
 
 
 // Initialize magic numbers
-new MagicsStore();
 
 // Add cors
 builder.Services.AddCors(options =>

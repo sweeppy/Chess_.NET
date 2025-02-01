@@ -10,21 +10,68 @@ namespace Chess.Main.Models
         private ulong WhiteBishops;
         private ulong WhiteRooks;
         private ulong WhiteQueens;
-        private ulong WhiteKings;
+        private ulong WhiteKing;
 
         private ulong BlackPawns ;
         private ulong BlackKnights;
         private ulong BlackBishops;
         private ulong BlackRooks;
         private ulong BlackQueens;
-        private ulong BlackKings;
-
+        private ulong BlackKing;
 
         private ulong WhitePieces;
         private ulong BlackPieces;
 
-
         private ulong allPieces;
+
+        private bool CanWhiteKingCastle;
+        private bool CanWhiteQueenCastle;
+        private bool CanBlackKingCastle;
+        private bool CanBlackQueenCastle;
+
+        private bool IsWhiteTurn;
+
+        private ulong? EnPassantTarget;
+
+        private int MovesWithoutCapture;
+
+        private int ComingMoveCount;
+
+        public Board(ulong whitePawns, ulong whiteKnights, ulong whiteBishops, ulong whiteRooks,
+                     ulong whiteQueens, ulong whiteKing, bool canWhiteKingCastle, bool canWhiteQueenCastle,
+
+                     ulong blackPawns, ulong blackKnights, ulong blackBishops, ulong blackRooks,
+                     ulong blackQueens, ulong blackKing, bool canBlackKingCastle, bool canBlackQueenCastle,
+                     
+                     bool isWhiteTurn, int? enPassantSquare, int movesWithoutCapture, int comingMoveCount)
+        {
+            WhitePawns = whitePawns;
+            WhiteKnights = whiteKnights;
+            WhiteBishops = whiteBishops;
+            WhiteRooks = whiteRooks;
+            WhiteQueens = whiteQueens;
+            WhiteKing = whiteKing;
+            CanWhiteKingCastle = canWhiteKingCastle;
+            CanWhiteQueenCastle = canWhiteQueenCastle;
+
+            BlackPawns = blackPawns;
+            BlackKnights = blackKnights;
+            BlackBishops = blackBishops;
+            BlackRooks = blackRooks;
+            BlackQueens = blackQueens;
+            BlackKing = blackKing;
+            CanBlackKingCastle = canBlackKingCastle;
+            CanBlackQueenCastle = canBlackQueenCastle;
+
+            IsWhiteTurn = isWhiteTurn;
+            MovesWithoutCapture = movesWithoutCapture;
+            ComingMoveCount = comingMoveCount;
+            
+            if(enPassantSquare.HasValue)
+            {
+                EnPassantTarget = 1UL << enPassantSquare.Value;
+            }
+        }
 
         // Initial position
         public void InitializeBoard()
@@ -34,16 +81,16 @@ namespace Chess.Main.Models
             WhiteBishops = 0x00_00_00_00_00_00_00_24;
             WhiteRooks = 0x00_00_00_00_00_00_00_81;
             WhiteQueens = 0x00_00_00_00_00_00_00_10;
-            WhiteKings = 0x00_00_00_00_00_00_00_08;
-            WhitePieces = WhitePawns | WhiteKnights | WhiteBishops | WhiteRooks | WhiteQueens | WhiteKings;
+            WhiteKing = 0x00_00_00_00_00_00_00_08;
+            WhitePieces = WhitePawns | WhiteKnights | WhiteBishops | WhiteRooks | WhiteQueens | WhiteKing;
 
             BlackPawns = 0x00_FF_00_00_00_00_00_00;
             BlackKnights = 0x42_00_00_00_00_00_00_00;
             BlackBishops = 0x24_00_00_00_00_00_00_00;
             BlackRooks = 0x81_00_00_00_00_00_00_00;
             BlackQueens = 0x08_00_00_00_00_00_00_00;
-            BlackKings = 0x10_00_00_00_00_00_00_00;
-            BlackPieces = BlackPawns | BlackKnights | BlackBishops | BlackRooks | BlackQueens | BlackKings;
+            BlackKing = 0x10_00_00_00_00_00_00_00;
+            BlackPieces = BlackPawns | BlackKnights | BlackBishops | BlackRooks | BlackQueens | BlackKing;
 
 
             allPieces = WhitePieces | BlackPieces;
@@ -54,14 +101,14 @@ namespace Chess.Main.Models
         public ulong GetWhiteBishops() => WhiteBishops;
         public ulong GetWhiteRooks() => WhiteRooks;
         public ulong GetWhiteQueens() => WhiteQueens;
-        public ulong GetWhiteKings() => WhiteKings;
+        public ulong GetWhiteKing() => WhiteKing;
 
         public ulong GetBlackPawns() => BlackPawns;
         public ulong GetBlackKnights() => BlackKnights;
         public ulong GetBlackBishops() => BlackBishops;
         public ulong GetBlackRooks() => BlackRooks;
         public ulong GetBlackQueens() => BlackQueens;
-        public ulong GetBlackKings() => BlackKings;
+        public ulong GetBlackKing() => BlackKing;
 
 
         public ulong GetWhitePieces() => WhitePieces;
@@ -89,7 +136,7 @@ namespace Chess.Main.Models
                 else if ((WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref WhiteBishops, startSquare, targetSquare);
                 else if ((WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref WhiteRooks, startSquare, targetSquare);
                 else if ((WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref WhiteQueens, startSquare, targetSquare);
-                else if ((WhiteKings & startBit) != 0) PieceMovement.PieceMove(ref WhiteKings, startSquare, targetSquare);
+                else if ((WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref WhiteKing, startSquare, targetSquare);
             }
             else
             {
@@ -98,7 +145,7 @@ namespace Chess.Main.Models
                 else if ((BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref BlackBishops, startSquare, targetSquare);
                 else if ((BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref BlackRooks, startSquare, targetSquare);
                 else if ((BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref BlackQueens, startSquare, targetSquare);
-                else if ((BlackKings & startBit) != 0) PieceMovement.PieceMove(ref BlackKings, startSquare, targetSquare);
+                else if ((BlackKing & startBit) != 0) PieceMovement.PieceMove(ref BlackKing, startSquare, targetSquare);
             }
         
         }
@@ -112,7 +159,7 @@ namespace Chess.Main.Models
                 else if ((WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
                 else if ((WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
                 else if ((WhiteQueens & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
-                else if ((WhiteKings & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteKing & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
             }
             else
             {
@@ -121,7 +168,7 @@ namespace Chess.Main.Models
                 else if ((BlackBishops & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
                 else if ((BlackRooks & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
                 else if ((BlackQueens & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
-                else if ((BlackKings & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackKing & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
             }
         
         }
@@ -158,7 +205,7 @@ namespace Chess.Main.Models
 
 // Each byte describes one rank of the board.
 
-// Examples for all pieces:
+// Examples for initial position:
 
 //      White Pawns                         Black Pawns
 /*

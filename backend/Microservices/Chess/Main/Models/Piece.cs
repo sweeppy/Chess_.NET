@@ -3,15 +3,6 @@ namespace Chess.Main.Models
 
     public static class Piece
     {
-        public  static Dictionary<char, int> pieceTypeFromSymbols = new Dictionary<char, int>()
-        {
-            ['k'] = King,
-            ['n'] = Knight,
-            ['b'] = Bishop,
-            ['r'] = Rook,
-            ['q'] = Queen,
-            ['p'] = Pawn
-        };
         // Pieces Types
         public const int None = 0;
         public const int Pawn = 1;

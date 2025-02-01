@@ -5,7 +5,7 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public static class RookMovement
     {
-        public static ulong Generate(int squareIndex, ulong blockers, ulong whitePieces, int rook)
+        public static ulong Generate(int squareIndex, ulong blockers, ulong alliedPieces)
         {
             ulong mask = MagicBitboards.MagicRookTable[squareIndex].Mask;
             ulong magic = MagicBitboards.MagicRookTable[squareIndex].MagicNumber;
@@ -16,10 +16,8 @@ namespace Chess.Main.Core.Movement.Generator
 
             ulong index = (blockers * magic) >> (64 - relativeBits);
 
-            // Allied blockers must be the same color as rook
-            ulong alliedBlockers = Piece.isWhite(rook) ? blockers & whitePieces : blockers & ~whitePieces;
-
-            return MagicBitboards.MagicRookTable[squareIndex].AttackTable[index] & ~alliedBlockers;
+            // Rook can't capture allied pieces
+            return MagicBitboards.MagicRookTable[squareIndex].AttackTable[index] & ~alliedPieces;
         }
     }
 }

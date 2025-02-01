@@ -13,8 +13,6 @@ builder.Services.AddSwaggerGen(options =>
 // Register dependencies
 
 
-// Initialize magic numbers
-
 // Add cors
 builder.Services.AddCors(options =>
 {

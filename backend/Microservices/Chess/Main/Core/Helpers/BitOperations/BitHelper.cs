@@ -14,7 +14,7 @@ namespace Chess.Main.Core.Helpers.BitOperation
             return count;
         }
 
-        public static int BitScanForward(ulong value)
+        public static int GetFirstBitIndex(ulong value)
         {
             return System.Numerics.BitOperations.TrailingZeroCount(value);
         }

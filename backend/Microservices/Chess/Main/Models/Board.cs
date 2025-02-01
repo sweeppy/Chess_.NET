@@ -1,21 +1,30 @@
+using Chess.Main.Core.Movement;
+
 namespace Chess.Main.Models
 {
     public sealed class Board
     {
         // Bitboards
-        public ulong WhitePawns  { get; private set; }
-        public ulong WhiteKnights { get; private set; }
-        public ulong WhiteBishops { get; private set; }
-        public ulong WhiteRooks { get; private set; }
-        public ulong WhiteQueens { get; private set; }
-        public ulong WhiteKings { get; private set; }
+        private ulong WhitePawns;
+        private ulong WhiteKnights;
+        private ulong WhiteBishops;
+        private ulong WhiteRooks;
+        private ulong WhiteQueens;
+        private ulong WhiteKings;
 
-        public ulong BlackPawns  { get; private set; }
-        public ulong BlackKnights { get; private set; }
-        public ulong BlackBishops { get; private set; }
-        public ulong BlackRooks { get; private set; }
-        public ulong BlackQueens { get; private set; }
-        public ulong BlackKings { get; private set; }
+        private ulong BlackPawns ;
+        private ulong BlackKnights;
+        private ulong BlackBishops;
+        private ulong BlackRooks;
+        private ulong BlackQueens;
+        private ulong BlackKings;
+
+
+        private ulong WhitePieces;
+        private ulong BlackPieces;
+
+
+        private ulong allPieces;
 
         // Initial position
         public void InitializeBoard()
@@ -26,6 +35,7 @@ namespace Chess.Main.Models
             WhiteRooks = 0x00_00_00_00_00_00_00_81;
             WhiteQueens = 0x00_00_00_00_00_00_00_10;
             WhiteKings = 0x00_00_00_00_00_00_00_08;
+            WhitePieces = WhitePawns | WhiteKnights | WhiteBishops | WhiteRooks | WhiteQueens | WhiteKings;
 
             BlackPawns = 0x00_FF_00_00_00_00_00_00;
             BlackKnights = 0x42_00_00_00_00_00_00_00;
@@ -33,6 +43,87 @@ namespace Chess.Main.Models
             BlackRooks = 0x81_00_00_00_00_00_00_00;
             BlackQueens = 0x08_00_00_00_00_00_00_00;
             BlackKings = 0x10_00_00_00_00_00_00_00;
+            BlackPieces = BlackPawns | BlackKnights | BlackBishops | BlackRooks | BlackQueens | BlackKings;
+
+
+            allPieces = WhitePieces | BlackPieces;
+        }
+
+        public ulong GetWhitePawns() => WhitePawns;
+        public ulong GetWhiteKnights() => WhiteKnights;
+        public ulong GetWhiteBishops() => WhiteBishops;
+        public ulong GetWhiteRooks() => WhiteRooks;
+        public ulong GetWhiteQueens() => WhiteQueens;
+        public ulong GetWhiteKings() => WhiteKings;
+
+        public ulong GetBlackPawns() => BlackPawns;
+        public ulong GetBlackKnights() => BlackKnights;
+        public ulong GetBlackBishops() => BlackBishops;
+        public ulong GetBlackRooks() => BlackRooks;
+        public ulong GetBlackQueens() => BlackQueens;
+        public ulong GetBlackKings() => BlackKings;
+
+
+        public ulong GetWhitePieces() => WhitePieces;
+        public ulong GetBlackPieces() => BlackPieces;
+
+
+        public void MakeMove(int startSquare, int targetSquare, bool isWhite)
+        {
+            ulong targetBit = 1UL << targetSquare;
+            if (((targetBit & WhitePieces) != 0) || ((targetBit & BlackPieces) != 0))
+            {
+                MakeMoveWithCapture(startSquare, targetSquare, isWhite);
+            }
+            else MakeMoveWithoutCapture(startSquare, targetSquare, isWhite);
+        }
+
+        private void MakeMoveWithoutCapture(int startSquare, int targetSquare, bool isWhite)
+        {
+            ulong startBit = 1Ul << startSquare;
+
+            if(isWhite)
+            {
+                if ((WhitePawns & startBit) != 0) PieceMovement.PieceMove(ref WhitePawns, startSquare, targetSquare);
+                else if ((WhiteKnights & startBit) != 0) PieceMovement.PieceMove(ref WhiteKnights, startSquare, targetSquare);
+                else if ((WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref WhiteBishops, startSquare, targetSquare);
+                else if ((WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref WhiteRooks, startSquare, targetSquare);
+                else if ((WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref WhiteQueens, startSquare, targetSquare);
+                else if ((WhiteKings & startBit) != 0) PieceMovement.PieceMove(ref WhiteKings, startSquare, targetSquare);
+            }
+            else
+            {
+                if ((BlackPawns & startBit) != 0) PieceMovement.PieceMove(ref BlackPawns, startSquare, targetSquare);
+                else if ((BlackKnights & startBit) != 0) PieceMovement.PieceMove(ref BlackKnights, startSquare, targetSquare);
+                else if ((BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref BlackBishops, startSquare, targetSquare);
+                else if ((BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref BlackRooks, startSquare, targetSquare);
+                else if ((BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref BlackQueens, startSquare, targetSquare);
+                else if ((BlackKings & startBit) != 0) PieceMovement.PieceMove(ref BlackKings, startSquare, targetSquare);
+            }
+        
+        }
+        private void MakeMoveWithCapture(int startSquare, int targetSquare, bool isWhite)
+        {
+            ulong startBit = 1Ul << startSquare;
+            if(isWhite)
+            {
+                if ((WhitePawns & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteKnights & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteQueens & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((WhiteKings & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+            }
+            else
+            {
+                if ((BlackPawns & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackKnights & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackBishops & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackRooks & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackQueens & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+                else if ((BlackKings & startBit) != 0) PieceMovement.PieceCapture(ref allPieces, startSquare, targetSquare);
+            }
+        
         }
     }
 }

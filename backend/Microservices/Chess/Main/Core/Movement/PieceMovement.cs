@@ -8,11 +8,11 @@ namespace Chess.Main.Core.Movement
             bitboard |= 1UL << targetSquare; 
         }
 
-        public static void PieceCapture(ref ulong attackerBitboard, ref ulong victimBitboard,
+        public static void PieceCapture(ref ulong allPiecesBitboard,
                                         int startSquare, int targetSquare)
-         {
-            victimBitboard &= ~(victimBitboard << targetSquare);
-            PieceMove(ref attackerBitboard, startSquare, targetSquare);
-         }
+        {
+            allPiecesBitboard &= ~(1Ul << targetSquare);
+            PieceMove(ref allPiecesBitboard, startSquare, targetSquare);
+        }
     }
 }

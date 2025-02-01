@@ -17,7 +17,7 @@ namespace Tests
 
                 ulong expectedMoves = GenerateExpectedBishopMoves(squareIndex, blockers);
 
-                ulong actualMoves = BishopMovement.Generate(squareIndex, blockers, 0, Piece.WhiteBishop); // 0 - means that all blockers are black
+                ulong actualMoves = BishopMovement.Generate(squareIndex, blockers, 0); // 0 - means that all blockers are black
 
                 Console.WriteLine($"Testing square: {squareIndex}");
                 Console.WriteLine("Blockers:");

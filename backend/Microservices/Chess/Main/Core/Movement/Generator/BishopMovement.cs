@@ -5,7 +5,7 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public static class BishopMovement
     {
-        public static ulong Generate(int squareIndex, ulong blockers, ulong whitePieces, int bishop)
+        public static ulong Generate(int squareIndex, ulong blockers, ulong alliedPieces)
         {
             ulong mask = MagicBitboards.MagicBishopTable[squareIndex].Mask;
             ulong magic = MagicBitboards.MagicBishopTable[squareIndex].MagicNumber;
@@ -15,11 +15,8 @@ namespace Chess.Main.Core.Movement.Generator
 
             ulong index = (blockers * magic) >> (64 - relevantBits);
 
-            // Allied blockers must be the same color as bishop
-            ulong alliedBlockers = Piece.isWhite(bishop) ? blockers & whitePieces : blockers & ~whitePieces;
-
-
-            return MagicBitboards.MagicBishopTable[squareIndex].AttackTable[index] & ~alliedBlockers;
+            // Bishop can capture allied pieces
+            return MagicBitboards.MagicBishopTable[squareIndex].AttackTable[index] & ~alliedPieces;
         }
     }
 }

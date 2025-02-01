@@ -3,6 +3,15 @@ namespace Chess.Main.Models
 
     public static class Piece
     {
+        public  static Dictionary<char, int> pieceTypeFromSymbols = new Dictionary<char, int>()
+        {
+            ['k'] = King,
+            ['n'] = Knight,
+            ['b'] = Bishop,
+            ['r'] = Rook,
+            ['q'] = Queen,
+            ['p'] = Pawn
+        };
         // Pieces Types
         public const int None = 0;
         public const int Pawn = 1;
@@ -45,15 +54,6 @@ namespace Chess.Main.Models
         public static bool isColor(int piece, int color) => (piece & colorMask) == color && piece != 0;
 
         public static bool isWhite(int piece) => isColor(piece, White);
-
-        // Queen, Rook or Bishop
-        public static bool isSlidingPiece(int piece) => PieceType(piece) is Queen or Rook or Bishop;
-
-        // Rook or Queen
-        public static bool isOrthogonalPiece(int piece) => PieceType(piece) is Queen or Rook;
-
-        // Queen or Bishop
-        public static bool isDiagonalPiece(int piece) => PieceType(piece) is Queen or Bishop;
 
         public static char GetSymbol(int piece)
         {

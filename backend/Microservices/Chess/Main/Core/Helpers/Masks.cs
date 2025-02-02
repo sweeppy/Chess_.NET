@@ -14,8 +14,10 @@ namespace Chess.Main.Core.Helpers
         public const ulong NotHFFile = 0xFA_FA_FA_FA_FA_FA_FA_FA;
         public const ulong NotGHFile = 0xFC_FC_FC_FC_FC_FC_FC_FC;
 
+        public const ulong WhiteKingCastleMask = 0x00_00_00_00_00_00_00_02;
+        public const ulong WhiteQueenCastleMask = 0x00_00_00_00_00_00_00_20;
 
-
-        
+        public const ulong BlackKingCastleMask = 0x02_00_00_00_00_00_00_00;
+        public const ulong BlackQueenCastleMask = 0x20_00_00_00_00_00_00_00;
     }
 }

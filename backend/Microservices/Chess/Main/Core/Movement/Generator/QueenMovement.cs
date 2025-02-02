@@ -5,7 +5,7 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public class QueenMovement
     {
-        public static ulong Generate(int squareIndex, ulong blockers, ulong alliedPieces)
+        public static ulong Generate(int squareIndex, Board board)
         {
             ulong bishopMask = MagicBitboards.MagicBishopTable[squareIndex].Mask;
             ulong rookMask = MagicBitboards.MagicRookTable[squareIndex].Mask;
@@ -16,6 +16,8 @@ namespace Chess.Main.Core.Movement.Generator
             int relevantBishopBits = MagicBitboards.MagicBishopTable[squareIndex].RelevantBits;
             int relevantRookBits = MagicBitboards.MagicRookTable[squareIndex].RelevantBits;
 
+            ulong blockers = board.GetAllPieces();
+
             blockers &= bishopMask | rookMask;
 
             ulong bishopIndex = (blockers * bishopMagic) >> (64 - relevantBishopBits);
@@ -23,6 +25,8 @@ namespace Chess.Main.Core.Movement.Generator
 
             ulong bishopMoves = MagicBitboards.MagicBishopTable[squareIndex].AttackTable[bishopIndex];
             ulong rookMoves = MagicBitboards.MagicRookTable[squareIndex].AttackTable[rookIndex];
+
+            ulong alliedPieces = board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces();
 
             return (bishopMoves | rookMoves) & ~alliedPieces;
         }

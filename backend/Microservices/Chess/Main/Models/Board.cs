@@ -51,6 +51,7 @@ namespace Chess.Main.Models
             WhiteRooks = whiteRooks;
             WhiteQueens = whiteQueens;
             WhiteKing = whiteKing;
+            WhitePieces = whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueens | whiteKing;
             CanWhiteKingCastle = canWhiteKingCastle;
             CanWhiteQueenCastle = canWhiteQueenCastle;
 
@@ -60,8 +61,11 @@ namespace Chess.Main.Models
             BlackRooks = blackRooks;
             BlackQueens = blackQueens;
             BlackKing = blackKing;
+            BlackPieces = blackPawns | blackKnights | blackBishops | blackRooks | blackQueens | blackKing;
             CanBlackKingCastle = canBlackKingCastle;
             CanBlackQueenCastle = canBlackQueenCastle;
+
+            allPieces = WhitePieces | BlackPieces;
 
             IsWhiteTurn = isWhiteTurn;
             MovesWithoutCapture = movesWithoutCapture;
@@ -114,6 +118,16 @@ namespace Chess.Main.Models
         public ulong GetWhitePieces() => WhitePieces;
         public ulong GetBlackPieces() => BlackPieces;
 
+        public ulong GetAllPieces() => allPieces;
+
+        public bool GetIsWhiteTurn() => IsWhiteTurn;
+
+        public bool GetCanWhiteKingCastle() => CanWhiteKingCastle;
+        public bool GetCanWhiteQueenCastle() => CanWhiteQueenCastle;
+        public bool GetCanBlackKingCastle() => CanBlackKingCastle;
+        public bool GetCanBlackQueenCastle() => CanBlackQueenCastle;
+
+        public ulong? GetEnPassantTarget() => EnPassantTarget;
 
         public void MakeMove(int startSquare, int targetSquare, bool isWhite)
         {

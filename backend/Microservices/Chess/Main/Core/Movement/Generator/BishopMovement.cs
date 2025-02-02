@@ -5,13 +5,17 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public static class BishopMovement
     {
-        public static ulong Generate(int squareIndex, ulong blockers, ulong alliedPieces)
+        public static ulong Generate(int squareIndex, Board board)
         {
             ulong mask = MagicBitboards.MagicBishopTable[squareIndex].Mask;
             ulong magic = MagicBitboards.MagicBishopTable[squareIndex].MagicNumber;
 
             int relevantBits = MagicBitboards.MagicBishopTable[squareIndex].RelevantBits;
-            blockers &= mask; // Blockers can be on the edge of the board (we are not interested in it)
+
+            ulong allPieces = board.GetAllPieces();
+            ulong blockers = allPieces & mask; // Blockers can be on the edge of the board (we are not interested in it)
+
+            ulong alliedPieces = allPieces & (board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces());
 
             ulong index = (blockers * magic) >> (64 - relevantBits);
 

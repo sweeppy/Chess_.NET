@@ -1,13 +1,73 @@
+using System.Text;
+using Chess.Main.Core.Helpers.BitOperation;
 using Chess.Main.Models;
 
 namespace Chess.Main.Core.FEN
 {
     public static class FenUtility
     {
-        // public static string GenerateFenFromBoard()
-        // {
+        public static string GenerateFenFromBoard(Board board)
+        {
+            Dictionary<char, ulong> allPiecesBitboards = GetBoardBitboards(board);
+            StringBuilder fenBuilder = new();
 
-        // }
+            // Generate positions string
+            int emptyCount = 0;
+            for (int rank = 7; rank >= 0; rank--)
+            {
+                for (int file = 7; file >= 0; file--)
+                {
+                    int squareIndex = rank * 8 + file;
+                    char? pieceSymbol = GetPieceSymbolFromSquare(allPiecesBitboards, squareIndex);
+
+                    if (!pieceSymbol.HasValue) emptyCount++;
+                    else
+                    {
+                        if (emptyCount > 0)
+                        {
+                            fenBuilder.Append(emptyCount);
+                            emptyCount = 0;
+                        }
+                        fenBuilder.Append(pieceSymbol.Value);
+                    }
+                }
+                if (emptyCount > 0)
+                {
+                    fenBuilder.Append(emptyCount);
+                    emptyCount = 0;
+                }
+                if (rank > 0) fenBuilder.Append('/');
+            }
+
+            // Whose turn
+            fenBuilder.Append(board.GetIsWhiteTurn() ? " w" : " b");
+
+            // Castling
+            StringBuilder castling = new();
+            if (board.GetCanWhiteKingCastle()) castling.Append('K');
+            if (board.GetCanWhiteQueenCastle()) castling.Append('Q');
+            if (board.GetCanBlackKingCastle()) castling.Append('k');
+            if (board.GetCanBlackQueenCastle()) castling.Append('q');
+            fenBuilder.Append(' ').Append(castling.Length == 0 ? '-' : castling);
+
+            // En passant
+            ulong? enPassantTarget = board.GetEnPassantTarget();
+            if(enPassantTarget.HasValue)
+            {
+                int square = BitHelper.GetFirstBitIndex(enPassantTarget.Value);
+                string squareName = squareToIndex.FirstOrDefault(x => x.Value == square).Key;
+                fenBuilder.Append(' ').Append(squareName);
+            }
+            else fenBuilder.Append(" -");
+
+            // Moves without capture
+            fenBuilder.Append(' ').Append(board.GetMovesWithoutCapture());
+
+            // Coming move count
+            fenBuilder.Append(' ').Append(board.GetComingMoveCount());
+
+            return fenBuilder.ToString();
+        }
         
         public static Board LoadBoardFromFen(string fen)
         {
@@ -74,10 +134,11 @@ namespace Chess.Main.Core.FEN
 
             bool isWhiteTurn = whoseTurn[0] == 'w';
 
-            bool canWhiteKingCastle = castling[0] != '-';
-            bool canWhiteQueenCastle = castling[1] != '-';
-            bool canBlackKingCastle = castling[2] != '-';
-            bool canBlackQueenCastle = castling[3] != '-';
+            bool canWhiteKingCastle = castling.Contains('K');
+            bool canWhiteQueenCastle = castling.Contains('Q');
+            bool canBlackKingCastle = castling.Contains('k');
+            bool canBlackQueenCastle = castling.Contains('q');
+
 
             int? enPassantSquare = squareToIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
 
@@ -105,6 +166,40 @@ namespace Chess.Main.Core.FEN
             { "a2", 15 }, { "b2", 14 }, { "c2", 13 }, { "d2", 12 }, { "e2", 11 }, { "f2", 10 }, { "g2", 9  }, { "h2", 8  },
             { "a1", 7  }, { "b1", 6  }, { "c1", 5  }, { "d1", 4  }, { "e1", 3  }, { "f1", 2  }, { "g1", 1  }, { "h1", 0  }
         };
+
+        private static Dictionary<char, ulong> GetBoardBitboards(Board board)
+        {
+            return new Dictionary<char, ulong>()
+            {
+                {'P', board.GetWhitePawns()},
+                {'N', board.GetWhiteKnights()},
+                {'B', board.GetWhiteBishops()},
+                {'R', board.GetWhiteRooks()},
+                {'Q', board.GetWhiteQueens()},
+                {'K', board.GetWhiteKing()},
+
+                {'p', board.GetBlackPawns()},
+                {'n', board.GetBlackKnights()},
+                {'b', board.GetBlackBishops()},
+                {'r', board.GetBlackRooks()},
+                {'q', board.GetBlackQueens()},
+                {'k', board.GetBlackKing()},
+            };
+        }
+
+        private static char? GetPieceSymbolFromSquare(Dictionary<char, ulong> bitboards, int square)
+        {
+            ulong squareMask = 1UL << square;
+
+            foreach (var entry in bitboards)
+            {
+                if ((entry.Value & squareMask) != 0)
+                {
+                    return entry.Key;
+                }
+            }
+            return null;
+        }
     }
 
     

@@ -1,5 +1,4 @@
 using Chess.Main.Core.Helpers.MagicBitboards;
-using Tests.Helpers;
 
 namespace Tests
 {

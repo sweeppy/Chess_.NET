@@ -17,10 +17,12 @@ namespace Chess.Main.Core.Movement.Generator
         {
             ulong result = lookUpDefaultMoves[squareIndex];
 
-            result |= getCastlingMask(board);
-
             if (checkSafety)
-                result &= GetKingSafeMask(board);
+            {
+                ulong squaresUnderAttack = GetUnderAttackSquares(board);
+                result |= GetCastlingMask(board, squaresUnderAttack);
+                result &= ~squaresUnderAttack;
+            }
 
             return result;
         }
@@ -52,11 +54,8 @@ namespace Chess.Main.Core.Movement.Generator
             }
         }
 
-        private static ulong GetKingSafeMask(Board board)
+        private static ulong GetUnderAttackSquares(Board board)
         {
-
-            ulong alliedPieces = board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces();
-
             //Get all enemy pieces bitboards
             bool isWhite = board.GetIsWhiteTurn();
             ulong enemyPawns = isWhite ? board.GetBlackPawns() : board.GetWhitePawns();
@@ -65,9 +64,6 @@ namespace Chess.Main.Core.Movement.Generator
             ulong enemyRooks = isWhite ? board.GetBlackRooks() : board.GetWhiteRooks();
             ulong enemyQueens = isWhite ? board.GetBlackQueens() : board.GetWhiteQueens();
             ulong enemyKing = isWhite ? board.GetBlackKing() : board.GetWhiteKing();
-
-            ulong enemyPieces = isWhite ? board.GetBlackPieces() : board.GetWhitePieces();
-            ulong allPieces = board.GetWhitePieces() | board.GetBlackPieces();
 
             ulong attackedMask = 0UL;
 
@@ -102,24 +98,41 @@ namespace Chess.Main.Core.Movement.Generator
             attackedMask |= Generate(enemyKingSquareIndex, board, false);
 
             // Return safety mask for king
-            return ~attackedMask;
-            throw new NotImplementedException();
+            return attackedMask;
         }
 
 
-        private static ulong getCastlingMask(Board board)
+        private static ulong GetCastlingMask(Board board, ulong attackedSquares)
         {
             ulong result = 0UL;
 
-            if(board.GetIsWhiteTurn()) // For white
+            ulong blockers = board.GetAllPieces();
+
+            bool isWhiteTurn = board.GetIsWhiteTurn();
+
+            int kingSquareIndex = isWhiteTurn ? 3 : 59;
+
+            // The squares that the king must pass through
+            ulong kingCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_03UL : 0x03_00_00_00_00_00_00_00UL;
+            ulong queenCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_03UL : 0x03_00_00_00_00_00_00_00UL;
+
+            // Check if the king is under attack now
+            bool isKingUnderAttack = (attackedSquares & (1UL << kingSquareIndex)) != 0;
+
+            // Check if the squares that the king must pass through are not under attack
+            bool isKingCastleNotUnderAttack = (kingCastleSquares & attackedSquares) == 0;
+            bool isQueenCastleNotUnderAttack = (queenCastleSquares & attackedSquares) == 0;
+
+            // Check if the squares that the king must pass through are free
+            bool isKingCastleFree = (blockers & kingCastleSquares) == 0;
+            bool isQueenCastleFree = (blockers & queenCastleSquares) == 0;
+
+            if(!isKingUnderAttack)
             {
-                if (board.GetCanWhiteKingCastle()) result |= Masks.WhiteKingCastleMask;
-                if (board.GetCanWhiteQueenCastle()) result |= Masks.WhiteQueenCastleMask;
-            }
-            else // For black
-            {
-                if(board.GetCanBlackKingCastle()) result |= Masks.BlackKingCastleMask;
-                if (board.GetCanBlackQueenCastle()) result |= Masks.BlackQueenCastleMask;
+                if (board.GetCanWhiteKingCastle() && isKingCastleNotUnderAttack && isKingCastleFree)
+                    result |= Masks.WhiteKingCastleMask;
+                if (board.GetCanWhiteQueenCastle() && isQueenCastleNotUnderAttack && isQueenCastleFree)
+                    result |= Masks.WhiteQueenCastleMask;
             }
 
             return result;

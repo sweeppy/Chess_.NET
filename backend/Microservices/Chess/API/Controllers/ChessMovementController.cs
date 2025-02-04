@@ -23,7 +23,7 @@ namespace Chess.API.Controllers
             string fenAfterMove = await _movementAPI.OnMove(request);
             return Ok(fenAfterMove);
         }
-
+        [HttpPost("getLegalMoves")]
         public IActionResult GetLegalMoves([FromBody] string fen)
         {
             Dictionary<int, List<int>> legalMoves = _movementAPI.GetLegalMoves(fen);

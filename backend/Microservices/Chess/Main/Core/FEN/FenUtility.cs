@@ -90,7 +90,6 @@ namespace Chess.Main.Core.FEN
                 // New rank
                 if(symbol == '/')
                 {
-                    bitPosition -= 8;
                     continue;
                 }
                 // Skip squares

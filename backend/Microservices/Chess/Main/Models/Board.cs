@@ -225,8 +225,12 @@ namespace Chess.Main.Models
 
                 int rookStartSquare = isKingCastle ? 0 : 7;
                 int rookTargetSquare = isKingCastle ? 2 : 4;
+
                 PieceMovement.PieceMove(ref board.allPieces, kingStartSquare, kingTargetSquare);
                 PieceMovement.PieceMove(ref board.allPieces, rookStartSquare, rookTargetSquare);
+
+                board.CanWhiteKingCastle = false;
+                board.CanWhiteQueenCastle = false;
             }
             else // Black castle
             {
@@ -235,8 +239,12 @@ namespace Chess.Main.Models
 
                 int rookStartSquare = isKingCastle ? 56 : 63;
                 int rookTargetSquare = isKingCastle ? 58 : 60;
+                
                 PieceMovement.PieceMove(ref board.allPieces, kingStartSquare, kingTargetSquare);
                 PieceMovement.PieceMove(ref board.allPieces, rookStartSquare, rookTargetSquare);
+
+                board.CanBlackKingCastle = false;
+                board.CanBlackQueenCastle = false;
             }
         }
     }

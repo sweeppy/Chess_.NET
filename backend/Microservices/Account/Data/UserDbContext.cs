@@ -37,5 +37,6 @@ namespace Account.Data
             
         }
         public DbSet<Player> Players { get; set; }
+        public DbSet<Tournament> Tournaments { get; set; }
     }
 }

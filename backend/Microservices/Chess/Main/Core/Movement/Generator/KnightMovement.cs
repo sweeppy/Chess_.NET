@@ -21,28 +21,29 @@ namespace Chess.Main.Core.Movement.Generator
                 A B C D E F G H
         */
 
-        public static ulong Generate(Board board)
+        public static ulong Generate(int squareIndex, Board board)
         {
-            ulong knights = 0Ul;
-
             bool isWhiteTurn = board.GetIsWhiteTurn();
-            knights = isWhiteTurn ? board.GetWhiteKnights() : board.GetBlackKnights();
-            if (knights == 0) return 0; // if there are no allied knights on the board
+
+            ulong bitboardPosition = 1UL << squareIndex;
+            
+            ulong knight = (isWhiteTurn ? board.GetWhiteKnights() : board.GetBlackKnights()) & bitboardPosition;
+            if (knight == 0) return 0; // if there are no allied knights on the board
 
             ulong alliedPieces = isWhiteTurn ? board.GetWhitePieces() : board.GetBlackPieces();
 
             // Clockwise
-            ulong NNE = ((knights & Masks.NotHFile) << 15) & ~alliedPieces;
-            ulong NEE = ((knights & Masks.NotGHFile) << 6) & ~alliedPieces;
+            ulong NNE = ((knight & Masks.NotHFile) << 15) & ~alliedPieces;
+            ulong NEE = ((knight & Masks.NotGHFile) << 6) & ~alliedPieces;
 
-            ulong SEE = ((knights & Masks.NotGHFile) >> 10) & ~alliedPieces;
-            ulong SSE = ((knights & Masks.NotHFile) >> 17) & ~alliedPieces;
+            ulong SEE = ((knight & Masks.NotGHFile) >> 10) & ~alliedPieces;
+            ulong SSE = ((knight & Masks.NotHFile) >> 17) & ~alliedPieces;
 
-            ulong SSW = ((knights & Masks.NotAFile) >> 15) & ~alliedPieces;
-            ulong SWW = ((knights & Masks.NotABFile) >> 6) & ~alliedPieces;
+            ulong SSW = ((knight & Masks.NotAFile) >> 15) & ~alliedPieces;
+            ulong SWW = ((knight & Masks.NotABFile) >> 6) & ~alliedPieces;
 
-            ulong NWW = ((knights & Masks.NotABFile) << 10) & ~alliedPieces;
-            ulong NNW = ((knights & Masks.NotAFile) << 17) & ~alliedPieces;
+            ulong NWW = ((knight & Masks.NotABFile) << 10) & ~alliedPieces;
+            ulong NNW = ((knight & Masks.NotAFile) << 17) & ~alliedPieces;
 
             return NNE | NEE | SEE | SSE | SSW | SWW  | NWW | NNW;
         }

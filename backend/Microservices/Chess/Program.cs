@@ -1,4 +1,6 @@
-using Chess.Main.Core.Helpers.MagicBitboards;
+using Chess.API.Implementations;
+using Chess.API.Interfaces;
+using Chess.Data;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +13,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Register dependencies
+builder.Services.AddScoped<GamesDbContext>();
 
+builder.Services.AddScoped<IMovement, MovementAPI>();
 
 // Add cors
 builder.Services.AddCors(options =>
@@ -36,7 +40,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseRouting();
+
 app.UseCors();
+
+app.UseAuthentication();
 
 app.MapControllers();
 app.Run();

@@ -13,7 +13,7 @@ namespace Chess.Main.Core.Movement.Generator
         {
             InitializeDefaultMovesTable();
         }
-        public static ulong Generate(int squareIndex,  Board board, bool checkSafety)
+        public static ulong Generate(int squareIndex,  Board board, bool checkSafety = true)
         {
             ulong result = lookUpDefaultMoves[squareIndex];
 
@@ -59,7 +59,6 @@ namespace Chess.Main.Core.Movement.Generator
             //Get all enemy pieces bitboards
             bool isWhite = board.GetIsWhiteTurn();
             ulong enemyPawns = isWhite ? board.GetBlackPawns() : board.GetWhitePawns();
-            ulong enemyKnights = isWhite ? board.GetBlackKnights() : board.GetWhiteKnights();
             ulong enemyBishops = isWhite ? board.GetBlackBishops() : board.GetWhiteBishops();
             ulong enemyRooks = isWhite ? board.GetBlackRooks() : board.GetWhiteRooks();
             ulong enemyQueens = isWhite ? board.GetBlackQueens() : board.GetWhiteQueens();
@@ -73,7 +72,13 @@ namespace Chess.Main.Core.Movement.Generator
             : (enemyPawns & Masks.NotHFile) << 7 | (enemyPawns & Masks.NotAFile) << 9;
             attackedMask |= pawnsAttack;
 
-            attackedMask |= KnightMovement.Generate(board);
+            ulong enemyKnights = isWhite ? board.GetBlackKnights() : board.GetWhiteKnights();
+            for (int i = 0; i < BitHelper.BitsCount(enemyKnights); i++)
+            {
+                int squareIndex = BitHelper.GetFirstBitIndex(enemyKnights);
+                attackedMask |= KnightMovement.Generate(squareIndex, board);
+                enemyKnights &= enemyKnights - 1; // delete first bit
+            }
 
             // Add to attacked mask bishops and queens diagonal attacks
             ulong bishopsAndQueens = enemyBishops | enemyQueens;

@@ -19,9 +19,17 @@ namespace Chess.Main.Core.Helpers.BitOperation
             return System.Numerics.BitOperations.TrailingZeroCount(value);
         }
 
-        private static ulong GetRandomUlongNumber()
+        public static List<int> SquareIndexesFromBitboard(ulong bitboard)
         {
-            return (ulong)rnd.NextInt64() & (ulong)rnd.NextInt64() & (ulong)rnd.NextInt64();
+            List<int> indexes = new List<int>();
+            while(bitboard != 0)
+            {
+                int index = GetFirstBitIndex(bitboard);
+                indexes.Add(index);
+                bitboard &= ~(1UL << index);
+            }
+            return indexes;
         }
+
     }
 }

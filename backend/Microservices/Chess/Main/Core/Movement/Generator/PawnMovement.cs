@@ -5,17 +5,18 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public static class PawnMovement
     {
-        public static ulong WhiteGenerate(ulong squareIndex, Board board)
+        public static ulong WhiteGenerate(int squareIndex, Board board)
         {
             ulong allPieces = board.GetAllPieces();
             ulong blackPieces = board.GetBlackPieces();
 
+            ulong bitboardPosition = 1UL << squareIndex;
 
-            ulong singlePush = (squareIndex << 8) & ~allPieces;
-            ulong doublePush = ((singlePush << 8) & (squareIndex & Masks.WhitePawnsStartingPosition << 16)) & ~allPieces;
+            ulong singlePush = (bitboardPosition << 8) & ~allPieces;
+            ulong doublePush = ((singlePush << 8) & (bitboardPosition & Masks.WhitePawnsStartingPosition << 16)) & ~allPieces;
 
-            ulong leftCapture = ((squareIndex & Masks.NotHFile) << 9) & blackPieces;
-            ulong rightCapture = ((squareIndex & Masks.NotAFile) << 7) & blackPieces;
+            ulong leftCapture = ((bitboardPosition & Masks.NotHFile) << 9) & blackPieces;
+            ulong rightCapture = ((bitboardPosition & Masks.NotAFile) << 7) & blackPieces;
 
             ulong enPassantMove = 0UL;
 
@@ -29,16 +30,18 @@ namespace Chess.Main.Core.Movement.Generator
             return singlePush | doublePush | leftCapture | rightCapture | enPassantMove;
         }
 
-        public static ulong BlackGenerate(ulong squareIndex, Board board)
+        public static ulong BlackGenerate(int squareIndex, Board board)
         {
             ulong allPieces = board.GetAllPieces();
             ulong whitePieces = board.GetWhitePieces();
 
-            ulong singlePush = (squareIndex >> 8) & ~allPieces;
-            ulong doublePush = ((singlePush >> 8) & (squareIndex & Masks.BlackPawnsStartingPosition >> 16)) & ~allPieces;
+            ulong bitboardPosition = 1UL << squareIndex;
 
-            ulong rightCapture = ((squareIndex & Masks.NotAFile) >> 9) & whitePieces;
-            ulong leftCapture = ((squareIndex & Masks.NotHFile) >> 7) & whitePieces;
+            ulong singlePush = (bitboardPosition >> 8) & ~allPieces;
+            ulong doublePush = ((singlePush >> 8) & (bitboardPosition & Masks.BlackPawnsStartingPosition >> 16)) & ~allPieces;
+
+            ulong rightCapture = ((bitboardPosition & Masks.NotAFile) >> 9) & whitePieces;
+            ulong leftCapture = ((bitboardPosition & Masks.NotHFile) >> 7) & whitePieces;
 
             ulong enPassantMove = 0UL;
             ulong? enPassantTarget = board.GetEnPassantTarget();

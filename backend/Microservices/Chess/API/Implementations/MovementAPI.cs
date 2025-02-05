@@ -73,9 +73,7 @@ namespace Chess.API.Implementations
             switch (pieceSymbol)
             {
                 case 'P':
-                    return board.GetIsWhiteTurn()
-                    ? PawnMovement.WhiteGenerate(squareIndex, board)
-                    : PawnMovement.BlackGenerate(squareIndex, board);
+                    return PawnMovement.WhiteGenerate(squareIndex, board);
                 case 'N':
                     return KnightMovement.Generate(squareIndex, board);
                 case 'B':
@@ -87,9 +85,7 @@ namespace Chess.API.Implementations
                 case 'K':
                     return KingMovement.Generate(squareIndex, board);
                 case 'p':
-                    return board.GetIsWhiteTurn()
-                    ? PawnMovement.WhiteGenerate(squareIndex, board)
-                    : PawnMovement.BlackGenerate(squareIndex, board);
+                    return PawnMovement.BlackGenerate(squareIndex, board);
                 case 'n':
                     return KnightMovement.Generate(squareIndex, board);
                 case 'b':

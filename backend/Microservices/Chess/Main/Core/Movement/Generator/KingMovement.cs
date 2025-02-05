@@ -17,11 +17,13 @@ namespace Chess.Main.Core.Movement.Generator
         {
             ulong result = lookUpDefaultMoves[squareIndex];
 
+
             if (checkSafety)
             {
                 ulong squaresUnderAttack = GetUnderAttackSquares(board);
                 result |= GetCastlingMask(board, squaresUnderAttack);
                 result &= ~squaresUnderAttack;
+                result &= ~board.GetAllPieces();
             }
 
             return result;

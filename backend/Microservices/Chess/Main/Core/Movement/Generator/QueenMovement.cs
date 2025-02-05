@@ -23,6 +23,8 @@ namespace Chess.Main.Core.Movement.Generator
             ulong bishopIndex = (blockers * bishopMagic) >> (64 - relevantBishopBits);
             ulong rookIndex = (blockers * rookMagic) >> (64 - relevantRookBits);
 
+
+            // TODO : IT IS NOT WORKING (there must be null in initial position); 
             ulong bishopMoves = MagicBitboards.MagicBishopTable[squareIndex].AttackTable[bishopIndex];
             ulong rookMoves = MagicBitboards.MagicRookTable[squareIndex].AttackTable[rookIndex];
 

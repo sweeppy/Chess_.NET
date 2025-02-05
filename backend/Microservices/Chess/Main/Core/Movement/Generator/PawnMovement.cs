@@ -13,7 +13,8 @@ namespace Chess.Main.Core.Movement.Generator
             ulong bitboardPosition = 1UL << squareIndex;
 
             ulong singlePush = (bitboardPosition << 8) & ~allPieces;
-            ulong doublePush = ((singlePush << 8) & (bitboardPosition & Masks.WhitePawnsStartingPosition << 16)) & ~allPieces;
+            ulong doublePush = ((singlePush << 8) & ~allPieces) &
+            ((Masks.WhitePawnsStartingPosition & bitboardPosition) << 16);
 
             ulong leftCapture = ((bitboardPosition & Masks.NotHFile) << 9) & blackPieces;
             ulong rightCapture = ((bitboardPosition & Masks.NotAFile) << 7) & blackPieces;
@@ -38,7 +39,8 @@ namespace Chess.Main.Core.Movement.Generator
             ulong bitboardPosition = 1UL << squareIndex;
 
             ulong singlePush = (bitboardPosition >> 8) & ~allPieces;
-            ulong doublePush = ((singlePush >> 8) & (bitboardPosition & Masks.BlackPawnsStartingPosition >> 16)) & ~allPieces;
+            ulong doublePush = ((singlePush >> 8) & ~allPieces) &
+            ((Masks.BlackPawnsStartingPosition & bitboardPosition) >> 16);
 
             ulong rightCapture = ((bitboardPosition & Masks.NotAFile) >> 9) & whitePieces;
             ulong leftCapture = ((bitboardPosition & Masks.NotHFile) >> 7) & whitePieces;

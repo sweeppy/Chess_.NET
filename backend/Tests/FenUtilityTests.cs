@@ -27,7 +27,7 @@ namespace Tests
 
             Board board = FenUtility.LoadBoardFromFen(fen);
 
-            UnitTestBitHelper.ShowOccupiedBoard(board.GetBlackBishops());
+            UnitTestBitHelper.ShowOccupiedBoard(0x7e01010101010100);
         }
     }
 }

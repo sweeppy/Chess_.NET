@@ -18,15 +18,18 @@ namespace Chess.Main.Core.Movement.Generator
 
             ulong blockers = board.GetAllPieces();
 
-            blockers &= bishopMask | rookMask;
+            ulong bishopBlockers = blockers & bishopMask;
+            ulong rookBlockers = blockers & rookMask;
 
-            ulong bishopIndex = (blockers * bishopMagic) >> (64 - relevantBishopBits);
-            ulong rookIndex = (blockers * rookMagic) >> (64 - relevantRookBits);
+            ulong bishopIndex = (bishopBlockers * bishopMagic) >> (64 - relevantBishopBits);
+            ulong rookIndex = (rookBlockers * rookMagic) >> (64 - relevantRookBits);
 
 
             // TODO : IT IS NOT WORKING (there must be null in initial position); 
             ulong bishopMoves = MagicBitboards.MagicBishopTable[squareIndex].AttackTable[bishopIndex];
             ulong rookMoves = MagicBitboards.MagicRookTable[squareIndex].AttackTable[rookIndex];
+
+            ulong bishopMoves2 = BishopMovement.Generate(squareIndex, board);
 
             ulong alliedPieces = board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces();
 

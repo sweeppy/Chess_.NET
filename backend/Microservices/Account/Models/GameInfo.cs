@@ -1,4 +1,4 @@
-namespace Chess.GeneralModels
+namespace Account.Models
 {
     public class GameInfo
     {

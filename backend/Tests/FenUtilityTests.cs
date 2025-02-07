@@ -1,5 +1,9 @@
+using Chess.API.Implementations;
+using Chess.API.Interfaces;
+using Chess.Data;
 using Chess.Main.Core.FEN;
 using Chess.Main.Models;
+using Microsoft.EntityFrameworkCore;
 using Tests.Helpers;
 
 namespace Tests
@@ -25,9 +29,20 @@ namespace Tests
         {
             string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-            Board board = FenUtility.LoadBoardFromFen(fen);
+            IMovement movement = new MovementAPI(null); //* NULL ONLY FOR THIS TEST, because here not engaged db
 
-            UnitTestBitHelper.ShowOccupiedBoard(0x7e01010101010100);
+            Board board = FenUtility.LoadBoardFromFen(fen);
+            Dictionary<int, List<int>> legalMoves = movement.GetLegalMoves(fen);
+
+            foreach(var moves in legalMoves)
+            {
+                ulong moveMask = 0UL;
+                foreach(int move in moves.Value)
+                {
+                    moveMask |= 1UL << move;
+                }
+                UnitTestBitHelper.ShowOccupiedBoard(moveMask);
+            }
         }
     }
 }

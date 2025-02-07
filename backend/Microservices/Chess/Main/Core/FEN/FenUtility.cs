@@ -1,5 +1,6 @@
 using System.Text;
 using Chess.Main.Core.Helpers.BitOperation;
+using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Models;
 
 namespace Chess.Main.Core.FEN
@@ -8,7 +9,6 @@ namespace Chess.Main.Core.FEN
     {
         public static string GenerateFenFromBoard(Board board)
         {
-            Dictionary<char, ulong> allPiecesBitboards = GetBoardBitboards(board);
             StringBuilder fenBuilder = new();
 
             // Generate positions string
@@ -18,7 +18,7 @@ namespace Chess.Main.Core.FEN
                 for (int file = 7; file >= 0; file--)
                 {
                     int squareIndex = rank * 8 + file;
-                    char? pieceSymbol = GetPieceSymbolFromSquare(allPiecesBitboards, squareIndex);
+                    char? pieceSymbol = SquaresHelper.GetPieceSymbolFromSquare(board, squareIndex);
 
                     if (!pieceSymbol.HasValue) emptyCount++;
                     else
@@ -55,7 +55,7 @@ namespace Chess.Main.Core.FEN
             if(enPassantTarget.HasValue)
             {
                 int square = BitHelper.GetFirstBitIndex(enPassantTarget.Value);
-                string squareName = squareToIndex.FirstOrDefault(x => x.Value == square).Key;
+                string squareName = SquaresHelper.stringSquareToSquareIndex.FirstOrDefault(x => x.Value == square).Key;
                 fenBuilder.Append(' ').Append(squareName);
             }
             else fenBuilder.Append(" -");
@@ -139,7 +139,7 @@ namespace Chess.Main.Core.FEN
             bool canBlackQueenCastle = castling.Contains('q');
 
 
-            int? enPassantSquare = squareToIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
+            int? enPassantSquare = SquaresHelper.stringSquareToSquareIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
 
             int.TryParse(strMovesWithoutCapture, out int movesWithoutCapture);
             int.TryParse(strComingMoveCount, out int comingMoveCount);
@@ -152,52 +152,6 @@ namespace Chess.Main.Core.FEN
                              canBlackKingCastle, canBlackQueenCastle,
                              
                              isWhiteTurn, enPassantSquare, movesWithoutCapture, comingMoveCount);
-        }
-
-        private static Dictionary<string, int> squareToIndex = new()
-        {
-            { "a8", 63 }, { "b8", 62 }, { "c8", 61 }, { "d8", 60 }, { "e8", 59 }, { "f8", 58 }, { "g8", 57 }, { "h8", 56 },
-            { "a7", 55 }, { "b7", 54 }, { "c7", 53 }, { "d7", 52 }, { "e7", 51 }, { "f7", 50 }, { "g7", 49 }, { "h7", 48 },
-            { "a6", 47 }, { "b6", 46 }, { "c6", 45 }, { "d6", 44 }, { "e6", 43 }, { "f6", 42 }, { "g6", 41 }, { "h6", 40 },
-            { "a5", 39 }, { "b5", 38 }, { "c5", 37 }, { "d5", 36 }, { "e5", 35 }, { "f5", 34 }, { "g5", 33 }, { "h5", 32 },
-            { "a4", 31 }, { "b4", 30 }, { "c4", 29 }, { "d4", 28 }, { "e4", 27 }, { "f4", 26 }, { "g4", 25 }, { "h4", 24 },
-            { "a3", 23 }, { "b3", 22 }, { "c3", 21 }, { "d3", 20 }, { "e3", 19 }, { "f3", 18 }, { "g3", 17 }, { "h3", 16 },
-            { "a2", 15 }, { "b2", 14 }, { "c2", 13 }, { "d2", 12 }, { "e2", 11 }, { "f2", 10 }, { "g2", 9  }, { "h2", 8  },
-            { "a1", 7  }, { "b1", 6  }, { "c1", 5  }, { "d1", 4  }, { "e1", 3  }, { "f1", 2  }, { "g1", 1  }, { "h1", 0  }
-        };
-
-        private static Dictionary<char, ulong> GetBoardBitboards(Board board)
-        {
-            return new Dictionary<char, ulong>()
-            {
-                {'P', board.GetWhitePawns()},
-                {'N', board.GetWhiteKnights()},
-                {'B', board.GetWhiteBishops()},
-                {'R', board.GetWhiteRooks()},
-                {'Q', board.GetWhiteQueens()},
-                {'K', board.GetWhiteKing()},
-
-                {'p', board.GetBlackPawns()},
-                {'n', board.GetBlackKnights()},
-                {'b', board.GetBlackBishops()},
-                {'r', board.GetBlackRooks()},
-                {'q', board.GetBlackQueens()},
-                {'k', board.GetBlackKing()},
-            };
-        }
-
-        private static char? GetPieceSymbolFromSquare(Dictionary<char, ulong> bitboards, int square)
-        {
-            ulong squareMask = 1UL << square;
-
-            foreach (var entry in bitboards)
-            {
-                if ((entry.Value & squareMask) != 0)
-                {
-                    return entry.Key;
-                }
-            }
-            return null;
         }
     }
 

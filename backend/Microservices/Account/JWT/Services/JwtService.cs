@@ -2,27 +2,29 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Account.DTO.Requests.JwtRequests;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Account.JWT
+namespace Account.JWT.Services
 {
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
 
-        public JwtService(IConfiguration configurration)
+        public JwtService(IConfiguration configuration)
         {
-            _configuration = configurration;
+            _configuration = configuration;
         }
 
-        public string GenerateToken(string email)
+        public string GenerateToken(GenerateTokenRequest request)
         {
             var SignKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SignKey").Value));
             var credentials = new SigningCredentials(SignKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            Claim[] claims = new Claim[]
             {
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.NameIdentifier, request.UserId.ToString()),
+                new Claim(ClaimTypes.Name, request.Username)
             };
 
             var token = new JwtSecurityToken(

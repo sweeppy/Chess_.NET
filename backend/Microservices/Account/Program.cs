@@ -1,20 +1,26 @@
 using Account.Services;
 using Account.Data;
-using Account.JWT;
-using Account.Config.JWT;
 using Microsoft.OpenApi.Models;
+using Account.JWT.Services;
+using Account.JWT.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
-// Dependencies
+// Add database
 builder.Services.AddScoped<UserDbContext>();
 
 // Add jwt configuration
-CustomJwtConfiguration.AddCustomJwtAuthentication(builder.Services, builder.Configuration);
-builder.Services.AddScoped<IJwtService, JwtService>();
-// For actions with authentication
-builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// REGISTER DEPENDENCIES:
+{
+    // Jwt service
+    builder.Services.AddScoped<IJwtService, JwtService>();
+
+    // For actions with authentication
+    builder.Services.AddScoped<IAccountService, AccountService>();
+}
 
 builder.Services.AddSwaggerGen(options =>
 {

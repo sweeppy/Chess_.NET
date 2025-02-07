@@ -19,10 +19,15 @@ namespace Account.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // For data base relations
+            // Database relations
+
+            modelBuilder.Entity<Player>() // Player-Games relations
+            .HasMany(p => p.Games);
+
             modelBuilder.Entity<Player>() // Player-Tournaments relations
             .HasMany(p => p.Tournaments)
             .WithMany(t => t.Players);
+            
 
             modelBuilder.Entity<Player>() // Player-Friends relations
             .HasMany(p => p.Friends)

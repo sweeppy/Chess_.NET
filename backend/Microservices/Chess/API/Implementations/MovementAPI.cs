@@ -1,10 +1,11 @@
-using System.Threading.Tasks;
+using System.Text;
 using Chess.API.Interfaces;
 using Chess.Data;
 using Chess.DTO.Requests;
 using Chess.GeneralModels;
 using Chess.Main.Core.FEN;
 using Chess.Main.Core.Helpers.BitOperation;
+using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
 using Microsoft.EntityFrameworkCore;
@@ -35,11 +36,6 @@ namespace Chess.API.Implementations
                 {
                     if ((pieces & (1UL << square)) != 0)
                     {
-                        if (square == 56)
-                        {
-
-                        }
-                        ulong moves = 0;
                         char pieceSymbol = piecesCollections.FirstOrDefault(x => (x.Value & (1UL << square)) != 0).Key;
 
                         ulong legalMovesForSquare = GetMovesByPieceSymbol(square, pieceSymbol, board);
@@ -114,13 +110,26 @@ namespace Chess.API.Implementations
         public async Task<string> OnMove(MoveRequest request)
         {
             Board board = FenUtility.LoadBoardFromFen(request.Fen);
+
+
+            StringBuilder stringMove = new();
+            stringMove.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
+            stringMove.Append(SquaresHelper.squareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value));
+
             board.MakeMove(request.StartSquare, request.TargetSquare, board, request.IsCastleMove, request.IsKingCastle);
+            
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
+
             var game = await _db.Games.FirstOrDefaultAsync(g => g.Id == request.GameId);
+
+
+
             if(game != null)
             {
                 game.Fens.Add(new FenEntry { Fen = fenAfterMove, GameInfoId = game.Id });
+
+                game.Moves.Add(stringMove.ToString());
                 await _db.SaveChangesAsync();
             }
 

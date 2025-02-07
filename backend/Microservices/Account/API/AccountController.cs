@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Account.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,15 +24,15 @@ namespace Account.API_controllers
         // }
 
         [HttpPost("EmailLogin")]
-        public async Task<IActionResult> LoginByEmail([FromBody]string email)
+        public async Task<IActionResult> LoginByEmail([FromBody] string email)
         {
             try
             {
-                // Chech user in db
+                // Check user in db
                 bool result = await _userService.IsUserExists(email);
                 if (!result)
                 {
-                    
+
                 }
                 return NoContent();
             }
@@ -47,5 +48,19 @@ namespace Account.API_controllers
         // {
         //     return NoContent();
         // }
+
+        [HttpGet("getUserData")]
+        public IActionResult GetData()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (userId != null && username != null)
+            {
+                return Ok(new { UserId = userId, Username = username });
+            }
+            return NotFound();
+        }
     }
 }

@@ -1,8 +1,9 @@
-using Account.Services;
 using Account.Data;
 using Microsoft.OpenApi.Models;
 using Account.JWT.Services;
 using Account.JWT.Configuration;
+using Account.Services.Interfaces;
+using Account.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -20,6 +21,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
     // For actions with authentication
     builder.Services.AddScoped<IAccountService, AccountService>();
+
+    // Email Service
+    builder.Services.AddScoped<IEmailService, EmailService>();
 }
 
 builder.Services.AddSwaggerGen(options =>

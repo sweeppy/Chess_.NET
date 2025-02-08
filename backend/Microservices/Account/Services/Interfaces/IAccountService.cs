@@ -1,4 +1,4 @@
-namespace Account.Services
+namespace Account.Services.Interfaces
 {
     public interface IAccountService
     {

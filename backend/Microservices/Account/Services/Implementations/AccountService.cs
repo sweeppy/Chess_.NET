@@ -1,7 +1,8 @@
 using Account.Data;
+using Account.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Account.Services
+namespace Account.Services.Implementations
 {
     public class AccountService : IAccountService
     {

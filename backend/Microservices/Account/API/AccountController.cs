@@ -7,7 +7,6 @@ using Account.Responses;
 using Account.Responses.Auth;
 using Account.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Account.API_controllers
@@ -18,17 +17,19 @@ namespace Account.API_controllers
     {
         private readonly IAccountService _userService;
         private readonly ILogger<AccountController> _logger;
-
         private readonly IEmailService _emailService;
+        private readonly IEncryptionService _encryption;
 
         private readonly UserDbContext _db;
 
         public AccountController(IAccountService userService, ILogger<AccountController> logger,
-                                 IEmailService emailService)
+                                 IEmailService emailService, UserDbContext db, IEncryptionService encryption)
         {
             _userService = userService;
             _logger = logger;
             _emailService = emailService;
+            _db = db;
+            _encryption = encryption;
         }
 
         [HttpPost("is_user_exists")]
@@ -40,75 +41,68 @@ namespace Account.API_controllers
             }
             catch (Exception ex)
             {
-                _logger.LogCritical($"Exception in AccountController HttpPost(IsUserExists). Exeption: {ex.Message}");
+                _logger.LogCritical($"Exception in AccountController HttpPost(IsUserExists). Exception: {ex.Message}");
                 return BadRequest("Something went wrong, while we were checking your email");
             }
         }
 
-        [HttpPost("send_verification_code")]
-        public async Task<IActionResult> GenerateAndSendVerificationCode(string email)
+        [HttpPost("add_new_user")]
+        public async Task<IActionResult> AddUserAndConfirmHisEmail(string email)
         {
             try
             {
                 // Add new player to database
                 Player player = new Player { Email = email };
                 _db.Players.Add(player);
+
+                // Generate code
+                string code = _userService.GenerateVerificationCode();
+                string encryptedCode = _encryption.Encrypt(code);
+
+                // Save new player with encrypted code in DB
+                player.VerifyCode = encryptedCode;
+                _db.Players.Add(player);
+
                 // Send verification code to user's email
-                SendEmailRequest request = new SendEmailRequest(email, "Confirm your email", 123456.ToString());
+                SendEmailRequest request = new(email, "Confirm your email", code);
                 await _emailService.SendEmailAsync(request);
 
                 // After success sent email
                 await _db.SaveChangesAsync();
 
-                return Ok(new BaseResponse(true, "Code was successfully sent"));
+                return Ok(new RegisterUserResponse(true, "Code was successfully sent", true));
+            }
+            catch (ArgumentException ArgEx) // Exception with encrypting code
+            {
+                _logger.LogCritical($"Exception in AccountController HttpPost(send_verification_code). {ArgEx.Message}");
             }
             catch (Exception ex)
             {
                 _logger.LogCritical($"Exception in AccountController HttpPost(send_verification_code). Exception: {ex.Message}");
-                return BadRequest(new BaseResponse(false, "Something went wrong, while we were sending email."));
             }
+            return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
         }
 
-        // [HttpPost("EmailLogin")]
-        // public async Task<IActionResult> LoginByEmail([FromBody] string email)
-        // {
-        //     try
-        //     {
-        //         if (!result)
-        //         {
-        //             SendEmailRequest request = new SendEmailRequest(email, "PixelChess", "123456");
-        //             await _emailService.SendEmailAsync(request);
-
-        //             LoginResponse response = new LoginResponse(isSuccess: true, message: "Email was sent successfully", isEmailSent: true);
-        //             return Ok(response);
-        //         }
-        //         else
-        //         {
-        //             return Ok(new BaseResponse);
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogCritical($"Exception in AccountController HttpPost(IsUserExists). Exeption: {ex.Message}");
-        //         return BadRequest("Something went wrong, while we were checking your email");
-        //     }
-        // }
-
         [HttpPost("verify_code")]
-        public async Task<IActionResult> VerifyCode(VerifyCodeRequest request)
+        public IActionResult VerifyCode(VerifyCodeRequest request)
         {
             try
             {
-                Player player = _db.Players.FirstOrDefault(p => p.Email == request.email);
+                Player? player = _db.Players.FirstOrDefault(p => p.Email == request.email);
                 if (player == null)
                 {
-                    throw new NullReferenceException("Player with this email was not found.");
+                    throw new ArgumentException("Player with this email was not found.");
                 }
+                // Get verification code from DB
+                string decryptedCode = _encryption.Decrypt(player.VerifyCode);
 
-// TODO make verify code logic
-                return Ok();
+                // If user's input code is wrong
+                if (decryptedCode != request.code)
+                    return BadRequest(new BaseResponse(false, "The code is wrong."));
+
+                return Ok(new BaseResponse(true, "Email is confirmed"));
             }
-            catch (NullReferenceException ex)
+            catch (ArgumentException ex)
             {
                 _logger.LogCritical($"Exception in AccountController HttpPost(send_verification_code). Exception: {ex.Message}");
                 return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying confirm email."));

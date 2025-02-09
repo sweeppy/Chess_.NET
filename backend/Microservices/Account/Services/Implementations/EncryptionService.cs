@@ -14,7 +14,7 @@ namespace Account.Services.Implementations
             _key = Encoding.UTF8.GetBytes(configuration["EncryptionKey"]);
             _iv = Encoding.UTF8.GetBytes(configuration["EncryptionIV"]);
 
-            if (_key.Length != 32 || _iv.Length != 16)
+            if (_key.Length != 32 || _iv.Length != 16 || _key == null || _iv == null)
             {
                 throw new ArgumentException("Key must be 32 bytes and IV must be 16 bytes");
             }

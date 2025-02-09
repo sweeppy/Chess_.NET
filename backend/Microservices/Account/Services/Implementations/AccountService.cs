@@ -13,6 +13,12 @@ namespace Account.Services.Implementations
             _db = db;
         }
 
+        public string GenerateVerificationCode()
+        {
+            Random rand = new Random();
+            return rand.Next(100000, 999999).ToString();
+        }
+
         public async Task<bool> IsUserExists(string Email)
         {
             if (await _db.Players.FirstOrDefaultAsync(p => p.Email == Email) == null)

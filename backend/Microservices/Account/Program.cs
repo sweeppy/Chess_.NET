@@ -24,6 +24,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
     // Email Service
     builder.Services.AddScoped<IEmailService, EmailService>();
+
+    // Encryption service
+    builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 }
 
 builder.Services.AddSwaggerGen(options =>

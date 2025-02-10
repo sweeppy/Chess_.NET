@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Account.Data;
 using Account.Models;
 using Account.Requests.AccountRequests;
@@ -7,6 +8,7 @@ using Account.Responses;
 using Account.Responses.Auth;
 using Account.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Account.API_controllers
@@ -51,30 +53,35 @@ namespace Account.API_controllers
         {
             try
             {
-                // Add new player to database
-                Player player = new Player { Email = email };
-                _db.Players.Add(player);
-
                 // Generate code
                 string code = _userService.GenerateVerificationCode();
                 string encryptedCode = _encryption.Encrypt(code);
 
+                // Add new player to database
+                Player player = new Player
+                {
+                    Email = email,
+                    VerifyCode = encryptedCode
+                };
+
                 // Save new player with encrypted code in DB
-                player.VerifyCode = encryptedCode;
                 _db.Players.Add(player);
+
+                await _db.SaveChangesAsync();
 
                 // Send verification code to user's email
                 SendEmailRequest request = new(email, "Confirm your email", code);
                 await _emailService.SendEmailAsync(request);
-
-                // After success sent email
-                await _db.SaveChangesAsync();
 
                 return Ok(new RegisterUserResponse(true, "Code was successfully sent", true));
             }
             catch (ArgumentException ArgEx) // Exception with encrypting code
             {
                 _logger.LogCritical($"Exception in AccountController HttpPost(send_verification_code). {ArgEx.Message}");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogCritical($"DB error: {dbEx.InnerException?.Message ?? dbEx.Message}");
             }
             catch (Exception ex)
             {
@@ -83,8 +90,8 @@ namespace Account.API_controllers
             return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
         }
 
-        [HttpPost("verify_code")]
-        public IActionResult VerifyCode(VerifyCodeRequest request)
+        [HttpPut("verify_code")]
+        public async Task<IActionResult> VerifyCode(VerifyCodeRequest request)
         {
             try
             {
@@ -100,6 +107,9 @@ namespace Account.API_controllers
                 if (decryptedCode != request.code)
                     return BadRequest(new BaseResponse(false, "The code is wrong."));
 
+                player.IsEmailConfirmed = true;
+                _db.Players.Update(player);
+                await _db.SaveChangesAsync();
                 return Ok(new BaseResponse(true, "Email is confirmed"));
             }
             catch (ArgumentException ex)

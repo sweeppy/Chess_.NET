@@ -6,9 +6,9 @@ namespace Account.Models
     {
         public int Id { get; set; }
         [MaxLength(89)]
-        public string Fen { get; set; }
+        public required string Fen { get; set; }
 
         public int GameInfoId { get; set; }
-        public GameInfo GameInfo { get; set; }
+        public required GameInfo GameInfo { get; set; }
     }
 }

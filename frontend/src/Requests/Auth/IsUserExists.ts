@@ -13,7 +13,6 @@ export const isUserExistsRequestAsync = async (email: string) => {
     );
     return response.data;
   } catch (error: any) {
-    console.error(error.response.data);
-    return null;
+    throw new Error(error.message);
   }
 };

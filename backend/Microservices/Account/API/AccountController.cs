@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Account.Data;
 using Account.Models;
 using Account.Requests.AccountRequests;
@@ -34,7 +33,7 @@ namespace Account.API_controllers
             _encryption = encryption;
         }
 
-        [HttpPost("is_user_exists")]
+        [HttpPost("IsUserExists")]
         public async Task<IActionResult> Login([FromBody] string email)
         {
             try
@@ -48,7 +47,7 @@ namespace Account.API_controllers
             }
         }
 
-        [HttpPost("add_new_user")]
+        [HttpPost("AddNewUser")]
         public async Task<IActionResult> AddUserAndConfirmHisEmail(string email)
         {
             try
@@ -90,7 +89,7 @@ namespace Account.API_controllers
             return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
         }
 
-        [HttpPut("verify_code")]
+        [HttpPut("VerifyCode")]
         public async Task<IActionResult> VerifyCode(VerifyCodeRequest request)
         {
             try
@@ -124,7 +123,7 @@ namespace Account.API_controllers
             }
         }
 
-        [HttpGet("getUserData")]
+        [HttpGet("GetUserData")]
         public IActionResult GetData()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

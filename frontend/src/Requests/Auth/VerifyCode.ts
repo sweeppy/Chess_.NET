@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const VerifyCodeAsync = async (email: string, code: string) => {
   try {
-    const response = await axios.put(
+    await axios.put(
       "http://localhost:5096/api/Account/VerifyCode",
       {
         email,

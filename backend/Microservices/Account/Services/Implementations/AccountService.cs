@@ -19,13 +19,10 @@ namespace Account.Services.Implementations
             return rand.Next(100000, 999999).ToString();
         }
 
-        public async Task<bool> IsUserExists(string Email)
+        public async Task<bool> IsUserExistsAndEmailConfirmed(string Email)
         {
-            if (await _db.Players.FirstOrDefaultAsync(p => p.Email == Email) == null)
-            {
-                return false;
-            }
-            return true;
+            return await _db.Players
+            .FirstOrDefaultAsync(p => p.Email == Email && p.IsEmailConfirmed == true) != null;
         }
     }
 }

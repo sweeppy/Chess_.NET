@@ -1,9 +1,9 @@
 import axios from "axios";
 
-export const isUserExistsRequestAsync = async (email: string) => {
+export const isUserExistsAndEmailConfirmedAsync = async (email: string) => {
   try {
     const response = await axios.post(
-      "http://localhost:5096/api/Account/IsUserExists",
+      "http://localhost:5096/api/Account/IsUserExistsAndEmailConfirmed",
       email,
       {
         headers: {
@@ -13,6 +13,9 @@ export const isUserExistsRequestAsync = async (email: string) => {
     );
     return response.data;
   } catch (error: any) {
-    throw new Error(error.message);
+    console.error(error);
+    throw new Error(
+      "En error occurred while checking your account. Please try again or contact support."
+    );
   }
 };

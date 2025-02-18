@@ -1,6 +1,8 @@
 import { ChangeEvent, useState } from "react";
 import { AlternativeLogin } from "./AlternativeLogin";
-import { isUserExistsRequestAsync } from "../../Requests/Auth/IsUserExists";
+import { isUserExistsAndEmailConfirmedAsync } from "../../Requests/Auth/IsUserExists";
+import { AddNewUserAndSendVerificationCodeAsync } from "../../Requests/Auth/AddNewUser";
+import { VerifyCodeAsync } from "../../Requests/Auth/VerifyCode";
 
 const Login = () => {
   // When user is not registered - verification section
@@ -10,14 +12,14 @@ const Login = () => {
   const [isPasswordSectionVisible, setIsPasswordSectionVisible] = useState(false);
 
   // Error state
-  const [error, setError] = useState<string | null>(null);
+  const [errorAlert, setErrorAlert] = useState<string | null>(null);
 
   // Handle alert animation
   const [isAlertClosing, setIsAlertClosing] = useState(false);
   const closeAlert = () => {
     setIsAlertClosing(true); // Start animation timeout
     setTimeout(() => {
-      setError(null);
+      setErrorAlert(null);
       setIsAlertClosing(false);
     }, 500);
   };
@@ -29,30 +31,49 @@ const Login = () => {
     if (isVerificationSectionVisible || isPasswordSectionVisible) {
       setIsVerificationSectionVisible(false);
       setIsPasswordSectionVisible(false);
+      setCodeText("");
     }
   };
+  // Verification code input
+  const [codeText, setCodeText] = useState("");
+  const handleCodeTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCodeText(e.target.value);
+  };
 
-  // After email input
+  // Password input
+  const [passwordText, setPasswordText] = useState("");
+  const handlePasswordTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPasswordText(e.target.value);
+  };
+
+  // After email input and continue with password button click
   const handleEmailContinueClick = async () => {
     try {
-      const isUserExists = await isUserExistsRequestAsync(emailText);
+      const isUserExists = await isUserExistsAndEmailConfirmedAsync(emailText);
 
       if (isUserExists) {
         setIsPasswordSectionVisible(true);
       } else {
+        await AddNewUserAndSendVerificationCodeAsync(emailText);
         setIsVerificationSectionVisible(true);
       }
     } catch (error: any) {
-      setError(
-        "En error occurred while checking your account. Please try again or contact support."
-      );
+      setErrorAlert(error.message);
     }
   };
+  // After password input and continue button click
+  const handleLoginByPassword = async () => {};
+
+  // After verification code input and continue button click
+  const handleVerifyCodeAsync = async () => {
+    await VerifyCodeAsync(emailText, codeText);
+  };
+
   return (
     <>
-      {error && (
+      {errorAlert && (
         <div className={`alert error-alert ${isAlertClosing ? "hide" : ""}`}>
-          <span className="alert-message">{error}</span>
+          <span className="alert-message">{errorAlert}</span>
           <button className="close" onClick={() => closeAlert()}>
             &times;
           </button>
@@ -94,10 +115,14 @@ const Login = () => {
                   className="input"
                   type="text"
                   placeholder="Paste verification code "
+                  value={codeText}
+                  onChange={handleCodeTextChange}
                 />
               </div>
             </div>
-            <button className="button max-width">Verify code</button>
+            <button className="button max-width" onClick={handleVerifyCodeAsync}>
+              Verify code
+            </button>
           </>
         )}
         {isPasswordSectionVisible && (

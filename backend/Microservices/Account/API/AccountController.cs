@@ -33,12 +33,12 @@ namespace Account.API_controllers
             _encryption = encryption;
         }
 
-        [HttpPost("IsUserExists")]
-        public async Task<IActionResult> Login([FromBody] string email)
+        [HttpPost("IsUserExistsAndEmailConfirmed")]
+        public async Task<IActionResult> IsUserExistsAndEmailConfirmed([FromBody] string email)
         {
             try
             {
-                return Ok(await _userService.IsUserExists(email));
+                return Ok(await _userService.IsUserExistsAndEmailConfirmed(email));
             }
             catch (Exception ex)
             {
@@ -48,7 +48,7 @@ namespace Account.API_controllers
         }
 
         [HttpPost("AddNewUser")]
-        public async Task<IActionResult> AddUserAndConfirmHisEmail(string email)
+        public async Task<IActionResult> AddNewUser([FromBody]string email)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace Account.API_controllers
                 string encryptedCode = _encryption.Encrypt(code);
 
                 // Add new player to database
-                Player player = new Player
+                Player player = new()
                 {
                     Email = email,
                     VerifyCode = encryptedCode

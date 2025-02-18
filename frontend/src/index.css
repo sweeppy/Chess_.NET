@@ -8,6 +8,7 @@
   --clr-accent-button: #76abae;
   --clr-text: #eeeeee;
   --clr-white: #eeeeee;
+  --clr-gray: #3b4453;
   --clr-black: #2f2f2fee;
   --clr-select: #77b254;
 
@@ -62,7 +63,7 @@
 }
 
 /* Button base */
-button {
+button:not(:disabled) {
   cursor: pointer;
 }
 
@@ -398,12 +399,15 @@ button[data-icon] img {
   transition: all 0.3s;
   color: var(--clr-button-text);
 }
+.button:disabled {
+  background-color: var(--clr-gray);
+}
 .wide-button {
   padding-block: var(--size-300);
   padding-inline: var(--size-1000);
 }
 
-.button:hover {
+.button:not(:disabled):hover {
   scale: 1.03;
 }
 
@@ -709,4 +713,33 @@ button.close {
 
 .success-alert {
   background-color: var(--clr-success);
+}
+
+.loader {
+  width: 35px;
+  height: 35px;
+  display: block;
+  margin: 30px auto;
+  position: relative;
+  color: #fff;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+.loader::after,
+.loader::before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  background-color: #fff;
+  border-radius: 50%;
+  animation: scale50 1s infinite ease-in-out;
+}
+.loader::before {
+  top: auto;
+  bottom: 0;
+  background-color: var(--clr-accent-100);
+  animation-delay: 0.5s;
 }

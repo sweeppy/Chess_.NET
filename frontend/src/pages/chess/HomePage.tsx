@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import Nav from "../../Main/Nav";
+import Nav from "../../components/chess/Nav";
 
-const Home = () => {
+const HomePage = () => {
   const navigate = useNavigate();
 
   // Redirect to play with computer
@@ -15,7 +15,7 @@ const Home = () => {
       <div className="container no-scroll">
         <div className="even-columns max-height">
           <div>
-            <img width={500} src="/design/game/home_board.svg" alt="board" />
+            <img width={500} src="/src/assets/game/home_board.svg" alt="board" />
           </div>
           <div className="flex-column flex-center play-menu">
             <h1 className="fs-800 fw-bold padding-block-200">Play now!</h1>
@@ -36,4 +36,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

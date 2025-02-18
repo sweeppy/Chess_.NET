@@ -1,5 +1,3 @@
-interface GameHistoryProps {}
-
 const GameHistory = () => {
   return (
     <>

@@ -53,7 +53,7 @@ const GameOptions: React.FC<GameOptionsProps> = ({
           >
             <img
               width={30}
-              src="/design/game/assets/chess_pieces/BW_King.svg"
+              src="/src/assets/game/chess_pieces/BW_King.svg"
               alt=""
             />
           </div>
@@ -62,7 +62,7 @@ const GameOptions: React.FC<GameOptionsProps> = ({
             onClick={() => handleChooseClick("white")}
           >
             <img
-              src="/design/game/assets/chess_pieces/W_King.svg"
+              src="/src/assets/game/chess_pieces/W_King.svg"
               width={30}
               alt="white color"
             />
@@ -73,7 +73,7 @@ const GameOptions: React.FC<GameOptionsProps> = ({
           >
             <img
               width={30}
-              src="/design/game/assets/chess_pieces/B_King.svg"
+              src="/src/assets/game/chess_pieces/B_King.svg"
               alt="black color"
             />
           </div>

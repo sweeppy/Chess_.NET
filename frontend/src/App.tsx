@@ -1,17 +1,17 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Login from "./Components/Account/Login";
-import Home from "./Components/Game/home/Home";
-import WelcomePage from "./Components/Main/WelcomePage";
-import Computer from "./Components/Game/Play/Computer";
+import WelcomePage from "./pages/welcome/WelcomePage";
+import LoginPage from "./pages/authentication/LoginPage";
+import HomePage from "./pages/chess/HomePage";
+import PlayWithComputerPage from "./pages/chess/PlayWithComputerPage";
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="" element={<WelcomePage />}></Route>
-        <Route path="/login" element={<Login />}></Route>
-        <Route path="/home" element={<Home />}></Route>
-        <Route path="/play/computer" element={<Computer />}></Route>
+        <Route path="/login" element={<LoginPage />}></Route>
+        <Route path="/home" element={<HomePage />}></Route>
+        <Route path="/play/computer" element={<PlayWithComputerPage />}></Route>
       </Routes>
     </Router>
   );

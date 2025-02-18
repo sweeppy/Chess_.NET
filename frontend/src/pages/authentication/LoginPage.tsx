@@ -1,10 +1,10 @@
 import { ChangeEvent, useState } from "react";
-import { AlternativeLogin } from "./AlternativeLogin";
 import { isUserExistsAndEmailConfirmedAsync } from "../../Requests/Auth/IsUserExists";
 import { AddNewUserAndSendVerificationCodeAsync } from "../../Requests/Auth/AddNewUser";
 import { VerifyCodeAsync } from "../../Requests/Auth/VerifyCode";
+import { AlternativeLogin } from "../../components/authentication/AlternativeLogin";
 
-const Login = () => {
+const LoginPage = () => {
   // When user is not registered - verification section
   const [isVerificationSectionVisible, setIsVerificationSectionVisible] =
     useState(false);
@@ -46,9 +46,12 @@ const Login = () => {
     setPasswordText(e.target.value);
   };
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // After email input and continue with password button click
   const handleEmailContinueClick = async () => {
     try {
+      setIsLoading(true);
       const isUserExists = await isUserExistsAndEmailConfirmedAsync(emailText);
 
       if (isUserExists) {
@@ -59,8 +62,11 @@ const Login = () => {
       }
     } catch (error: any) {
       setErrorAlert(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   // After password input and continue button click
   const handleLoginByPassword = async () => {};
 
@@ -97,9 +103,16 @@ const Login = () => {
             />
           </div>
         </div>
-        <button className="button max-width" onClick={handleEmailContinueClick}>
-          Continue
+        <button
+          className="button max-width"
+          onClick={handleEmailContinueClick}
+          disabled={
+            isLoading || isVerificationSectionVisible || isPasswordSectionVisible
+          }
+        >
+          {isLoading ? "Loading..." : "Continue"}
         </button>
+        {isLoading && <span className="loader"></span>}
         {isVerificationSectionVisible && (
           <>
             <div className="max-width padding-block-600">
@@ -149,4 +162,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;

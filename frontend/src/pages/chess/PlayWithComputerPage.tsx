@@ -1,11 +1,14 @@
 import { useState } from "react";
-import Nav from "../../Main/Nav";
-import { ChessPiece, initialPieces } from "./GameScripts/Pieces";
-import { getLegalMoves } from "./GameScripts/LegalMoves";
-import GameOptions from "./GameOptions";
-import GameHistory from "./GameHistory";
+import { getLegalMoves } from "../../components/Game/Play/GameScripts/LegalMoves";
+import GameHistory from "../../components/chess/game/GameHistory";
+import GameOptions from "../../components/chess/game/GameOptions";
+import {
+  ChessPiece,
+  initialPieces,
+} from "../../Components/Game/Play/GameScripts/Pieces";
+import Nav from "../../components/chess/Nav";
 
-const Computer = () => {
+const PlayWithComputerPage = () => {
   const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const numbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
@@ -206,7 +209,7 @@ const Computer = () => {
                       >
                         <img
                           className="img-lm"
-                          src={"/design/game/assets/moves/legal_move.svg"}
+                          src={"/src/assets/game/moves/legal_move.svg"}
                           alt={"Legal move"}
                         />
                       </div>
@@ -230,4 +233,4 @@ const Computer = () => {
   );
 };
 
-export default Computer;
+export default PlayWithComputerPage;

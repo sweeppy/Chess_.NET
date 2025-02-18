@@ -21,14 +21,14 @@ const WelcomePage = () => {
     <div className="container">
       <div className="even-columns no-scroll max-height">
         <div className="flex-column flex-center flow">
-          <h1 className="inline-padding">Welccome, New Grandmaster!</h1>
+          <h1 className="inline-padding">Welcome, New Grandmaster!</h1>
           <img
             height={300}
-            src="/design/game/welcome_board.svg"
+            src="/src/assets/game/welcome_board.svg"
             alt="chess_board"
           />
           <button className="button button-accent" onClick={handleLoginClick}>
-            Start Chess Jorney
+            Start Chess Journey
           </button>
         </div>
         <div className="flex-column flex-center">
@@ -47,7 +47,7 @@ const WelcomePage = () => {
               <div className="img-container">
                 <img
                   width={40}
-                  src="/design/web/icons/social/telegram_icon.svg"
+                  src="/src/assets/web/icons/social/telegram_icon.svg"
                   alt="telegram_link"
                   onClick={handleTelegramIconClick}
                 />
@@ -55,7 +55,7 @@ const WelcomePage = () => {
               <div className="img-container">
                 <img
                   width={40}
-                  src="/design/web/icons/social/github_icon.svg"
+                  src="/src/assets/web/icons/social/github_icon.svg"
                   alt="github_link"
                   onClick={handleGithubIconClick}
                 />

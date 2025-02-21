@@ -46,12 +46,13 @@ const LoginPage = () => {
     setPasswordText(e.target.value);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  // State for email sending loader
+  const [isSending, setIsSending] = useState(false);
 
   // After email input and continue with password button click
   const handleEmailContinueClick = async () => {
     try {
-      setIsLoading(true);
+      setIsSending(true);
       const isUserExists = await isUserExistsAndEmailConfirmedAsync(emailText);
 
       if (isUserExists) {
@@ -63,7 +64,7 @@ const LoginPage = () => {
     } catch (error: any) {
       setErrorAlert(error.message);
     } finally {
-      setIsLoading(false);
+      setIsSending(false);
     }
   };
 
@@ -90,9 +91,7 @@ const LoginPage = () => {
         <h2 className="fs-xl fw-bold padding-block-900">Log in</h2>
         <AlternativeLogin />
         <div className="max-width padding-block-600">
-          <label htmlFor="" className="label">
-            Email
-          </label>
+          <label className="label">Email</label>
           <div className="input-container">
             <input
               className="input"
@@ -107,12 +106,12 @@ const LoginPage = () => {
           className="button max-width"
           onClick={handleEmailContinueClick}
           disabled={
-            isLoading || isVerificationSectionVisible || isPasswordSectionVisible
+            isSending || isVerificationSectionVisible || isPasswordSectionVisible
           }
         >
-          {isLoading ? "Loading..." : "Continue"}
+          {isSending ? "Sending..." : "Continue"}
         </button>
-        {isLoading && <span className="loader"></span>}
+        {isSending && <span className="loader"></span>}
         {isVerificationSectionVisible && (
           <>
             <div className="max-width padding-block-600">
@@ -120,9 +119,7 @@ const LoginPage = () => {
                 Please confirm your email to continue. Check your inbox for a
                 verification code and enter it below.
               </p>
-              <label htmlFor="" className="label">
-                Verification Code
-              </label>
+              <label className="label">Verification Code</label>
               <div className="input-container">
                 <input
                   className="input"
@@ -141,14 +138,13 @@ const LoginPage = () => {
         {isPasswordSectionVisible && (
           <>
             <div className="max-width padding-block-600">
-              <label htmlFor="" className="label">
-                Password
-              </label>
+              <label className="label">Password</label>
               <div className="input-container">
                 <input
                   className="input"
                   type="password"
                   placeholder="Enter your password..."
+                  onChange={handlePasswordTextChange}
                 />
               </div>
             </div>

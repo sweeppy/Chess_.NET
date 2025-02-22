@@ -3,6 +3,8 @@ import { isUserExistsAndEmailConfirmedAsync } from "../../Requests/Auth/IsUserEx
 import { AddNewUserAndSendVerificationCodeAsync } from "../../Requests/Auth/AddNewUser";
 import { VerifyCodeAsync } from "../../Requests/Auth/VerifyCode";
 import { AlternativeLogin } from "../../components/authentication/AlternativeLogin";
+import { IsUserExistsAndEmailConfirmedResponse } from "../../models/IsUserExistsRequest";
+import { SendVerificationCodeAsync } from "../../Requests/Auth/SendVerificationCode";
 
 const LoginPage = () => {
   // When user is not registered - verification section
@@ -53,10 +55,13 @@ const LoginPage = () => {
   const handleEmailContinueClick = async () => {
     try {
       setIsSending(true);
-      const isUserExists = await isUserExistsAndEmailConfirmedAsync(emailText);
+      const data = await isUserExistsAndEmailConfirmedAsync(emailText);
 
-      if (isUserExists) {
+      if (data.isConfirmed) {
         setIsPasswordSectionVisible(true);
+      } else if (data.isExists) {
+        await SendVerificationCodeAsync(emailText);
+        setIsVerificationSectionVisible(true);
       } else {
         await AddNewUserAndSendVerificationCodeAsync(emailText);
         setIsVerificationSectionVisible(true);

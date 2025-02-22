@@ -1,8 +1,11 @@
 import axios from "axios";
+import { IsUserExistsAndEmailConfirmedResponse } from "../../models/IsUserExistsRequest";
 
-export const isUserExistsAndEmailConfirmedAsync = async (email: string) => {
+export const isUserExistsAndEmailConfirmedAsync = async (
+  email: string
+): Promise<IsUserExistsAndEmailConfirmedResponse> => {
   try {
-    const response = await axios.post(
+    const response = await axios.post<IsUserExistsAndEmailConfirmedResponse>(
       "http://localhost:5096/api/Account/IsUserExistsAndEmailConfirmed",
       email,
       {
@@ -11,7 +14,13 @@ export const isUserExistsAndEmailConfirmedAsync = async (email: string) => {
         },
       }
     );
-    return response.data;
+    const data = response.data;
+
+    if (data.jwtToken) {
+      localStorage.setItem("jwtToken", data.jwtToken);
+    }
+
+    return data;
   } catch (error: any) {
     console.error(error);
     throw new Error(

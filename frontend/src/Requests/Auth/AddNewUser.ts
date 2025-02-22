@@ -7,7 +7,6 @@ export const AddNewUserAndSendVerificationCodeAsync = async (email: string) => {
         "Content-Type": "application/json",
       },
     });
-    // return response.data;
   } catch (error: any) {
     console.error(error);
     throw new Error(

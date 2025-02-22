@@ -1,8 +1,12 @@
+
+
+using Account.Responses.Auth;
+
 namespace Account.Services.Interfaces
 {
     public interface IAccountService
     {
-        public Task<bool> IsUserExistsAndEmailConfirmed(string Email);
+        public Task<IsUserExistsAndEmailConfirmedResponse> IsUserExistsAndEmailConfirmed(string Email);
 
         public string GenerateVerificationCode();
     }

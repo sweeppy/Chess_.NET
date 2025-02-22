@@ -21,11 +21,12 @@ namespace Account.JWT.Services
             var SignKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SignKey").Value));
             var credentials = new SigningCredentials(SignKey, SecurityAlgorithms.HmacSha256);
 
-            Claim[] claims = new Claim[]
-            {
+            Claim[] claims =
+            [
                 new Claim(ClaimTypes.NameIdentifier, request.UserId.ToString()),
+                new Claim(ClaimTypes.Email, request.Email),
                 new Claim(ClaimTypes.Name, request.Username)
-            };
+            ];
 
             var token = new JwtSecurityToken(
                 claims: claims,

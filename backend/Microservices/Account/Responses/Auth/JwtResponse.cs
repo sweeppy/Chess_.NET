@@ -1,14 +1,8 @@
 namespace Account.Responses.Auth
 {
-    public class JwtResponse : BaseResponse
+    public class JwtResponse(bool isSuccess, string message, string jwtToken)
+    : BaseResponse(isSuccess, message)
     {
-        public JwtResponse(bool isSuccess, string message, string accessToken, string refreshToken) : base(isSuccess, message)
-        {
-            AccessToken = accessToken;
-            RefreshToken = refreshToken;
-        }
-
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
+        public string JwtToken { get; set; } = jwtToken;
     }
 }

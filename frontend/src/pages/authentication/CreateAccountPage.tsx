@@ -155,7 +155,9 @@ const CreateAccountPage = () => {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Crop Image</h2>
+            <h2 className="secondary-heading flex-center padding-block-200">
+              Crop Image
+            </h2>
             <div>
               <img
                 ref={imgRef}

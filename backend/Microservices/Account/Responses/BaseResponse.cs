@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Account.Responses
 {
     public class BaseResponse
@@ -7,8 +9,9 @@ namespace Account.Responses
             IsSuccess = isSuccess;
             ResponseMessage = message;
         }
+        [JsonPropertyName("isSuccess")]
         public bool IsSuccess { get; set; }
-
+        [JsonPropertyName("message")]
         public string ResponseMessage { get; set; }
     }
 }

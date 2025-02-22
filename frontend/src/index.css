@@ -747,8 +747,8 @@ button.close {
   animation-delay: 0.5s;
 }
 .avatar-wrapper {
-  height: 100px;
-  width: 100px;
+  height: 150px;
+  width: 150px;
   border-radius: 8px;
   border: var(--clr-accent-100) 5px solid;
 }

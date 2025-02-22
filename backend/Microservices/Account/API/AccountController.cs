@@ -66,7 +66,7 @@ namespace Account.API_controllers
 
                 // Update player's verification code in DB
                 Player player = await _db.Players.FirstAsync(p => p.Email == email);
-                player.VerifyCode = encryptedCode;
+                player.VerificationCode = encryptedCode;
                 _db.Players.Update(player);
                 await _db.SaveChangesAsync();
 
@@ -104,7 +104,7 @@ namespace Account.API_controllers
                 Player player = new()
                 {
                     Email = email,
-                    VerifyCode = encryptedCode
+                    VerificationCode = encryptedCode
                 };
 
                 // Save new player with encrypted code in DB
@@ -144,11 +144,11 @@ namespace Account.API_controllers
                     throw new ArgumentException("Player with this email was not found.");
                 }
                 // Get verification code from DB
-                string decryptedCode = _encryption.Decrypt(player.VerifyCode);
+                string decryptedCode = _encryption.Decrypt(player.VerificationCode);
 
                 // If user's input code is wrong
                 if (decryptedCode != request.code)
-                    return BadRequest(new BaseResponse(false, "The code is wrong."));
+                    return Ok(new VerifyResponse(false, "The code is wrong.", false, null));
 
                 player.IsEmailConfirmed = true;
                 _db.Players.Update(player);
@@ -157,7 +157,7 @@ namespace Account.API_controllers
                 // Generate JWT token
                 string jwtToken = _jwtService.GenerateToken(new GenerateTokenRequest(player.Id, "", player.Email));
 
-                return Ok(new JwtResponse(true, "Email successfully confirmed", jwtToken));
+                return Ok(new VerifyResponse(true, "Email successfully confirmed", true, jwtToken));
             }
             catch (ArgumentException ex)
             {

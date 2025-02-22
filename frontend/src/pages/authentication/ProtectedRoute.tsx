@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { validateToken } from "../../Requests/Auth/ValidateToken";
+import { validateToken } from "../../services/Auth/ValidateToken";
 
 const ProtectedRoute = () => {
   const [isValid, setIsValid] = useState<boolean | null>(null);

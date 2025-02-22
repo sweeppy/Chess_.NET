@@ -8,7 +8,7 @@ namespace Account.Models
         public string? Username { get; set; }
         public string? ImagePath { get; set; }
 
-        public required string VerifyCode { get; set; }
+        public required string VerificationCode { get; set; }
         public bool IsEmailConfirmed { get; set; } = false;
     }
 }

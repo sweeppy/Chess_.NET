@@ -33,7 +33,9 @@ namespace Account.Services.Implementations
             // If player exists
             if (player != null)
             {
-                GenerateTokenRequest request = player.Username == null
+                bool isAccountCreated = player.Username == null;
+
+                GenerateTokenRequest request = isAccountCreated
                 ? new GenerateTokenRequest(player.Id, "", player.Email)
                 : new GenerateTokenRequest(player.Id, player.Username, player.Email);
 
@@ -48,7 +50,8 @@ namespace Account.Services.Implementations
                     message: successMessage,
                     isExists: true,
                     isEmailConfirmed: isConfirmed,
-                    jwtToken: isConfirmed ? token : null
+                    jwtToken: isConfirmed ? token : null,
+                    isAccountCreated: !(player.Username == null)
                 );
             }
             // Player doesn't exists in DB
@@ -57,7 +60,8 @@ namespace Account.Services.Implementations
                     message: "User doesn't exists in DB",
                     isExists: false,
                     isEmailConfirmed: false,
-                    jwtToken: null
+                    jwtToken: null,
+                    isAccountCreated: false
             );
         }
     }

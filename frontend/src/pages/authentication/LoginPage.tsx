@@ -1,12 +1,14 @@
 import { ChangeEvent, useState } from "react";
-import { isUserExistsAndEmailConfirmedAsync } from "../../Requests/Auth/IsUserExists";
-import { AddNewUserAndSendVerificationCodeAsync } from "../../Requests/Auth/AddNewUser";
-import { VerifyCodeAsync } from "../../Requests/Auth/VerifyCode";
+import { isUserExistsAndEmailConfirmedAsync } from "../../services/Auth/IsUserExists";
+import { AddNewUserAndSendVerificationCodeAsync } from "../../services/Auth/AddNewUser";
+import { VerifyCodeAsync } from "../../services/Auth/VerifyCode";
 import { AlternativeLogin } from "../../components/authentication/AlternativeLogin";
-import { IsUserExistsAndEmailConfirmedResponse } from "../../models/IsUserExistsRequest";
-import { SendVerificationCodeAsync } from "../../Requests/Auth/SendVerificationCode";
+import { SendVerificationCodeAsync } from "../../services/Auth/SendVerificationCode";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
   // When user is not registered - verification section
   const [isVerificationSectionVisible, setIsVerificationSectionVisible] =
     useState(false);
@@ -57,12 +59,18 @@ const LoginPage = () => {
       setIsSending(true);
       const data = await isUserExistsAndEmailConfirmedAsync(emailText);
 
-      if (data.isConfirmed) {
+      if (data.isAccountCreated) {
+        // if user have already created his account
         setIsPasswordSectionVisible(true);
+      } else if (data.isConfirmed) {
+        // if user only confirm his email, but didn't create his account
+        navigate("/createAccount");
       } else if (data.isExists) {
+        // is user already in DB, but didn't confirm his email
         await SendVerificationCodeAsync(emailText);
         setIsVerificationSectionVisible(true);
       } else {
+        // user not in DB
         await AddNewUserAndSendVerificationCodeAsync(emailText);
         setIsVerificationSectionVisible(true);
       }
@@ -78,7 +86,16 @@ const LoginPage = () => {
 
   // After verification code input and continue button click
   const handleVerifyCodeAsync = async () => {
-    await VerifyCodeAsync(emailText, codeText);
+    try {
+      const data = await VerifyCodeAsync(emailText, codeText);
+      if (data.isCodeCorrect == false) {
+        setErrorAlert("Wrong code!");
+      } else {
+        navigate("/createAccount");
+      }
+    } catch (error: any) {
+      setErrorAlert(error.message);
+    }
   };
 
   return (

@@ -1,8 +1,12 @@
 import axios from "axios";
+import { VerifyResponse } from "../../models/VerifyResponse";
 
-export const VerifyCodeAsync = async (email: string, code: string) => {
+export const VerifyCodeAsync = async (
+  email: string,
+  code: string
+): Promise<VerifyResponse> => {
   try {
-    const response = await axios.put(
+    const response = await axios.put<VerifyResponse>(
       "http://localhost:5096/api/Account/VerifyCode",
       {
         email,
@@ -17,6 +21,7 @@ export const VerifyCodeAsync = async (email: string, code: string) => {
     if (response.data.jwtToken) {
       localStorage.setItem("jwtToken", response.data.jwtToken);
     }
+    return response.data;
   } catch (error) {
     console.error(error);
     throw new Error(

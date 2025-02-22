@@ -73,20 +73,26 @@ const CreateAccountPage = () => {
   }, [showModal, cropper, originalImage]);
 
   // Username input
-  const [username, setUsername] = useState("");
-  const handleChangeUsername = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+  const [usernameText, setUsernameText] = useState("");
+  const handleChangeUsernameText = (e: ChangeEvent<HTMLInputElement>) => {
+    setUsernameText(e.target.value);
   };
 
   // Password input
-  const [password, setPassword] = useState("");
-  const handleChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+  const [passwordText, setPasswordText] = useState("");
+  const handleChangePasswordText = (e: ChangeEvent<HTMLInputElement>) => {
+    setPasswordText(e.target.value);
+  };
+
+  // Confirm password input
+  const [confirmPasswordText, setConfirmPasswordText] = useState("");
+  const handleChangeConfirmPasswordText = (e: ChangeEvent<HTMLInputElement>) => {
+    setConfirmPasswordText(e.target.value);
   };
 
   // All fields must be not empty
   const readyToContinue = () => {
-    return !!username && !!password;
+    return !!usernameText && !!passwordText && !!confirmPasswordText;
   };
 
   return (
@@ -102,7 +108,6 @@ const CreateAccountPage = () => {
                 alt="avatar"
                 className="avatar-wrapper"
                 onClick={handleImageClick}
-                style={{ cursor: "pointer" }}
               />
               <input
                 type="file"
@@ -116,7 +121,7 @@ const CreateAccountPage = () => {
               </label>
             </div>
             <div className="input-fields">
-              <div className="max-width padding-block-600">
+              <div className="max-width padding-block-300">
                 <label htmlFor="" className="label">
                   Username
                 </label>
@@ -125,21 +130,33 @@ const CreateAccountPage = () => {
                     className="input"
                     type="text"
                     placeholder="Enter your username..."
-                    value={username}
-                    onChange={handleChangeUsername}
+                    value={usernameText}
+                    onChange={handleChangeUsernameText}
                   />
                 </div>
               </div>
 
-              <div className="max-width padding-block-600">
+              <div className="max-width padding-block-300">
                 <label className="label">Password</label>
                 <div className="input-container">
                   <input
                     className="input"
                     type="password"
                     placeholder="Enter your password..."
-                    value={password}
-                    onChange={handleChangePassword}
+                    value={passwordText}
+                    onChange={handleChangePasswordText}
+                  />
+                </div>
+              </div>
+              <div className="max-width padding-block-300">
+                <label className="label">Confirm your password</label>
+                <div className="input-container">
+                  <input
+                    className="input"
+                    type="password"
+                    placeholder="Repeat password..."
+                    value={confirmPasswordText}
+                    onChange={handleChangeConfirmPasswordText}
                   />
                 </div>
               </div>
@@ -163,7 +180,6 @@ const CreateAccountPage = () => {
                 ref={imgRef}
                 src={croppedImage}
                 alt="avatar"
-                style={{ display: "block", maxWidth: "100%" }}
                 onLoad={handleCropperInit}
               />
             </div>

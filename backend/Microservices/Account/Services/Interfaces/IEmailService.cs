@@ -1,4 +1,4 @@
-using Account.Requests.Email;
+using Account.DTO.EmailRequests;
 
 namespace Account.Services.Interfaces
 {

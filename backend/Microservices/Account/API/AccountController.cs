@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Account.Data;
-using Account.DTO.Requests.JwtRequests;
+using Account.DTO.AccountRequests;
+using Account.DTO.EmailRequests;
+using Account.DTO.JwtRequests;
 using Account.JWT.Services;
 using Account.Models;
-using Account.Requests.AccountRequests;
-using Account.Requests.Email;
 using Account.Responses;
 using Account.Responses.Auth;
 using Account.Services.Interfaces;
@@ -180,7 +180,9 @@ namespace Account.API_controllers
 
                 var username = User.FindFirst(ClaimTypes.Name)?.Value;
 
-                return Ok(new { UserId = userId, Username = username });
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                return Ok(new { UserId = userId, Username = username, Email = email});
             }
             catch (ArgumentNullException ex)
             {
@@ -193,6 +195,13 @@ namespace Account.API_controllers
 
             return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to get your data"));
         }
+
+        [HttpPost("CreateAccount")]
+        public async Task<IActionResult> CraeteAccount()
+        {
+            return Ok();
+        }
+
         
         [HttpGet("ValidateToken")]
         [Authorize]

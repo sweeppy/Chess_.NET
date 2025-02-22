@@ -2,7 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Account.DTO.Requests.JwtRequests;
+using Account.DTO.JwtRequests;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Account.JWT.Services

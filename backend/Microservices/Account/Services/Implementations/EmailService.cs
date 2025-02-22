@@ -1,4 +1,4 @@
-using Account.Requests.Email;
+using Account.DTO.EmailRequests;
 using Account.Services.Interfaces;
 using MimeKit;
 

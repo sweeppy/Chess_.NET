@@ -1,4 +1,4 @@
-namespace Account.Requests.AccountRequests
+namespace Account.DTO.AccountRequests
 {
     public record VerifyCodeRequest(string email, string code);
 }

@@ -1,5 +1,5 @@
 using Account.Data;
-using Account.DTO.Requests.JwtRequests;
+using Account.DTO.JwtRequests;
 using Account.JWT.Services;
 using Account.Models;
 using Account.Responses.Auth;

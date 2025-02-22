@@ -1,4 +1,4 @@
-using Account.DTO.Requests.JwtRequests;
+using Account.DTO.JwtRequests;
 
 namespace Account.JWT.Services
 {

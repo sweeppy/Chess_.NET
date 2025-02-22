@@ -1,5 +1,5 @@
 using Account.Data;
-using Account.DTO.Requests.GameRequests;
+using Account.DTO.GameRequests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Account.API

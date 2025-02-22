@@ -1,4 +1,4 @@
-namespace Account.DTO.Requests.GameRequests
+namespace Account.DTO.GameRequests
 {
     public record StartGameRequest(int GameId);
 }

@@ -5,6 +5,7 @@ import { VerifyCodeAsync } from "../../services/Auth/VerifyCode";
 import { AlternativeLogin } from "../../components/authentication/AlternativeLogin";
 import { SendVerificationCodeAsync } from "../../services/Auth/SendVerificationCode";
 import { useNavigate } from "react-router-dom";
+import ErrorAlert from "../../components/alerts/ErrorAlert";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,21 +16,23 @@ const LoginPage = () => {
   // When user is registered - password section
   const [isPasswordSectionVisible, setIsPasswordSectionVisible] = useState(false);
 
-  // Error state
-  const [errorAlert, setErrorAlert] = useState<string | null>(null);
+  // Error message state
+  const [errorAlertMessage, setErrorAlertMessage] = useState<string | null>(null);
 
   // Handle alert animation
   const [isAlertClosing, setIsAlertClosing] = useState(false);
   const closeAlert = () => {
     setIsAlertClosing(true); // Start animation timeout
     setTimeout(() => {
-      setErrorAlert(null);
+      setErrorAlertMessage(null);
       setIsAlertClosing(false);
     }, 500);
   };
 
-  // Email input
+  // Inputs
   const [emailText, setEmailText] = useState("");
+  const [codeText, setCodeText] = useState("");
+  const [passwordText, setPasswordText] = useState("");
   const handleEmailTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmailText(e.target.value);
     if (isVerificationSectionVisible || isPasswordSectionVisible) {
@@ -37,17 +40,6 @@ const LoginPage = () => {
       setIsPasswordSectionVisible(false);
       setCodeText("");
     }
-  };
-  // Verification code input
-  const [codeText, setCodeText] = useState("");
-  const handleCodeTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCodeText(e.target.value);
-  };
-
-  // Password input
-  const [passwordText, setPasswordText] = useState("");
-  const handlePasswordTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPasswordText(e.target.value);
   };
 
   // State for email sending loader
@@ -75,7 +67,7 @@ const LoginPage = () => {
         setIsVerificationSectionVisible(true);
       }
     } catch (error: any) {
-      setErrorAlert(error.message);
+      setErrorAlertMessage(error.message);
     } finally {
       setIsSending(false);
     }
@@ -89,24 +81,23 @@ const LoginPage = () => {
     try {
       const data = await VerifyCodeAsync(emailText, codeText);
       if (data.isCodeCorrect == false) {
-        setErrorAlert("Wrong code!");
+        setErrorAlertMessage("Wrong code!");
       } else {
         navigate("/createAccount");
       }
     } catch (error: any) {
-      setErrorAlert(error.message);
+      setErrorAlertMessage(error.message);
     }
   };
 
   return (
     <>
-      {errorAlert && (
-        <div className={`alert error-alert ${isAlertClosing ? "hide" : ""}`}>
-          <span className="alert-message">{errorAlert}</span>
-          <button className="close" onClick={() => closeAlert()}>
-            &times;
-          </button>
-        </div>
+      {errorAlertMessage && (
+        <ErrorAlert
+          isAlertClosing={isAlertClosing}
+          errorMessage={errorAlertMessage}
+          closeAlert={closeAlert}
+        />
       )}
 
       <div className="container auth-container">
@@ -148,7 +139,7 @@ const LoginPage = () => {
                   type="text"
                   placeholder="Paste verification code "
                   value={codeText}
-                  onChange={handleCodeTextChange}
+                  onChange={(e) => setCodeText(e.target.value)}
                 />
               </div>
             </div>
@@ -166,7 +157,7 @@ const LoginPage = () => {
                   className="input"
                   type="password"
                   placeholder="Enter your password..."
-                  onChange={handlePasswordTextChange}
+                  onChange={(e) => setPasswordText(e.target.value)}
                 />
               </div>
             </div>

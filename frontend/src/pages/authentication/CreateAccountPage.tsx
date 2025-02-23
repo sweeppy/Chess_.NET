@@ -1,6 +1,8 @@
 import { ChangeEvent, useState, useRef, useEffect } from "react";
 import "cropperjs/dist/cropper.css";
 import Cropper from "cropperjs";
+import ErrorAlert from "../../components/alerts/ErrorAlert";
+import { createAccountAsync } from "../../services/Auth/CreateAccount";
 
 const CreateAccountPage = () => {
   // Real image, that will be saved
@@ -72,31 +74,57 @@ const CreateAccountPage = () => {
     }
   }, [showModal, cropper, originalImage]);
 
-  // Username input
+  // Inputs
   const [usernameText, setUsernameText] = useState("");
-  const handleChangeUsernameText = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsernameText(e.target.value);
-  };
-
-  // Password input
   const [passwordText, setPasswordText] = useState("");
-  const handleChangePasswordText = (e: ChangeEvent<HTMLInputElement>) => {
-    setPasswordText(e.target.value);
-  };
-
-  // Confirm password input
   const [confirmPasswordText, setConfirmPasswordText] = useState("");
-  const handleChangeConfirmPasswordText = (e: ChangeEvent<HTMLInputElement>) => {
-    setConfirmPasswordText(e.target.value);
-  };
 
-  // All fields must be not empty
+  // All string fields must be not empty
   const readyToContinue = () => {
     return !!usernameText && !!passwordText && !!confirmPasswordText;
   };
 
+  // Error message state
+  const [errorAlertMessage, setErrorAlertMessage] = useState<string | null>(null);
+
+  // Handle alert animation
+  const [isAlertClosing, setIsAlertClosing] = useState(false);
+  const closeAlert = () => {
+    setIsAlertClosing(true); // Start animation timeout
+    setTimeout(() => {
+      setErrorAlertMessage(null);
+      setIsAlertClosing(false);
+    }, 500);
+  };
+
+  const handleCreateAccount = async () => {
+    // Check if passwords match
+    if (passwordText !== confirmPasswordText) {
+      setErrorAlertMessage("Passwords do not match");
+      return;
+    }
+
+    try {
+      await createAccountAsync(
+        usernameText,
+        passwordText,
+        confirmPasswordText,
+        croppedImage
+      );
+    } catch (error: any) {
+      setErrorAlertMessage(error.message);
+    }
+  };
+
   return (
     <>
+      {errorAlertMessage && (
+        <ErrorAlert
+          isAlertClosing={isAlertClosing}
+          errorMessage={errorAlertMessage}
+          closeAlert={closeAlert}
+        />
+      )}
       <div className="container">
         <div className="flex-column flex-center max-height">
           <h1>Create your account</h1>
@@ -131,7 +159,7 @@ const CreateAccountPage = () => {
                     type="text"
                     placeholder="Enter your username..."
                     value={usernameText}
-                    onChange={handleChangeUsernameText}
+                    onChange={(e) => setUsernameText(e.target.value)}
                   />
                 </div>
               </div>
@@ -144,7 +172,7 @@ const CreateAccountPage = () => {
                     type="password"
                     placeholder="Enter your password..."
                     value={passwordText}
-                    onChange={handleChangePasswordText}
+                    onChange={(e) => setPasswordText(e.target.value)}
                   />
                 </div>
               </div>
@@ -156,14 +184,18 @@ const CreateAccountPage = () => {
                     type="password"
                     placeholder="Repeat password..."
                     value={confirmPasswordText}
-                    onChange={handleChangeConfirmPasswordText}
+                    onChange={(e) => setConfirmPasswordText(e.target.value)}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <button className="button no-wrap" disabled={!readyToContinue()}>
+          <button
+            className="button no-wrap"
+            disabled={!readyToContinue()}
+            onClick={handleCreateAccount}
+          >
             Start playing
           </button>
         </div>

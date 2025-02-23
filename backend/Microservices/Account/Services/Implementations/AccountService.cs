@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Account.Data;
+using Account.DTO.AccountRequests;
 using Account.DTO.JwtRequests;
 using Account.JWT.Services;
 using Account.Models;
@@ -17,6 +19,46 @@ namespace Account.Services.Implementations
         {
             _db = db;
             _jwtService = jwtService;
+        }
+
+        public async Task CreateAccount(CreateAccountRequest request, ClaimsPrincipal user)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = user.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentNullException("Email not found in token.");
+            }
+
+            var player = await _db.Players.FirstOrDefaultAsync(p => p.Email == email);
+            if (player == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+
+            if (request.profileImage != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Generate unique file name
+                var fileName = $"{userId}_{Guid.NewGuid()}.jpg";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.profileImage.CopyToAsync(stream);
+                }
+
+                // Save image file path to DB
+                player.ImagePath = $"/images/{fileName}";
+                _db.Players.Update(player);
+                await _db.SaveChangesAsync();
+            }
         }
 
         public string GenerateVerificationCode()

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Account.Data;
 using Account.DTO.AccountRequests;
 using Account.DTO.EmailRequests;
@@ -197,9 +198,30 @@ namespace Account.API_controllers
         }
 
         [HttpPost("CreateAccount")]
-        public async Task<IActionResult> CraeteAccount()
+        [Authorize]
+        public async Task<IActionResult> CreateAccount([FromForm] CreateAccountRequest request)
         {
-            return Ok();
+            try
+            {
+                await _userService.CreateAccount(request, User);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogCritical($"ArgumentException in AccountController(CreateAccount): {ex.Message}");
+                return BadRequest(new BaseResponse(false, ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogCritical($"ArgumentException in AccountController(CreateAccount): {ex.Message}");
+                return BadRequest(new BaseResponse(false, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception in AccountController(CreateAccount): {ex.Message}");
+                return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to create your account"));
+            }
+
+            return Ok(new BaseResponse(true, "Account was successfully created"));
         }
 
         

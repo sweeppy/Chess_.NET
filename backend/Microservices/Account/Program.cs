@@ -4,6 +4,7 @@ using Account.JWT.Services;
 using Account.JWT.Configuration;
 using Account.Services.Interfaces;
 using Account.Services.Implementations;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -56,6 +57,26 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Account_Chess API v1.0.0");
     });
 }
+
+var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+{
+    Directory.CreateDirectory(wwwrootPath);
+}
+
+var imagesPath = Path.Combine(wwwrootPath, "images");
+if (!Directory.Exists(imagesPath))
+{
+    Directory.CreateDirectory(imagesPath);
+}
+
+// For users accounts images
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images")),
+    RequestPath = "/images"
+});
 
 app.UseRouting();
 

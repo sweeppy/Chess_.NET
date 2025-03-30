@@ -173,6 +173,7 @@ namespace Account.API_controllers
         }
 
         [HttpGet("GetUserData")]
+        [Authorize]
         public IActionResult GetData()
         {
             try
@@ -183,7 +184,7 @@ namespace Account.API_controllers
 
                 var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                return Ok(new { UserId = userId, Username = username, Email = email});
+                return Ok(new { UserId = userId, Username = username, Email = email });
             }
             catch (ArgumentNullException ex)
             {
@@ -224,7 +225,7 @@ namespace Account.API_controllers
             return Ok(new BaseResponse(true, "Account was successfully created"));
         }
 
-        
+
         [HttpGet("ValidateToken")]
         [Authorize]
         public IActionResult ValidateToken()

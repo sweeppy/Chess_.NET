@@ -23,6 +23,12 @@ namespace Account.Services.Implementations
 
         public async Task CreateAccount(CreateAccountRequest request, ClaimsPrincipal user)
         {
+            var isPasswordValidResponse = PasswordValidator.ValidatePassword(request.Password, request.ConfirmPassword);
+            if (!isPasswordValidResponse.IsValid)
+            {
+                throw new ArgumentException(isPasswordValidResponse.Message);
+            }
+
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var email = user.FindFirst(ClaimTypes.Email)?.Value;
 
@@ -54,8 +60,11 @@ namespace Account.Services.Implementations
                     await request.profileImage.CopyToAsync(stream);
                 }
 
-                // Save image file path to DB
+                // Save player information to DB
                 player.ImagePath = $"/images/{fileName}";
+                player.Username = request.Username;
+                // TODO Password:
+
                 _db.Players.Update(player);
                 await _db.SaveChangesAsync();
             }
@@ -75,11 +84,11 @@ namespace Account.Services.Implementations
             // If player exists
             if (player != null)
             {
-                bool isAccountCreated = player.Username == null;
+                bool isAccountCreated = player.Username != null;
 
                 GenerateTokenRequest request = isAccountCreated
-                ? new GenerateTokenRequest(player.Id, "", player.Email)
-                : new GenerateTokenRequest(player.Id, player.Username, player.Email);
+                ? new GenerateTokenRequest(player.Id, player.Username, player.Email)
+                : new GenerateTokenRequest(player.Id, "", player.Email);
 
                 string token = _jwtService.GenerateToken(request);
                 bool isConfirmed = player.IsEmailConfirmed;

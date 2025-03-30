@@ -2,13 +2,18 @@ using System.Text.RegularExpressions;
 
 public static class PasswordValidator
 {
-    public static (bool IsValid, string Message) ValidatePassword(string password)
+    public static (bool IsValid, string Message) ValidatePassword(string password, string confirmPassword)
     {
-        // Minimum password length
-        if (password.Length < 8)
+        if (password != confirmPassword)
         {
-            return (false, "Password must be at least 8 characters long.");
+            return (false, "Passwords do not match.");
         }
+
+        // Minimum password length
+            if (password.Length < 8)
+            {
+                return (false, "Password must be at least 8 characters long.");
+            }
 
         // Check for at least one digit
         if (!Regex.IsMatch(password, @"\d"))

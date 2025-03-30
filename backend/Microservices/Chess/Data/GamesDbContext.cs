@@ -1,4 +1,4 @@
-using Chess.GeneralModels;
+using Chess.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chess.Data
@@ -17,16 +17,7 @@ namespace Chess.Data
             optionsBuilder.UseNpgsql(_configuration.GetConnectionString("ChessServiceConnection"));
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<GameInfo>()
-                .HasMany(g => g.Fens)
-                .WithOne(f => f.GameInfo)
-                .HasForeignKey(f => f.GameInfoId)
-                .HasPrincipalKey(g => g.Id);
-        }
 
         public DbSet<GameInfo> Games { get; set; }
-        public DbSet<FenEntry> Fens { get; set; }
     }
 }

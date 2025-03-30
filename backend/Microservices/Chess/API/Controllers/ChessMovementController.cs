@@ -1,10 +1,11 @@
-using System.Threading.Tasks;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Chess.API.Interfaces;
 using Chess.Data;
 using Chess.DTO.Requests;
-using Chess.GeneralModels;
+using Chess.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Chess.API.Controllers
 {
@@ -12,49 +13,80 @@ namespace Chess.API.Controllers
     [Route("api/ChessMovement")]
     public class ChessMovementController : ControllerBase
     {
-        private readonly IMovement _movementAPI;
-
+        private readonly IMovement _movement;
         private readonly GamesDbContext _db;
+        private readonly ILogger<ChessMovementController> _logger;
 
 
-        public ChessMovementController(IMovement movementAPI, GamesDbContext db)
+        public ChessMovementController(IMovement movementAPI, GamesDbContext db, ILogger<ChessMovementController> logger)
         {
-            _movementAPI = movementAPI;
+            _movement = movementAPI;
             _db = db;
+            _logger = logger;
         }
 
         [HttpPost("makeMove")]
         public async Task<IActionResult> MakeMove([FromBody] MoveRequest request)
         {
-            string fenAfterMove = await _movementAPI.OnMove(request);
+            string fenAfterMove = await _movement.OnMove(request);
             return Ok(fenAfterMove);
         }
         [HttpPost("getLegalMoves")]
         public IActionResult GetLegalMoves([FromBody] string fen)
         {
-            Dictionary<int, List<int>> legalMoves = _movementAPI.GetLegalMoves(fen);
+            Dictionary<int, List<int>> legalMoves = _movement.GetLegalMoves(fen);
             return Ok(legalMoves);
         }
 
-        [HttpGet]
+        [HttpPost("OnGameStart")]
+        [Authorize]
         public async Task<IActionResult> OnGameStart()
         {
-            GameInfo newGame = new GameInfo
+            try
             {
-                Fens = new List<FenEntry> 
+                GameInfo newGame = new()
                 {
-                    new FenEntry {Fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}
-                },
-                Moves = new List<string> { }
-            };
+                    Fens = ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"],
+                    Moves = [],
+                    IsActiveGame = true,
+                    FirstPlayerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
+                    SecondPlayerId = 0
+                };
+                
+                _db.Games.Add(newGame);
+                await _db.SaveChangesAsync();
 
-
-            _db.Games.Add(newGame);
-            await _db.SaveChangesAsync();
-
-            return Ok( new {GameId = newGame.Id});
+                return Ok(new { GameId = newGame.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex.Message);
+                throw;
+            }
         }
-
+[AllowAnonymous]
+[HttpGet("ValidateTest")]
+public IActionResult ValidateTest([FromHeader] string authorization)
+{
+    try
+    {
+        var token = authorization.Replace("Bearer ", "");
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(token);
+        
+        return Ok(new {
+            ValidTo = jwt.ValidTo,
+            ServerTime = DateTime.UtcNow,
+            IsExpired = jwt.ValidTo < DateTime.UtcNow,
+            Issuer = jwt.Issuer,
+            Audience = jwt.Audiences.FirstOrDefault()
+        });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(ex.Message);
+    }
+}
         
     }
 }

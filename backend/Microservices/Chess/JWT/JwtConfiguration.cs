@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Account.JWT.Configuration
+namespace Chess.JWT
 {
-    public static class JwtConfiguration
+public static class JwtConfiguration
     {
         public static IServiceCollection AddJwtAuthentication(
             this IServiceCollection services,
@@ -28,8 +28,9 @@ namespace Account.JWT.Configuration
                     ValidAudience = "ChessService",
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
                 };
+                
             });
 
             return services;

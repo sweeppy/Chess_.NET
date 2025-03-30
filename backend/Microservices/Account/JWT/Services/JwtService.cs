@@ -17,8 +17,8 @@ namespace Account.JWT.Services
         }
 
         public string GenerateToken(GenerateTokenRequest request)
-        {
-            var SignKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings:SignKey").Value));
+        {var SignKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_SECRET"]));
+            
             var credentials = new SigningCredentials(SignKey, SecurityAlgorithms.HmacSha256);
 
             Claim[] claims =
@@ -29,8 +29,10 @@ namespace Account.JWT.Services
             ];
 
             var token = new JwtSecurityToken(
+                issuer: "AccountService",
+                audience: "ChessService",
                 claims: claims,
-                expires: DateTime.Now.AddHours(Convert.ToByte(_configuration["JwtSettings:ExpireHours"])),
+                expires: DateTime.Now.AddHours(Convert.ToByte(_configuration["EXPIRE_HOURS"])),
                 signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);

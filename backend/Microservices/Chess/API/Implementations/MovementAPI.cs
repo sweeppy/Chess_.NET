@@ -2,7 +2,7 @@ using System.Text;
 using Chess.API.Interfaces;
 using Chess.Data;
 using Chess.DTO.Requests;
-using Chess.GeneralModels;
+using Chess.Models;
 using Chess.Main.Core.FEN;
 using Chess.Main.Core.Helpers.BitOperation;
 using Chess.Main.Core.Helpers.Squares;
@@ -120,15 +120,13 @@ namespace Chess.API.Implementations
             
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-
-            var game = await _db.Games.FirstOrDefaultAsync(g => g.Id == request.GameId);
+            GameInfo? game = await _db.Games.FirstOrDefaultAsync(g => g.Id == request.GameId);
 
 
 
             if(game != null)
             {
-                game.Fens.Add(new FenEntry { Fen = fenAfterMove, GameInfoId = game.Id });
-
+                game.Fens.Add(fenAfterMove);
                 game.Moves.Add(stringMove.ToString());
                 await _db.SaveChangesAsync();
             }

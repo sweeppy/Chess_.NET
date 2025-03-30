@@ -1,6 +1,7 @@
 using Chess.API.Implementations;
 using Chess.API.Interfaces;
 using Chess.Data;
+using Chess.JWT;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,14 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Chess_bots API", Version = "v1.0" });
 });
 
+DotNetEnv.Env.Load();
+
+// Add environment variables
+builder.Configuration.AddEnvironmentVariables();
+
+// Add jwt authentication
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 // Register dependencies
 builder.Services.AddScoped<GamesDbContext>();
 
@@ -22,7 +31,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(options =>
     {
-        options.WithOrigins("http://localhost:5173", "http://localhost:5011")
+        options.WithOrigins("http://localhost:5173")
         .SetIsOriginAllowedToAllowWildcardSubdomains()
         .AllowAnyHeader()
         .AllowAnyMethod();
@@ -45,6 +54,7 @@ app.UseRouting();
 app.UseCors();
 
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.Run();

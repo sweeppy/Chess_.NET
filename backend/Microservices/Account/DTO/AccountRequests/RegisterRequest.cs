@@ -1,4 +1,4 @@
 namespace Account.DTO.AccountRequests
 {
-    public record RegisterDtoRequest(string Email, string HashedPassword);
+    public record LoginByPasswordRequest(string Email, string Password);
 }

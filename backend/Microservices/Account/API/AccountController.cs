@@ -1,9 +1,8 @@
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Account.Data;
 using Account.DTO.AccountRequests;
-using Account.DTO.EmailRequests;
 using Account.DTO.JwtRequests;
+using Account.DTO.VerificationCodeRequests;
 using Account.JWT.Services;
 using Account.Models;
 using Account.Responses;
@@ -56,42 +55,6 @@ namespace Account.API_controllers
             }
         }
 
-        [HttpPost("SendVerificationCode")]
-        public async Task<IActionResult> SendVerificationCode([FromBody] string email)
-        {
-            try
-            {
-                // Generate code
-                string code = _userService.GenerateVerificationCode();
-                string encryptedCode = _encryption.Encrypt(code);
-
-                // Update player's verification code in DB
-                Player player = await _db.Players.FirstAsync(p => p.Email == email);
-                player.VerificationCode = encryptedCode;
-                _db.Players.Update(player);
-                await _db.SaveChangesAsync();
-
-                // Send verification code to user's email
-                SendEmailRequest request = new(email, "Confirm your email", code);
-                await _emailService.SendEmailAsync(request);
-
-                return Ok(new RegisterUserResponse(true, "Code was successfully sent", true));
-            }
-            catch (ArgumentException ArgEx) // Exception with encrypting code
-            {
-                _logger.LogCritical($"Exception in AccountController HttpPost(AddNewUser). {ArgEx.Message}");
-            }
-            catch (InvalidOperationException operationException) // Player with this email not found
-            {
-                _logger.LogCritical($"InvalidOperationException in AccountController HttpPost(AddNewUser). {operationException.Message}");
-            }
-            catch (Exception ex) // Other exceptions
-            {
-                _logger.LogCritical($"Exception in AccountController HttpPost(SendVerificationCode). Exception: {ex.Message}");
-            }
-            return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
-        }
-
         [HttpPost("AddNewUser")]
         public async Task<IActionResult> AddNewUser([FromBody] string email)
         {
@@ -134,12 +97,48 @@ namespace Account.API_controllers
             return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
         }
 
+        [HttpPost("SendVerificationCode")]
+        public async Task<IActionResult> SendVerificationCode([FromBody] string email)
+        {
+            try
+            {
+                // Generate code
+                string code = _userService.GenerateVerificationCode();
+                string encryptedCode = _encryption.Encrypt(code);
+
+                // Update player's verification code in DB
+                Player player = await _db.Players.FirstAsync(p => p.Email == email);
+                player.VerificationCode = encryptedCode;
+                _db.Players.Update(player);
+                await _db.SaveChangesAsync();
+
+                // Send verification code to user's email
+                SendEmailRequest request = new(email, "Confirm your email", code);
+                await _emailService.SendEmailAsync(request);
+
+                return Ok(new RegisterUserResponse(true, "Code was successfully sent", true));
+            }
+            catch (ArgumentException ArgEx) // Exception with encrypting code
+            {
+                _logger.LogCritical($"Exception in AccountController HttpPost(AddNewUser). {ArgEx.Message}");
+            }
+            catch (InvalidOperationException operationException) // Player with this email not found
+            {
+                _logger.LogCritical($"InvalidOperationException in AccountController HttpPost(AddNewUser). {operationException.Message}");
+            }
+            catch (Exception ex) // Other exceptions
+            {
+                _logger.LogCritical($"Exception in AccountController HttpPost(SendVerificationCode). Exception: {ex.Message}");
+            }
+            return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to send you email."));
+        }
+
         [HttpPut("VerifyCode")]
         public async Task<IActionResult> VerifyCode(VerifyCodeRequest request)
         {
             try
             {
-                Player? player = _db.Players.FirstOrDefault(p => p.Email == request.email);
+                Player? player = _db.Players.FirstOrDefault(p => p.Email == request.Email);
                 if (player == null)
                 {
                     throw new ArgumentException("Player with this email was not found.");
@@ -148,7 +147,7 @@ namespace Account.API_controllers
                 string decryptedCode = _encryption.Decrypt(player.VerificationCode);
 
                 // If user's input code is wrong
-                if (decryptedCode != request.code)
+                if (decryptedCode != request.Code)
                     return Ok(new VerifyResponse(false, "The code is wrong.", false, null));
 
                 player.IsEmailConfirmed = true;
@@ -171,31 +170,23 @@ namespace Account.API_controllers
                 return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying confirm email."));
             }
         }
-
-        [HttpGet("GetUserData")]
-        [Authorize]
-        public IActionResult GetData()
+        [HttpPost("LoginByPassword")]
+        public async Task<IActionResult> LoginByPassword(LoginByPasswordRequest request)
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                bool isLoginDataValid = await _userService.LoginByPassword(request);
 
-                var username = User.FindFirst(ClaimTypes.Name)?.Value;
-
-                var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-                return Ok(new { UserId = userId, Username = username, Email = email });
-            }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogCritical($"ArgumentNullException in AccountController(GetUserData): {ex.Message}");
+                var response = isLoginDataValid ? new BaseResponse(isLoginDataValid, "Successful login")
+                                                : new BaseResponse(isLoginDataValid, "Login failed");
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogCritical($"Exception in AccountController(GetUserData): {ex.Message}");
+                _logger.LogCritical($"Exception, while trying to login: {ex.Message}");
+                var badResponse = new BaseResponse(false, ex.Message);
+                return BadRequest(badResponse);
             }
-
-            return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to get your data"));
         }
 
         [HttpPost("CreateAccount")]
@@ -225,6 +216,31 @@ namespace Account.API_controllers
             return Ok(new BaseResponse(true, "Account was successfully created"));
         }
 
+        [HttpGet("GetUserData")]
+        [Authorize]
+        public IActionResult GetData()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                return Ok(new { UserId = userId, Username = username, Email = email });
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogCritical($"ArgumentNullException in AccountController(GetUserData): {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception in AccountController(GetUserData): {ex.Message}");
+            }
+
+            return BadRequest(new BaseResponse(false, "Something went wrong, while we were trying to get your data"));
+        }
 
         [HttpGet("ValidateToken")]
         [Authorize]

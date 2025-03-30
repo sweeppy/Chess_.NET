@@ -13,5 +13,7 @@ namespace Account.Services.Interfaces
         public string GenerateVerificationCode();
 
         public Task CreateAccount(CreateAccountRequest request, ClaimsPrincipal user);
+
+        public Task<bool> LoginByPassword(LoginByPasswordRequest request);
     }
 }

@@ -43,7 +43,7 @@ namespace Account.Services.Implementations
                 throw new KeyNotFoundException("User not found.");
             }
 
-            if (request.profileImage != null)
+            if (request.ProfileImage != null)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
                 if (!Directory.Exists(uploadsFolder))
@@ -57,13 +57,16 @@ namespace Account.Services.Implementations
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    await request.profileImage.CopyToAsync(stream);
+                    await request.ProfileImage.CopyToAsync(stream);
                 }
+
+                // Hash password
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12);
 
                 // Save player information to DB
                 player.ImagePath = $"/images/{fileName}";
                 player.Username = request.Username;
-                // TODO Password:
+                player.Password = hashedPassword;
 
                 _db.Players.Update(player);
                 await _db.SaveChangesAsync();
@@ -114,6 +117,25 @@ namespace Account.Services.Implementations
                     jwtToken: null,
                     isAccountCreated: false
             );
+        }
+
+        public async Task<bool> LoginByPassword(LoginByPasswordRequest request)
+        {
+            if (!PasswordValidator.ValidatePassword(request.Password).IsValid)
+            {
+                throw new ArgumentException("Password invalid");
+            }
+
+            Player? player = await _db.Players.FirstOrDefaultAsync(p => p.Email == request.Email);
+            if (player == null)
+            {
+                throw new KeyNotFoundException("Account with this email was not found");
+            }
+            string hashedPassword = player.Password;
+
+            bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, hashedPassword);
+
+            return isPasswordCorrect;
         }
     }
 }

@@ -1,4 +1,4 @@
-using Account.DTO.EmailRequests;
+using Account.DTO.VerificationCodeRequests;
 
 namespace Account.Services.Interfaces
 {

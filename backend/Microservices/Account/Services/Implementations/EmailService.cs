@@ -1,4 +1,4 @@
-using Account.DTO.EmailRequests;
+using Account.DTO.VerificationCodeRequests;
 using Account.Services.Interfaces;
 using MimeKit;
 
@@ -22,12 +22,12 @@ namespace Account.Services.Implementations
 
             var email = new MimeMessage();
             email.From.Add(new MailboxAddress("PixelChess", _smtpUsername));
-            email.To.Add(new MailboxAddress("", request.toEmail));
-            email.Subject = request.subject;
+            email.To.Add(new MailboxAddress("", request.ToEmail));
+            email.Subject = request.Subject;
 
             email.Body = new TextPart("plain")
             {
-                Text = request.body
+                Text = request.Body
             };
 
             using (var client = new MailKit.Net.Smtp.SmtpClient())

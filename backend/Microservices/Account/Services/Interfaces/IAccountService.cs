@@ -14,6 +14,6 @@ namespace Account.Services.Interfaces
 
         public Task CreateAccount(CreateAccountRequest request, ClaimsPrincipal user);
 
-        public Task<bool> LoginByPassword(LoginByPasswordRequest request);
+        public Task<LoginResponse> LoginByPassword(LoginByPasswordRequest request);
     }
 }

@@ -17,11 +17,6 @@ export const isUserExistsAndEmailConfirmedAsync = async (
             );
         const data = response.data;
 
-        if (data.jwtToken) {
-            localStorage.setItem('jwtToken', data.jwtToken);
-            console.log(data.jwtToken);
-        }
-
         return data;
     } catch (error: any) {
         console.error(error);

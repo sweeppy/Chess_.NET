@@ -1,97 +1,109 @@
-import { ChangeEvent, useState } from 'react'
-import { isUserExistsAndEmailConfirmedAsync } from '../../services/Auth/IsUserExists'
-import { AddNewUserAndSendVerificationCodeAsync } from '../../services/Auth/AddNewUser'
-import { VerifyCodeAsync } from '../../services/Auth/VerifyCode'
-import { AlternativeLogin } from '../../components/authentication/AlternativeLogin'
-import { SendVerificationCodeAsync } from '../../services/Auth/SendVerificationCode'
-import { useNavigate } from 'react-router-dom'
-import ErrorAlert from '../../components/alerts/ErrorAlert'
+import { ChangeEvent, useState } from 'react';
+import { isUserExistsAndEmailConfirmedAsync } from '../../services/Auth/IsUserExists';
+import { AddNewUserAndSendVerificationCodeAsync } from '../../services/Auth/AddNewUser';
+import { VerifyCodeAsync } from '../../services/Auth/VerifyCode';
+import { AlternativeLogin } from '../../components/authentication/AlternativeLogin';
+import { SendVerificationCodeAsync } from '../../services/Auth/SendVerificationCode';
+import { useNavigate } from 'react-router-dom';
+import ErrorAlert from '../../components/alerts/ErrorAlert';
+import { LoginByPasswordAsync } from '../../services/Auth/LoginByPassword';
 
 const LoginPage = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     // When user is not registered - verification section
     const [isVerificationSectionVisible, setIsVerificationSectionVisible] =
-        useState(false)
+        useState(false);
     // When user is registered - password section
     const [isPasswordSectionVisible, setIsPasswordSectionVisible] =
-        useState(false)
+        useState(false);
 
     // Error message state
     const [errorAlertMessage, setErrorAlertMessage] = useState<string | null>(
         null
-    )
+    );
 
     // Handle alert animation
-    const [isAlertClosing, setIsAlertClosing] = useState(false)
+    const [isAlertClosing, setIsAlertClosing] = useState(false);
     const closeAlert = () => {
-        setIsAlertClosing(true) // Start animation timeout
+        setIsAlertClosing(true); // Start animation timeout
         setTimeout(() => {
-            setErrorAlertMessage(null)
-            setIsAlertClosing(false)
-        }, 500)
-    }
+            setErrorAlertMessage(null);
+            setIsAlertClosing(false);
+        }, 500);
+    };
 
     // Inputs
-    const [emailText, setEmailText] = useState('')
-    const [codeText, setCodeText] = useState('')
-    const [passwordText, setPasswordText] = useState('')
+    const [emailText, setEmailText] = useState('');
+    const [codeText, setCodeText] = useState('');
+    const [passwordText, setPasswordText] = useState('');
     const handleEmailTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setEmailText(e.target.value)
+        setEmailText(e.target.value);
         if (isVerificationSectionVisible || isPasswordSectionVisible) {
-            setIsVerificationSectionVisible(false)
-            setIsPasswordSectionVisible(false)
-            setCodeText('')
+            setIsVerificationSectionVisible(false);
+            setIsPasswordSectionVisible(false);
+            setCodeText('');
         }
-    }
+    };
 
     // State for email sending loader
-    const [isSending, setIsSending] = useState(false)
+    const [isSending, setIsSending] = useState(false);
 
     // After email input and continue with password button click
     const handleEmailContinueClick = async () => {
         try {
-            setIsSending(true)
-            const data = await isUserExistsAndEmailConfirmedAsync(emailText)
+            setIsSending(true);
+            const data = await isUserExistsAndEmailConfirmedAsync(emailText);
 
             if (data.isAccountCreated) {
                 // if user have already created his account
-                setIsPasswordSectionVisible(true)
+                setIsPasswordSectionVisible(true);
             } else if (data.isConfirmed) {
                 // if user only confirm his email, but didn't create his account
-                navigate('/createAccount')
+                navigate('/createAccount');
             } else if (data.isExists) {
                 // is user already in DB, but didn't confirm his email
-                await SendVerificationCodeAsync(emailText)
-                setIsVerificationSectionVisible(true)
+                await SendVerificationCodeAsync(emailText);
+                setIsVerificationSectionVisible(true);
             } else {
                 // user not in DB
-                await AddNewUserAndSendVerificationCodeAsync(emailText)
-                setIsVerificationSectionVisible(true)
+                await AddNewUserAndSendVerificationCodeAsync(emailText);
+                setIsVerificationSectionVisible(true);
             }
         } catch (error: any) {
-            setErrorAlertMessage(error.message)
+            setErrorAlertMessage(error.message);
         } finally {
-            setIsSending(false)
+            setIsSending(false);
         }
-    }
+    };
 
     // After password input and continue button click
-    const handleLoginByPassword = async () => {}
+    const handleLoginByPassword = async () => {
+        try {
+            const response = await LoginByPasswordAsync({
+                email: emailText,
+                password: passwordText,
+            });
+            if (!response.isSuccess) setErrorAlertMessage(response.message);
+            else navigate('/home');
+        } catch (error: any) {
+            setErrorAlertMessage(error.message);
+        }
+    };
 
     // After verification code input and continue button click
     const handleVerifyCodeAsync = async () => {
         try {
-            const data = await VerifyCodeAsync(emailText, codeText)
+            const data = await VerifyCodeAsync(emailText, codeText);
             if (data.isCodeCorrect == false) {
-                setErrorAlertMessage('Wrong code!')
+                setErrorAlertMessage('Wrong code!');
             } else {
-                navigate('/createAccount')
+                navigate('/createAccount');
             }
         } catch (error: any) {
-            setErrorAlertMessage(error.message)
+            setErrorAlertMessage(error.message);
         }
-    }
+    };
 
     return (
         <>
@@ -174,14 +186,17 @@ const LoginPage = () => {
                                 />
                             </div>
                         </div>
-                        <button className="button max-width no-wrap">
+                        <button
+                            className="button max-width no-wrap"
+                            onClick={handleLoginByPassword}
+                        >
                             Continue with password
                         </button>
                     </>
                 )}
             </div>
         </>
-    )
-}
+    );
+};
 
-export default LoginPage
+export default LoginPage;

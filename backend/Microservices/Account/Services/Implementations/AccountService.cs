@@ -89,11 +89,6 @@ namespace Account.Services.Implementations
             {
                 bool isAccountCreated = player.Username != null;
 
-                GenerateTokenRequest request = isAccountCreated
-                ? new GenerateTokenRequest(player.Id, player.Username, player.Email)
-                : new GenerateTokenRequest(player.Id, "", player.Email);
-
-                string token = _jwtService.GenerateToken(request);
                 bool isConfirmed = player.IsEmailConfirmed;
 
                 string successMessage = isConfirmed ? "User exists and email confirmed"
@@ -104,7 +99,6 @@ namespace Account.Services.Implementations
                     message: successMessage,
                     isExists: true,
                     isEmailConfirmed: isConfirmed,
-                    jwtToken: isConfirmed ? token : null,
                     isAccountCreated: !(player.Username == null)
                 );
             }
@@ -114,16 +108,16 @@ namespace Account.Services.Implementations
                     message: "User doesn't exists in DB",
                     isExists: false,
                     isEmailConfirmed: false,
-                    jwtToken: null,
                     isAccountCreated: false
             );
         }
 
-        public async Task<bool> LoginByPassword(LoginByPasswordRequest request)
+        public async Task<LoginResponse> LoginByPassword(LoginByPasswordRequest request)
         {
-            if (!PasswordValidator.ValidatePassword(request.Password).IsValid)
+            var isPasswordValidResponse = PasswordValidator.ValidatePassword(request.Password);
+            if (!isPasswordValidResponse.IsValid)
             {
-                throw new ArgumentException("Password invalid");
+                throw new ArgumentException(isPasswordValidResponse.Message);
             }
 
             Player? player = await _db.Players.FirstOrDefaultAsync(p => p.Email == request.Email);
@@ -135,7 +129,13 @@ namespace Account.Services.Implementations
 
             bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(request.Password, hashedPassword);
 
-            return isPasswordCorrect;
+            if (!isPasswordCorrect)
+                throw new ArgumentException("Wrong password.");
+
+            string jwtToken = _jwtService.GenerateToken(new GenerateTokenRequest
+            (UserId: player.Id, Username: player.Username, Email: player.Email));
+
+            return new LoginResponse(isSuccess: true, message: "Successfully login", jwtToken: jwtToken);
         }
     }
 }

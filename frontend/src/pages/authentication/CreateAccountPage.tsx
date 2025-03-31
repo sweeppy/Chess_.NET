@@ -1,120 +1,120 @@
-import { ChangeEvent, useState, useRef, useEffect } from 'react'
-import 'cropperjs/dist/cropper.css'
-import Cropper from 'cropperjs'
-import ErrorAlert from '../../components/alerts/ErrorAlert'
-import { createAccountAsync } from '../../services/Auth/CreateAccount'
-import { validatePassword } from '../../validations/PasswordValidator'
-import { useNavigate } from 'react-router-dom'
+import { ChangeEvent, useState, useRef, useEffect } from 'react';
+import 'cropperjs/dist/cropper.css';
+import Cropper from 'cropperjs';
+import ErrorAlert from '../../components/alerts/ErrorAlert';
+import { createAccountAsync } from '../../services/Auth/CreateAccount';
+import { validatePassword } from '../../validations/PasswordValidator';
+import { useNavigate } from 'react-router-dom';
 
 const CreateAccountPage = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     // Real image, that will be saved
     const [originalImage, setOriginalImage] = useState<string>(
         '/src/assets/web/icons/auth/avatar.svg'
-    )
+    );
     // Pre-real image, that user cropping
-    const [croppedImage, setCroppedImage] = useState<string>(originalImage)
+    const [croppedImage, setCroppedImage] = useState<string>(originalImage);
 
-    const [cropper, setCropper] = useState<Cropper | null>(null)
+    const [cropper, setCropper] = useState<Cropper | null>(null);
 
     // Modal window for cropper
-    const [showModal, setShowModal] = useState(false)
+    const [showModal, setShowModal] = useState(false);
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    const imgRef = useRef<HTMLImageElement>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const imgRef = useRef<HTMLImageElement>(null);
 
     const handleUploadImage = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
+        const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader()
+            const reader = new FileReader();
             reader.onload = () => {
-                setCroppedImage(reader.result as string)
-                setShowModal(true)
-            }
-            reader.readAsDataURL(file)
+                setCroppedImage(reader.result as string);
+                setShowModal(true);
+            };
+            reader.readAsDataURL(file);
         }
-        e.target.value = ''
-    }
+        e.target.value = '';
+    };
 
     const handleCrop = () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
                 width: 300,
                 height: 300,
-            })
-            const croppedImageBase64 = croppedCanvas.toDataURL('image/png')
-            setCroppedImage(croppedImageBase64)
-            setOriginalImage(croppedImageBase64)
-            setShowModal(false)
+            });
+            const croppedImageBase64 = croppedCanvas.toDataURL('image/png');
+            setCroppedImage(croppedImageBase64);
+            setOriginalImage(croppedImageBase64);
+            setShowModal(false);
         }
-    }
+    };
 
     const handleImageClick = () => {
-        fileInputRef.current?.click()
-    }
+        fileInputRef.current?.click();
+    };
 
     const handleCropperInit = () => {
         if (imgRef.current) {
             if (cropper) {
-                cropper.destroy()
-                setCropper(null)
+                cropper.destroy();
+                setCropper(null);
             }
 
             const newCropper = new Cropper(imgRef.current, {
                 aspectRatio: 1,
                 viewMode: 1,
                 ready() {
-                    setCropper(newCropper)
+                    setCropper(newCropper);
                 },
-            })
+            });
         }
-    }
+    };
 
     useEffect(() => {
         if (!showModal && cropper) {
-            cropper.destroy()
-            setCropper(null)
-            setCroppedImage(originalImage)
+            cropper.destroy();
+            setCropper(null);
+            setCroppedImage(originalImage);
         }
-    }, [showModal, cropper, originalImage])
+    }, [showModal, cropper, originalImage]);
 
     // Inputs
-    const [usernameText, setUsernameText] = useState('')
-    const [passwordText, setPasswordText] = useState('')
-    const [confirmPasswordText, setConfirmPasswordText] = useState('')
+    const [usernameText, setUsernameText] = useState('');
+    const [passwordText, setPasswordText] = useState('');
+    const [confirmPasswordText, setConfirmPasswordText] = useState('');
 
     // All string fields must be not empty
     const readyToContinue = () => {
-        return !!usernameText && !!passwordText && !!confirmPasswordText
-    }
+        return !!usernameText && !!passwordText && !!confirmPasswordText;
+    };
 
     // Error message state
     const [errorAlertMessage, setErrorAlertMessage] = useState<string | null>(
         null
-    )
+    );
 
     // Handle alert animation
-    const [isAlertClosing, setIsAlertClosing] = useState(false)
+    const [isAlertClosing, setIsAlertClosing] = useState(false);
     const closeAlert = () => {
-        setIsAlertClosing(true) // Start animation timeout
+        setIsAlertClosing(true); // Start animation timeout
         setTimeout(() => {
-            setErrorAlertMessage(null)
-            setIsAlertClosing(false)
-        }, 500)
-    }
+            setErrorAlertMessage(null);
+            setIsAlertClosing(false);
+        }, 500);
+    };
 
     const handleCreateAccount = async () => {
         // Check if passwords match
         if (passwordText !== confirmPasswordText) {
-            setErrorAlertMessage('Passwords do not match')
-            return
+            setErrorAlertMessage('Passwords do not match');
+            return;
         }
 
-        const isPasswordValidResult = validatePassword(passwordText)
+        const isPasswordValidResult = validatePassword(passwordText);
         if (!isPasswordValidResult.isSuccess) {
-            setErrorAlertMessage(isPasswordValidResult.message)
-            return
+            setErrorAlertMessage(isPasswordValidResult.message);
+            return;
         }
 
         try {
@@ -123,12 +123,12 @@ const CreateAccountPage = () => {
                 passwordText,
                 confirmPasswordText,
                 croppedImage
-            )
-            navigate('/Home')
+            );
+            navigate('/Home');
         } catch (error: any) {
-            setErrorAlertMessage(error.message)
+            setErrorAlertMessage(error.message);
         }
-    }
+    };
 
     return (
         <>
@@ -254,7 +254,7 @@ const CreateAccountPage = () => {
                 </div>
             )}
         </>
-    )
-}
+    );
+};
 
-export default CreateAccountPage
+export default CreateAccountPage;

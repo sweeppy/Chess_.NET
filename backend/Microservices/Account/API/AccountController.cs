@@ -171,14 +171,11 @@ namespace Account.API_controllers
             }
         }
         [HttpPost("LoginByPassword")]
-        public async Task<IActionResult> LoginByPassword(LoginByPasswordRequest request)
+        public async Task<IActionResult> LoginByPassword([FromBody] LoginByPasswordRequest request)
         {
             try
             {
-                bool isLoginDataValid = await _userService.LoginByPassword(request);
-
-                var response = isLoginDataValid ? new BaseResponse(isLoginDataValid, "Successful login")
-                                                : new BaseResponse(isLoginDataValid, "Login failed");
+                LoginResponse response = await _userService.LoginByPassword(request);
                 return Ok(response);
             }
             catch (Exception ex)

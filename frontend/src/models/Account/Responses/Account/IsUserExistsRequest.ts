@@ -1,4 +1,4 @@
-import { BaseResponse } from './BaseResponse';
+import { BaseResponse } from '../BaseResponse';
 
 export interface IsUserExistsAndEmailConfirmedResponse extends BaseResponse {
     isExists: boolean;

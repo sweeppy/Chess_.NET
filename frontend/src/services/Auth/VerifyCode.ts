@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { VerifyResponse } from '../../models/Account/Responses/VerifyResponse';
+import { VerifyResponse } from '../../models/Account/Responses/Account/VerifyResponse';
 
 export const VerifyCodeAsync = async (
     email: string,

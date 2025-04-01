@@ -48,7 +48,7 @@ namespace Chess.API.Implementations
             return legalMoves;
         }
 
-        private Dictionary<char, ulong> GetActivePieces(Board board)
+        private static Dictionary<char, ulong> GetActivePieces(Board board)
         {
             Dictionary<char, ulong> pieces = [];
 
@@ -74,42 +74,29 @@ namespace Chess.API.Implementations
             return pieces;
         }
 
-        private ulong GetMovesByPieceSymbol(int squareIndex, char pieceSymbol, Board board)
+        private static ulong GetMovesByPieceSymbol(int squareIndex, char pieceSymbol, Board board)
         {
-            switch (pieceSymbol)
+            return pieceSymbol switch
             {
-                case 'P':
-                    return PawnMovement.WhiteGenerate(squareIndex, board);
-                case 'N':
-                    return KnightMovement.Generate(squareIndex, board);
-                case 'B':
-                    return BishopMovement.Generate(squareIndex, board);
-                case 'R':
-                    return RookMovement.Generate(squareIndex, board);
-                case 'Q':
-                    return QueenMovement.Generate(squareIndex, board);
-                case 'K':
-                    return KingMovement.Generate(squareIndex, board);
-                case 'p':
-                    return PawnMovement.BlackGenerate(squareIndex, board);
-                case 'n':
-                    return KnightMovement.Generate(squareIndex, board);
-                case 'b':
-                    return BishopMovement.Generate(squareIndex, board);
-                case 'r':
-                    return RookMovement.Generate(squareIndex, board);
-                case 'q':
-                    return QueenMovement.Generate(squareIndex, board);
-                case 'k':
-                    return KingMovement.Generate(squareIndex, board);
-                default:
-                    return 0;
-            }
+                'P' => PawnMovement.WhiteGenerate(squareIndex, board),
+                'N' => KnightMovement.Generate(squareIndex, board),
+                'B' => BishopMovement.Generate(squareIndex, board),
+                'R' => RookMovement.Generate(squareIndex, board),
+                'Q' => QueenMovement.Generate(squareIndex, board),
+                'K' => KingMovement.Generate(squareIndex, board),
+                'p' => PawnMovement.BlackGenerate(squareIndex, board),
+                'n' => KnightMovement.Generate(squareIndex, board),
+                'b' => BishopMovement.Generate(squareIndex, board),
+                'r' => RookMovement.Generate(squareIndex, board),
+                'q' => QueenMovement.Generate(squareIndex, board),
+                'k' => KingMovement.Generate(squareIndex, board),
+                _ => 0,
+            };
         }
 
         public async Task<string> OnMove(MoveRequest request)
         {
-            Board board = FenUtility.LoadBoardFromFen(request.Fen);
+            Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
 
             StringBuilder stringMove = new();

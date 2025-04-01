@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { LoginRequest } from '../../models/Account/Requests/LoginRequest';
-import { LoginResponse } from '../../models/Account/Responses/LoginResponse';
+import { LoginResponse } from '../../models/Account/Responses/Account/LoginResponse';
 
 export const LoginByPasswordAsync = async (
     request: LoginRequest
@@ -29,7 +29,8 @@ export const LoginByPasswordAsync = async (
         if (axios.isAxiosError(error)) {
             if (error.response) {
                 const errorMessage =
-                    error.response.data?.message || error.response.statusText;
+                    error.response.data?.message ||
+                    'Something went wrong. Please try again or contact support.';
                 throw new Error(errorMessage);
             }
         }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IsUserExistsAndEmailConfirmedResponse } from '../../models/Account/Responses/IsUserExistsRequest';
+import { IsUserExistsAndEmailConfirmedResponse } from '../../models/Account/Responses/Account/IsUserExistsRequest';
 
 export const isUserExistsAndEmailConfirmedAsync = async (
     email: string

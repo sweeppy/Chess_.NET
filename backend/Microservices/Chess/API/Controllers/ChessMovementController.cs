@@ -4,6 +4,8 @@ using Chess.API.Interfaces;
 using Chess.Data;
 using Chess.DTO.Requests;
 using Chess.Models;
+using Chess.Responses;
+using Chess.Responses.GameProcess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,49 +46,32 @@ namespace Chess.API.Controllers
         {
             try
             {
+                string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
                 GameInfo newGame = new()
                 {
-                    Fens = ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"],
+                    Fens = [fen],
                     Moves = [],
                     IsActiveGame = true,
                     FirstPlayerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
                     SecondPlayerId = 0
                 };
+                var legalMoves = _movement.GetLegalMoves(fen);
                 
                 _db.Games.Add(newGame);
                 await _db.SaveChangesAsync();
 
-                return Ok(new { GameId = newGame.Id });
+                GameStartResponse response = new(
+                    isSuccess: true, message: "Game successfully started", fen: fen, legalMoves: legalMoves);
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 _logger.LogCritical(ex.Message);
-                throw;
+                BaseResponse response = new(
+                    isSuccess: false, "Something went wrong while trying to create the game");
+                return BadRequest(response);
             }
-        }
-[AllowAnonymous]
-[HttpGet("ValidateTest")]
-public IActionResult ValidateTest([FromHeader] string authorization)
-{
-    try
-    {
-        var token = authorization.Replace("Bearer ", "");
-        var handler = new JwtSecurityTokenHandler();
-        var jwt = handler.ReadJwtToken(token);
-        
-        return Ok(new {
-            ValidTo = jwt.ValidTo,
-            ServerTime = DateTime.UtcNow,
-            IsExpired = jwt.ValidTo < DateTime.UtcNow,
-            Issuer = jwt.Issuer,
-            Audience = jwt.Audiences.FirstOrDefault()
-        });
-    }
-    catch (Exception ex)
-    {
-        return BadRequest(ex.Message);
-    }
-}
-        
+        } 
     }
 }

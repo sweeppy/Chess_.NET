@@ -42,11 +42,19 @@ namespace Chess.API.Controllers
 
         [HttpPost("OnGameStart")]
         [Authorize]
-        public async Task<IActionResult> OnGameStart()
+        public async Task<IActionResult> OnGameStart([FromBody] GameStartRequest request)
         {
             try
             {
-                string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+                string fen;
+                if (request.IsPlayerPlayWhite)
+                    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+                else
+                {
+                    // TODO here will be a computer move and fen after this move will assign below
+                    fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
+                }
+                            
                 GameInfo newGame = new()
                 {
                     Fens = [fen],

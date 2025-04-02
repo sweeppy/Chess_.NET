@@ -7,6 +7,7 @@ import Nav from '../../components/chess/Nav';
 import ErrorAlert from '../../components/alerts/ErrorAlert';
 import { ChessPiece, initialPieces } from '../../models/Game/Pieces';
 import { OnStartGame } from '../../services/Game/startGame';
+import { getPiecesFromFen } from '../../services/Game/GameProcess/fenUtility';
 
 const PlayWithComputerPage = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -14,7 +15,7 @@ const PlayWithComputerPage = () => {
 
   const [isGameStarted, setIsGameStarted] = useState(false);
 
-  const [pieces, setPieces] = useState(initialPieces);
+  const [pieces, setPieces] = useState<ChessPiece[]>(initialPieces);
   const [allLegalMoves, setAllLegalMoves] = useState<Record<
     number,
     number[]
@@ -40,14 +41,13 @@ const PlayWithComputerPage = () => {
 
   const handleLegalMoveClick = (newSquareIndex: number) => {};
 
-  const handleGameStart = async () => {
+  const handleGameStart = async (color: 'white' | 'black') => {
     try {
-      const response = await OnStartGame();
-      console.log(response.fen);
-      console.log(response.legalMoves);
+      const response = await OnStartGame(color === 'white');
       setCurrentFen(response.fen);
       setAllLegalMoves(response.legalMoves);
       setIsGameStarted(true);
+      setPieces(getPiecesFromFen(response.fen));
     } catch (error: any) {
       setErrorAlertMessage(error.message);
     }
@@ -63,6 +63,15 @@ const PlayWithComputerPage = () => {
       setErrorAlertMessage(null);
       setIsErrorAlertClosing(false);
     }, 500);
+  };
+
+  const isAlliedPiece = (piece?: ChessPiece) => {
+    if (!piece) return false;
+    return (
+      (piece.type === piece.type.toLocaleLowerCase() &&
+        playerColor == 'black') ||
+      (piece.type === piece.type.toUpperCase() && playerColor == 'white')
+    );
   };
 
   return (
@@ -89,7 +98,11 @@ const PlayWithComputerPage = () => {
                     className={`cell ${
                       Math.floor(i / 8) % 2 === i % 2 ? 'white' : 'black'
                     }`}
-                    onClick={() => handlePieceClick(squareIndex)}
+                    onClick={
+                      isAlliedPiece(piece)
+                        ? () => handlePieceClick(squareIndex)
+                        : () => {}
+                    }
                   >
                     {i % 8 == 0 && (
                       <span
@@ -117,7 +130,9 @@ const PlayWithComputerPage = () => {
                       <img
                         src={piece.svg}
                         alt={`${piece.type}`}
-                        className="chess-piece"
+                        className={`chess-piece ${
+                          isAlliedPiece(piece) ? 'allied' : ''
+                        }`}
                       />
                     )}
                     {currentLegalMoves?.includes(squareIndex) && (
@@ -141,8 +156,8 @@ const PlayWithComputerPage = () => {
             <GameHistory />
           ) : (
             <GameOptions
-              OnColorChange={handleColorChange}
               OnGameStart={handleGameStart}
+              OnColorChange={handleColorChange}
             />
           )}
         </div>

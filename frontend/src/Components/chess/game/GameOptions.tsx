@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface GameOptionsProps {
-  OnColorChange: (color: "white" | "black") => void;
-  OnGameStart: () => void;
+  OnColorChange: (color: 'white' | 'black') => void;
+  OnGameStart: (playerColor: 'white' | 'black') => void;
 }
 
 const GameOptions: React.FC<GameOptionsProps> = ({
@@ -10,15 +10,16 @@ const GameOptions: React.FC<GameOptionsProps> = ({
   OnGameStart,
 }) => {
   // color of the player
-  const [chosenColor, setChosenColor] = useState<"white" | "black" | "all-clr">(
-    "all-clr"
+  const [chosenColor, setChosenColor] = useState<'white' | 'black' | 'all-clr'>(
+    'all-clr'
   );
   // set player's color
-  const handleChooseClick = (choice: "white" | "black" | "all-clr") => {
+  const handleChooseClick = (choice: 'white' | 'black' | 'all-clr') => {
+    console.log(choice);
     setChosenColor(choice);
   };
   // bot difficulty
-  const [chosenDifficulty, setChosenDifficulty] = useState("easy");
+  const [chosenDifficulty, setChosenDifficulty] = useState('easy');
   // set bot difficulty
   const handleChooseDifficulty = (difficulty: string) => {
     setChosenDifficulty(difficulty);
@@ -27,17 +28,17 @@ const GameOptions: React.FC<GameOptionsProps> = ({
   const handelStartGame = () => {
     const color = getFinalColor(chosenColor);
     OnColorChange(color);
-    OnGameStart();
+    OnGameStart(color);
   };
 
   const getFinalColor = (
-    color: "white" | "black" | "all-clr"
-  ): "white" | "black" => {
-    if (color === "white" || color === "black") return color;
+    color: 'white' | 'black' | 'all-clr'
+  ): 'white' | 'black' => {
+    if (color === 'white' || color === 'black') return color;
     const number = Math.floor(Math.random() * 2) + 1;
 
-    if (number === 1) return "white";
-    else return "black";
+    if (number === 1) return 'white';
+    else return 'black';
   };
 
   return (
@@ -47,9 +48,9 @@ const GameOptions: React.FC<GameOptionsProps> = ({
         <div className="padding-block-600 choice-wrapper">
           <div
             className={`choice all-clr ${
-              chosenColor === "all-clr" ? "chosen" : ""
+              chosenColor === 'all-clr' ? 'chosen' : ''
             }`}
-            onClick={() => handleChooseClick("all-clr")}
+            onClick={() => handleChooseClick('all-clr')}
           >
             <img
               width={30}
@@ -58,8 +59,10 @@ const GameOptions: React.FC<GameOptionsProps> = ({
             />
           </div>
           <div
-            className={`choice white ${chosenColor === "white" ? "chosen" : ""}`}
-            onClick={() => handleChooseClick("white")}
+            className={`choice white ${
+              chosenColor === 'white' ? 'chosen' : ''
+            }`}
+            onClick={() => handleChooseClick('white')}
           >
             <img
               src="/src/assets/game/chess_pieces/W_King.svg"
@@ -68,8 +71,10 @@ const GameOptions: React.FC<GameOptionsProps> = ({
             />
           </div>
           <div
-            className={`choice black ${chosenColor === "black" ? "chosen" : ""}`}
-            onClick={() => handleChooseClick("black")}
+            className={`choice black ${
+              chosenColor === 'black' ? 'chosen' : ''
+            }`}
+            onClick={() => handleChooseClick('black')}
           >
             <img
               width={30}
@@ -88,8 +93,8 @@ const GameOptions: React.FC<GameOptionsProps> = ({
               type="checkbox"
               name="difficulty"
               value="easy"
-              checked={chosenDifficulty === "easy"}
-              onChange={() => handleChooseDifficulty("easy")}
+              checked={chosenDifficulty === 'easy'}
+              onChange={() => handleChooseDifficulty('easy')}
             />
             <label>Easy</label>
           </div>
@@ -98,8 +103,8 @@ const GameOptions: React.FC<GameOptionsProps> = ({
               type="checkbox"
               name="difficulty"
               value="medium"
-              checked={chosenDifficulty === "medium"}
-              onChange={() => handleChooseDifficulty("medium")}
+              checked={chosenDifficulty === 'medium'}
+              onChange={() => handleChooseDifficulty('medium')}
             />
             <label>Medium</label>
           </div>
@@ -108,8 +113,8 @@ const GameOptions: React.FC<GameOptionsProps> = ({
               type="checkbox"
               name="difficulty"
               value="hard"
-              checked={chosenDifficulty === "hard"}
-              onChange={() => handleChooseDifficulty("hard")}
+              checked={chosenDifficulty === 'hard'}
+              onChange={() => handleChooseDifficulty('hard')}
             />
             <label>Hard</label>
           </div>

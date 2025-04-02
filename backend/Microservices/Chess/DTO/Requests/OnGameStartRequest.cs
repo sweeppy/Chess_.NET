@@ -1,8 +1,9 @@
 namespace Chess.DTO.Requests
 {
-    public record OnGameStartRequest
+    public class OnlineGameStartRequest(bool isPlayerPlayWhite, int firstPlayerId, int secondPlayerId = 0)
+    : GameStartRequest(isPlayerPlayWhite)
     {
-        public required int FirstPlayerId { get; init; }
-        public int SecondePlayerId { get; init; } = 0;
+        public required int FirstPlayerId { get; init; } = firstPlayerId;
+        public int SecondePlayerId { get; init; } = secondPlayerId;
     }
 }

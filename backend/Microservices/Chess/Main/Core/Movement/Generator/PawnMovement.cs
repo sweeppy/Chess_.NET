@@ -25,7 +25,19 @@ namespace Chess.Main.Core.Movement.Generator
 
             if(enPassantTarget.HasValue)
             {
-                enPassantMove = enPassantTarget.Value << 8;
+                bool isOnEnPassantRank = squareIndex >= 32 && squareIndex <= 39;
+                if (isOnEnPassantRank)
+                {
+                    ulong enPassantBitboard = enPassantTarget.Value;
+                    ulong leftEnPassantCandidate = (enPassantBitboard << 1) & Masks.NotHFFile;
+                    ulong rightEnPassantCandidate = (enPassantBitboard >> 1) & Masks.NotAFile;
+
+                    if ((leftEnPassantCandidate == bitboardPosition) ||
+                        (rightEnPassantCandidate == bitboardPosition))
+                    {
+                        enPassantMove = enPassantTarget.Value << 8;
+                    }
+                }
             }
 
             return singlePush | doublePush | leftCapture | rightCapture | enPassantMove;
@@ -50,7 +62,19 @@ namespace Chess.Main.Core.Movement.Generator
 
             if(enPassantTarget.HasValue)
             {
-                enPassantMove = enPassantTarget.Value >> 8;
+                bool isOnEnPassantRank = squareIndex >= 24 && squareIndex <= 31;
+                if (isOnEnPassantRank)
+                {
+                    ulong enPassantBitboard = enPassantTarget.Value;
+                    ulong leftEnPassantCandidate = (enPassantBitboard << 1) & Masks.NotAFile;
+                    ulong rightEnPassantCandidate = (enPassantBitboard >> 1) & Masks.NotHFile;
+
+                    if ((bitboardPosition == leftEnPassantCandidate) ||
+                        (bitboardPosition == rightEnPassantCandidate))
+                    {
+                        enPassantMove = enPassantTarget.Value >> 8;
+                    }
+                }
             }
 
 

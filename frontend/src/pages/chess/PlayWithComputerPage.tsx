@@ -24,7 +24,6 @@ const PlayWithComputerPage = () => {
     number[] | undefined
   >(undefined);
   const [currentFen, setCurrentFen] = useState<string>();
-  const [selectedPiece, setSelectedPiece] = useState<ChessPiece | undefined>();
 
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
 
@@ -57,14 +56,6 @@ const PlayWithComputerPage = () => {
     setPlayerColor(color);
   };
 
-  const handleErrorAlertClose = () => {
-    setIsErrorAlertClosing(true);
-    setTimeout(() => {
-      setErrorAlertMessage(null);
-      setIsErrorAlertClosing(false);
-    }, 500);
-  };
-
   const isAlliedPiece = (piece?: ChessPiece) => {
     if (!piece) return false;
     return (
@@ -72,6 +63,14 @@ const PlayWithComputerPage = () => {
         playerColor == 'black') ||
       (piece.type === piece.type.toUpperCase() && playerColor == 'white')
     );
+  };
+
+  const handleErrorAlertClose = () => {
+    setIsErrorAlertClosing(true);
+    setTimeout(() => {
+      setErrorAlertMessage(null);
+      setIsErrorAlertClosing(false);
+    }, 500);
   };
 
   return (
@@ -89,7 +88,7 @@ const PlayWithComputerPage = () => {
           <div className="chessboard-wrapper">
             <div className="chessboard">
               {[...Array(64)].map((_, i) => {
-                const squareIndex = 63 - i;
+                const squareIndex = playerColor == 'white' ? 63 - i : i;
                 const piece = pieces.find((p) => p.squareIndex === squareIndex);
 
                 return (

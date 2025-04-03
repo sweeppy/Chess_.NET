@@ -15,7 +15,6 @@ const GameOptions: React.FC<GameOptionsProps> = ({
   );
   // set player's color
   const handleChooseClick = (choice: 'white' | 'black' | 'all-clr') => {
-    console.log(choice);
     setChosenColor(choice);
   };
   // bot difficulty

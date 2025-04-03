@@ -6,16 +6,16 @@ export const getPiecesFromFen = (fen: string) => {
   const boardPart = fenParts[0];
 
   let rank = 7;
-  let file = 7;
+  let file = 0;
 
   for (const symbol of boardPart) {
     if (symbol === '/') {
       rank--;
-      file = 7;
+      file = 0;
     } else if (/\d/.test(symbol)) {
       file += parseInt(symbol, 10);
     } else {
-      const squareIndex = rank * 8 + file;
+      const squareIndex = rank * 8 + (7 - file);
       const type = symbol as ChessPiece['type'];
 
       pieces.push({
@@ -23,7 +23,7 @@ export const getPiecesFromFen = (fen: string) => {
         squareIndex,
         svg: getPieceSvg(type),
       });
-      file--;
+      file++;
     }
   }
   return pieces;

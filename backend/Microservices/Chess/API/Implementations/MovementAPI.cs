@@ -94,7 +94,7 @@ namespace Chess.API.Implementations
             };
         }
 
-        public async Task<string> OnMove(MoveRequest request)
+        public async Task<string> OnMove(MoveRequest request, int playerId)
         {
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
@@ -103,11 +103,11 @@ namespace Chess.API.Implementations
             stringMove.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
             stringMove.Append(SquaresHelper.squareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value));
 
-            board.MakeMove(request.StartSquare, request.TargetSquare, board, request.IsCastleMove, request.IsKingCastle);
+            board.MakeMove(request.StartSquare, request.TargetSquare, board);
             
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-            GameInfo? game = await _db.Games.FirstOrDefaultAsync(g => g.Id == request.GameId);
+            GameInfo? game = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId);
 
 
 

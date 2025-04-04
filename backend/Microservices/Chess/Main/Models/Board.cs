@@ -1,3 +1,4 @@
+using Chess.Main.Core.Helpers.Castling;
 using Chess.Main.Core.Movement;
 
 namespace Chess.Main.Models
@@ -147,11 +148,12 @@ namespace Chess.Main.Models
 
         public int GetComingMoveCount() => ComingMoveCount;
 
-        public void MakeMove(int startSquare, int targetSquare, Board board, bool isCastleMove, bool? isKingCastle)
+        public void MakeMove(int startSquare, int targetSquare, Board board)
         {
-            if(isCastleMove && isKingCastle.HasValue)
+            bool isKingCastle = CastleHelper.IsKingCastle(startSquare, targetSquare);
+            if (CastleHelper.IsCastleMove(startSquare, targetSquare, board) && isKingCastle)
             {
-                MakeCastleMove(board, isKingCastle.Value);
+                MakeCastleMove(board, isKingCastle);
             }
             else
             {

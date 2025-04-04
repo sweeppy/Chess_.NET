@@ -27,17 +27,13 @@ namespace Chess.API.Controllers
             _logger = logger;
         }
 
-        [HttpPost("makeMove")]
+        [HttpPost("MakeMove")]
+        [Authorize]
         public async Task<IActionResult> MakeMove([FromBody] MoveRequest request)
         {
-            string fenAfterMove = await _movement.OnMove(request);
+            int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            string fenAfterMove = await _movement.OnMove(request, playerId);
             return Ok(fenAfterMove);
-        }
-        [HttpPost("getLegalMoves")]
-        public IActionResult GetLegalMoves([FromBody] string fen)
-        {
-            Dictionary<int, List<int>> legalMoves = _movement.GetLegalMoves(fen);
-            return Ok(legalMoves);
         }
 
         [HttpPost("OnGameStart")]

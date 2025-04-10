@@ -8,6 +8,8 @@ import ErrorAlert from '../../components/alerts/ErrorAlert';
 import { ChessPiece, initialPieces } from '../../models/Game/Pieces';
 import { OnStartGame } from '../../services/Game/startGame';
 import { getPiecesFromFen } from '../../services/Game/GameProcess/fenUtility';
+import { MakeMove } from '../../services/Game/GameProcess/makeMove';
+import { MakeMoveRequest } from '../../models/Requests/Game/MakeMoveRequest';
 
 const PlayWithComputerPage = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -32,13 +34,27 @@ const PlayWithComputerPage = () => {
   );
   const [isErrorAlertClosing, setIsErrorAlertClosing] = useState(false);
 
+  const [startSquare, setStartSquare] = useState<number | null>(null);
+
   const handlePieceClick = (squareIndex: number) => {
     setCurrentLegalMoves(allLegalMoves?.[squareIndex]);
+    setStartSquare(squareIndex);
   };
 
-  const handlePieceMove = () => {};
-
-  const handleLegalMoveClick = (newSquareIndex: number) => {};
+  const handlePieceMove = async (targetSquare: number) => {
+    if (startSquare && targetSquare && currentFen) {
+      const request: MakeMoveRequest = {
+        startSquare: startSquare,
+        targetSquare: targetSquare,
+        fenBeforeMove: currentFen,
+      };
+      const response = await MakeMove(request);
+      setPieces(getPiecesFromFen(response.fen));
+      setAllLegalMoves(response.legalMoves);
+      setCurrentLegalMoves(undefined);
+      setCurrentFen(response.fen);
+    }
+  };
 
   const handleGameStart = async (color: 'white' | 'black') => {
     try {
@@ -136,7 +152,7 @@ const PlayWithComputerPage = () => {
                     )}
                     {currentLegalMoves?.includes(squareIndex) && (
                       <div
-                        onClick={() => handleLegalMoveClick(squareIndex)}
+                        onClick={() => handlePieceMove(squareIndex)}
                         className="container-lm"
                       >
                         <img

@@ -1,22 +1,24 @@
 import axios from 'axios';
-import { GameResponse } from '../../models/Responses/Chess/GameStartResponse';
+import { MakeMoveRequest } from '../../../models/Requests/Game/MakeMoveRequest';
+import { GameResponse } from '../../../models/Responses/Chess/GameStartResponse';
 
-export const OnStartGame = async (
-  isPlayerPlayWhite: boolean
+export const MakeMove = async (
+  request: MakeMoveRequest
 ): Promise<GameResponse> => {
   try {
     const token = localStorage.getItem('jwtToken');
-    if (!token) throw new Error('Login again');
+    if (!token) throw Error('Jwt token was not found');
 
     const response = await axios.post(
-      'http://localhost:5011/api/ChessMovement/OnGameStart',
-      { isPlayerPlayWhite },
+      'http://localhost:5011/api/ChessMovement/MakeMove',
+      request,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     );
+    console.log(response.data);
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {

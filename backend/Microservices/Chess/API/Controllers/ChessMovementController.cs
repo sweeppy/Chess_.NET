@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Chess.API.Interfaces;
@@ -8,6 +9,7 @@ using Chess.Responses;
 using Chess.Responses.GameProcess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chess.API.Controllers
 {
@@ -33,7 +35,22 @@ namespace Chess.API.Controllers
         {
             int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             string fenAfterMove = await _movement.OnMove(request, playerId);
-            return Ok(fenAfterMove);
+            // TODO make real computer move
+            // Imitation computer move:
+            {
+                MoveRequest request1 = new()
+                {
+                    TargetSquare = 32,
+                    StartSquare = 48,
+                    FenBeforeMove = fenAfterMove,
+                };
+                fenAfterMove = await _movement.OnMove(request1, playerId);
+            }
+            var legalMoves = _movement.GetLegalMoves(fenAfterMove);
+
+            GameResponse response = new(
+                    isSuccess: true, message: "Successful move", fen: fenAfterMove, legalMoves: legalMoves);
+            return Ok(response);
         }
 
         [HttpPost("OnGameStart")]
@@ -64,7 +81,7 @@ namespace Chess.API.Controllers
                 _db.Games.Add(newGame);
                 await _db.SaveChangesAsync();
 
-                GameStartResponse response = new(
+                GameResponse response = new(
                     isSuccess: true, message: "Game successfully started", fen: fen, legalMoves: legalMoves);
 
                 return Ok(response);

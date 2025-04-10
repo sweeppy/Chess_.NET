@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Chess.Responses.GameProcess
 {
-    public class GameStartResponse(bool isSuccess, string message,
+    public class GameResponse(bool isSuccess, string message,
         string fen, Dictionary<int, List<int>> legalMoves)
 
             : BaseResponse(isSuccess, message)

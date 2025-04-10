@@ -8,7 +8,6 @@ using Chess.Main.Core.Helpers.BitOperation;
 using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Chess.API.Implementations
@@ -107,9 +106,7 @@ namespace Chess.API.Implementations
             
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-            GameInfo? game = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId);
-
-
+            GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId);
 
             if(game != null)
             {

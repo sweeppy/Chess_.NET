@@ -2,17 +2,16 @@ namespace Chess.Main.Core.Movement
 {
     public static class PieceMovement
     {
-        public static void PieceMove(ref ulong bitboard, int startSquare, int targetSquare)
+        public static void PieceMove(ref ulong moveBitBoard, ulong startBit, ulong targetBit)
         {
-            bitboard &= ~(1UL << startSquare);
-            bitboard |= 1UL << targetSquare; 
+            moveBitBoard &= ~startBit;
+            moveBitBoard |= targetBit; 
         }
 
-        public static void PieceCapture(ref ulong allPiecesBitboard,
-                                        int startSquare, int targetSquare)
+        public static void PieceCapture(ref ulong captureBitboard, ulong targetBit)
         {
-            allPiecesBitboard &= ~(1Ul << targetSquare);
-            PieceMove(ref allPiecesBitboard, startSquare, targetSquare);
+            captureBitboard &= ~targetBit;
         }
+
     }
 }

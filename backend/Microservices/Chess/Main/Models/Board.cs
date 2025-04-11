@@ -169,81 +169,85 @@ namespace Chess.Main.Models
             
         }
 
-        private void MakeMoveWithoutCapture(int startSquare, int targetSquare, Board board)
+        private static void MakeMoveWithoutCapture(int startSquare, int targetSquare, Board board)
         {
             ulong startBit = 1Ul << startSquare;
+            ulong targetBit = 1UL << targetSquare;
 
-            if(board.IsWhiteTurn)
+            if (board.IsWhiteTurn)
             {
-                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceMove(ref board.WhitePawns, startSquare, targetSquare);
-                else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKnights, startSquare, targetSquare);
-                else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteBishops, startSquare, targetSquare);
-                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteRooks, startSquare, targetSquare);
-                else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteQueens, startSquare, targetSquare);
-                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKing, startSquare, targetSquare);
+                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceMove(ref board.WhitePawns, startBit, targetBit);
+                else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKnights, startBit, targetBit);
+                else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteBishops, startBit, targetBit);
+                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteRooks, startBit, targetBit);
+                else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteQueens, startBit, targetBit);
+                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKing, startBit, targetBit);
             }
             else
             {
-                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceMove(ref board.BlackPawns, startSquare, targetSquare);
-                else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKnights, startSquare, targetSquare);
-                else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref board.BlackBishops, startSquare, targetSquare);
-                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref board.BlackRooks, startSquare, targetSquare);
-                else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref board.BlackQueens, startSquare, targetSquare);
-                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKing, startSquare, targetSquare);
+                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceMove(ref board.BlackPawns, startBit, targetBit);
+                else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKnights, startBit, targetBit);
+                else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref board.BlackBishops, startBit, targetBit);
+                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref board.BlackRooks, startBit, targetBit);
+                else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref board.BlackQueens, startBit, targetBit);
+                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKing, startBit, targetBit);
             }
         
         }
-        private void MakeMoveWithCapture(int startSquare, int targetSquare, Board board)
+        private static void MakeMoveWithCapture(int startSquare, int targetSquare, Board board)
         {
             ulong startBit = 1Ul << startSquare;
-            if(board.IsWhiteTurn)
+            ulong targetBit = 1UL << targetSquare;
+            if (board.IsWhiteTurn)
             {
-                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
+                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
+                else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKnights, targetBit);
+                else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteBishops, targetBit);
+                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteRooks, targetBit);
+                else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteQueens, targetBit);
+                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKing, targetBit);
             }
             else
             {
-                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
-                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceCapture(ref board.allPieces, startSquare, targetSquare);
+                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackPawns, targetBit);
+                else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackKnights, targetBit);
+                else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackBishops, targetBit);
+                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackRooks, targetBit);
+                else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackQueens, targetBit);
+                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackKing, targetBit);
             }
-        
+            MakeMoveWithoutCapture(startSquare, targetSquare, board);
         }
 
 
-        private void MakeCastleMove(Board board, bool isKingCastle)
+        private static void MakeCastleMove(Board board, bool isKingCastle)
         {
             if (board.IsWhiteTurn) // White castle
             {
-                int kingStartSquare = 3;
-                int kingTargetSquare = isKingCastle ? 1 : 5;
+                ulong kingStartBit = 1UL << 3;
+                ulong kingTargetBit = isKingCastle ? 1UL << 1 : 1UL << 5;
 
-                int rookStartSquare = isKingCastle ? 0 : 7;
-                int rookTargetSquare = isKingCastle ? 2 : 4;
+                ulong rookStartBit = isKingCastle ? 1UL : 1UL << 7;
+                ulong rookTargetBit = isKingCastle ? 1UL << 2 : 1UL << 4;
 
-                PieceMovement.PieceMove(ref board.allPieces, kingStartSquare, kingTargetSquare);
-                PieceMovement.PieceMove(ref board.allPieces, rookStartSquare, rookTargetSquare);
+
+
+                PieceMovement.PieceMove(ref board.allPieces, kingStartBit, kingTargetBit);
+                PieceMovement.PieceMove(ref board.allPieces, rookStartBit, rookTargetBit);
 
                 board.CanWhiteKingCastle = false;
                 board.CanWhiteQueenCastle = false;
             }
             else // Black castle
             {
-                int kingStartSquare = 59;
-                int kingTargetSquare = isKingCastle ? 57 : 61;
+                ulong kingStartBit = 1UL << 59;
+                ulong kingTargetBit = isKingCastle ? 1UL << 57 : 1UL << 61;
 
-                int rookStartSquare = isKingCastle ? 56 : 63;
-                int rookTargetSquare = isKingCastle ? 58 : 60;
+                ulong rookStartBit = isKingCastle ? 1UL << 56 : 1UL << 63;
+                ulong rookTargetBit = isKingCastle ? 1UL << 58 : 1UL << 60;
                 
-                PieceMovement.PieceMove(ref board.allPieces, kingStartSquare, kingTargetSquare);
-                PieceMovement.PieceMove(ref board.allPieces, rookStartSquare, rookTargetSquare);
+                PieceMovement.PieceMove(ref board.allPieces, kingStartBit, kingTargetBit);
+                PieceMovement.PieceMove(ref board.allPieces, rookStartBit, rookTargetBit);
 
                 board.CanBlackKingCastle = false;
                 board.CanBlackQueenCastle = false;

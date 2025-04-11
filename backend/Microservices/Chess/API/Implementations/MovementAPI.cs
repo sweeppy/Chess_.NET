@@ -100,7 +100,14 @@ namespace Chess.API.Implementations
 
             StringBuilder stringMove = new();
             stringMove.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
-            stringMove.Append(SquaresHelper.squareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value));
+            if (SquaresHelper.squareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
+            {
+                stringMove.Append(value);
+            }
+            else
+            {
+                stringMove.Append("[unknown_square]");
+            }
 
             board.MakeMove(request.StartSquare, request.TargetSquare, board);
             

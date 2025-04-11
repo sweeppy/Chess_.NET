@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Chess.Main.Core.Helpers.MagicBitboards;
 using Chess.Main.Models;
 
@@ -5,7 +6,7 @@ namespace Chess.Main.Core.Movement.Generator
 {
     public static class RookMovement
     {
-        public static ulong Generate(int squareIndex, Board board)
+        public static ulong Generate(int squareIndex, Board board, bool isWhiteTurn)
         {
             ulong mask = MagicBitboards.MagicRookTable[squareIndex].Mask;
             ulong magic = MagicBitboards.MagicRookTable[squareIndex].MagicNumber;
@@ -19,7 +20,7 @@ namespace Chess.Main.Core.Movement.Generator
             ulong index = (blockers * magic) >> (64 - relativeBits);
 
             // Rook can't capture allied pieces
-            ulong alliedPieces = board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces();
+            ulong alliedPieces = isWhiteTurn ? board.GetWhitePieces() : board.GetBlackPieces();
             return MagicBitboards.MagicRookTable[squareIndex].AttackTable[index] & ~alliedPieces;
         }
     }

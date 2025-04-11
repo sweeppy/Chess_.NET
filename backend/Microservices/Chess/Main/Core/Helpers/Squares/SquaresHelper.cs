@@ -4,7 +4,7 @@ namespace Chess.Main.Core.Helpers.Squares
 {
     public static class SquaresHelper
     {
-        public static Dictionary<string, int> stringSquareToSquareIndex = new()
+        private static Dictionary<string, int> stringSquareToSquareIndex = new()
         {
             { "a8", 63 }, { "b8", 62 }, { "c8", 61 }, { "d8", 60 }, { "e8", 59 }, { "f8", 58 }, { "g8", 57 }, { "h8", 56 },
             { "a7", 55 }, { "b7", 54 }, { "c7", 53 }, { "d7", 52 }, { "e7", 51 }, { "f7", 50 }, { "g7", 49 }, { "h7", 48 },
@@ -16,8 +16,12 @@ namespace Chess.Main.Core.Helpers.Squares
             { "a1", 7  }, { "b1", 6  }, { "c1", 5  }, { "d1", 4  }, { "e1", 3  }, { "f1", 2  }, { "g1", 1  }, { "h1", 0  }
         };
 
-        public static Dictionary<int, string> squareIndexToStringSquare = stringSquareToSquareIndex
+        private static Dictionary<int, string> squareIndexToStringSquare = StringSquareToSquareIndex
             .ToDictionary(pair => pair.Value, pair => pair.Key);
+            
+
+        public static Dictionary<int, string> SquareIndexToStringSquare { get => squareIndexToStringSquare; set => squareIndexToStringSquare = value; }
+        public static Dictionary<string, int> StringSquareToSquareIndex { get => stringSquareToSquareIndex; set => stringSquareToSquareIndex = value; }
 
         public static char? GetPieceSymbolFromSquare(Board board, int square)
         {
@@ -38,6 +42,13 @@ namespace Chess.Main.Core.Helpers.Squares
             else if ((board.GetBlackKing() & squareMask) != 0) return 'k';
 
             return null;
+        }
+
+        public static bool IsPieceOnSquare(Board board, int squareIndex)
+        {
+            ulong bitIndex = 1UL << squareIndex;
+
+            return (board.GetAllPieces() & (1UL << squareIndex)) != 0UL;
         }
     }
 

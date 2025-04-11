@@ -36,6 +36,8 @@ const PlayWithComputerPage = () => {
 
   const [startSquare, setStartSquare] = useState<number | null>(null);
 
+  const [moveNotations, setMoveNotations] = useState<string[] | null>(null);
+
   const handlePieceClick = (squareIndex: number) => {
     setCurrentLegalMoves(allLegalMoves?.[squareIndex]);
     setStartSquare(squareIndex);
@@ -53,6 +55,8 @@ const PlayWithComputerPage = () => {
       setAllLegalMoves(response.legalMoves);
       setCurrentLegalMoves(undefined);
       setCurrentFen(response.fen);
+      console.log(moveNotations);
+      setMoveNotations(response.moveNotations);
     }
   };
 
@@ -63,6 +67,7 @@ const PlayWithComputerPage = () => {
       setAllLegalMoves(response.legalMoves);
       setIsGameStarted(true);
       setPieces(getPiecesFromFen(response.fen));
+      setMoveNotations(response.moveNotations);
     } catch (error: any) {
       setErrorAlertMessage(error.message);
     }
@@ -168,7 +173,7 @@ const PlayWithComputerPage = () => {
             </div>
           </div>
           {isGameStarted ? (
-            <GameHistory />
+            <GameHistory moveNotations={moveNotations} />
           ) : (
             <GameOptions
               OnGameStart={handleGameStart}

@@ -55,7 +55,7 @@ namespace Chess.Main.Core.FEN
             if(enPassantTarget.HasValue)
             {
                 int square = BitHelper.GetFirstBitIndex(enPassantTarget.Value);
-                string squareName = SquaresHelper.stringSquareToSquareIndex.FirstOrDefault(x => x.Value == square).Key;
+                string squareName = SquaresHelper.StringSquareToSquareIndex.FirstOrDefault(x => x.Value == square).Key;
                 fenBuilder.Append(' ').Append(squareName);
             }
             else fenBuilder.Append(" -");
@@ -139,10 +139,10 @@ namespace Chess.Main.Core.FEN
             bool canBlackQueenCastle = castling.Contains('q');
 
 
-            int? enPassantSquare = SquaresHelper.stringSquareToSquareIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
+            int? enPassantSquare = SquaresHelper.StringSquareToSquareIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
 
-            int.TryParse(strMovesWithoutCapture, out int movesWithoutCapture);
-            int.TryParse(strComingMoveCount, out int comingMoveCount);
+            _ = int.TryParse(strMovesWithoutCapture, out int movesWithoutCapture);
+            _ = int.TryParse(strComingMoveCount, out int comingMoveCount);
   
             // ! DO NOT CHANGE THE ORDER
             return new Board(whitePawns, whiteKnights, whiteBishops, whiteRooks, whiteQueens, whiteKing,

@@ -8,15 +8,16 @@ using Chess.Main.Core.Helpers.BitOperation;
 using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
+using Chess.DTO.Responses.GameProcess;
 
 
 namespace Chess.API.Implementations
 {
-    public class MovementAPI : IMovement
+    public class Movement : IMovement
     {
         private readonly GamesDbContext _db;
 
-        public MovementAPI(GamesDbContext db)
+        public Movement(GamesDbContext db)
         {
             _db = db;
         }
@@ -78,51 +79,68 @@ namespace Chess.API.Implementations
             return pieceSymbol switch
             {
                 'P' => PawnMovement.WhiteGenerate(squareIndex, board),
-                'N' => KnightMovement.Generate(squareIndex, board),
-                'B' => BishopMovement.Generate(squareIndex, board),
-                'R' => RookMovement.Generate(squareIndex, board),
-                'Q' => QueenMovement.Generate(squareIndex, board),
-                'K' => KingMovement.Generate(squareIndex, board),
+                'N' => KnightMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'B' => BishopMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'R' => RookMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'Q' => QueenMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'K' => KingMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
                 'p' => PawnMovement.BlackGenerate(squareIndex, board),
-                'n' => KnightMovement.Generate(squareIndex, board),
-                'b' => BishopMovement.Generate(squareIndex, board),
-                'r' => RookMovement.Generate(squareIndex, board),
-                'q' => QueenMovement.Generate(squareIndex, board),
+                'n' => KnightMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'b' => BishopMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'r' => RookMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
+                'q' => QueenMovement.Generate(squareIndex, board, board.GetIsWhiteTurn()),
                 'k' => KingMovement.Generate(squareIndex, board),
                 _ => 0,
             };
         }
 
-        public async Task<string> OnMove(MoveRequest request, int playerId)
+        public async Task<OnMoveResponse> OnMove(MoveRequest request, int playerId)
         {
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
+            StringBuilder moveNotation = new();
+            // Append piece symbol
+            moveNotation.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
 
-            StringBuilder stringMove = new();
-            stringMove.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
-            if (SquaresHelper.squareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
-            {
-                stringMove.Append(value);
-            }
+            // Make move (change board bitboards)
+            board.MakeMove(request.StartSquare, request.TargetSquare, ref board);
+
+            // Find current game in db
+            GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
+
+            // Create move notation
+            // If it capture move append 'x'
+            if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
+                moveNotation.Append('x');
+
+            // Append target square
+            if (SquaresHelper.SquareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
+                moveNotation.Append(value);
             else
+                moveNotation.Append("[unknown_square]");
+
+            // Append '+' if king under attack
+            if (KingMovement.IsKingUnderAttack(board))
             {
-                stringMove.Append("[unknown_square]");
+                moveNotation.Append('+');
             }
 
-            board.MakeMove(request.StartSquare, request.TargetSquare, board);
-            
+            // Generate fen from updated board
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-            GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId);
-
-            if(game != null)
+            if (game != null) // update game info
             {
                 game.Fens.Add(fenAfterMove);
-                game.Moves.Add(stringMove.ToString());
+                game.Moves.Add(moveNotation.ToString());
                 await _db.SaveChangesAsync();
-            }
 
-            return fenAfterMove;
+                List<string> moveNotations = game.Moves;
+                var response = new OnMoveResponse(fenAfterMove, moveNotations);
+
+                return response;
+            }
+            // ? Maybe change this response
+            return new OnMoveResponse(null, null);
         }
     }
 }

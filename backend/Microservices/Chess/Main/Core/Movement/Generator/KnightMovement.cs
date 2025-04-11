@@ -21,10 +21,8 @@ namespace Chess.Main.Core.Movement.Generator
                 A B C D E F G H
         */
 
-        public static ulong Generate(int squareIndex, Board board)
+        public static ulong Generate(int squareIndex, Board board, bool isWhiteTurn)
         {
-            bool isWhiteTurn = board.GetIsWhiteTurn();
-
             ulong bitboardPosition = 1UL << squareIndex;
             
             ulong knight = (isWhiteTurn ? board.GetWhiteKnights() : board.GetBlackKnights()) & bitboardPosition;

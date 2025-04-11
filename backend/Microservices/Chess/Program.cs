@@ -24,7 +24,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 // Register dependencies
 builder.Services.AddScoped<GamesDbContext>();
 
-builder.Services.AddScoped<IMovement, MovementAPI>();
+builder.Services.AddScoped<IMovement, Movement>();
 
 // Add cors
 builder.Services.AddCors(options =>

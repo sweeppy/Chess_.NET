@@ -148,7 +148,7 @@ namespace Chess.Main.Models
 
         public int GetComingMoveCount() => ComingMoveCount;
 
-        public void MakeMove(int startSquare, int targetSquare, Board board)
+        public void MakeMove(int startSquare, int targetSquare, ref Board board)
         {
             bool isKingCastle = CastleHelper.IsKingCastle(startSquare, targetSquare);
             if (CastleHelper.IsCastleMove(startSquare, targetSquare, board) && isKingCastle)
@@ -160,13 +160,14 @@ namespace Chess.Main.Models
                 ulong targetBit = 1UL << targetSquare;
                 if (((targetBit & WhitePieces) != 0) || ((targetBit & BlackPieces) != 0))
                 {
-                    MakeMoveWithCapture(startSquare, targetSquare, board);
+                    MakeMoveWithCapture(startSquare, targetSquare, ref board);
                 }
                 else MakeMoveWithoutCapture(startSquare, targetSquare, board);
+
                 board.IsWhiteTurn = !IsWhiteTurn;
             }
 
-            
+
         }
 
         private static void MakeMoveWithoutCapture(int startSquare, int targetSquare, Board board)
@@ -182,6 +183,11 @@ namespace Chess.Main.Models
                 else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteRooks, startBit, targetBit);
                 else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteQueens, startBit, targetBit);
                 else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKing, startBit, targetBit);
+                board.allPieces &= ~startBit;
+                board.WhitePieces &= ~startBit;
+                
+                board.allPieces |= targetBit;
+                board.BlackPieces |= startBit;
             }
             else
             {
@@ -191,16 +197,21 @@ namespace Chess.Main.Models
                 else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref board.BlackRooks, startBit, targetBit);
                 else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref board.BlackQueens, startBit, targetBit);
                 else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKing, startBit, targetBit);
+                board.allPieces &= ~startBit;
+                board.BlackPieces &= ~startBit;
+
+                board.allPieces |= targetBit;
+                board.BlackPieces |= startBit;
             }
         
         }
-        private static void MakeMoveWithCapture(int startSquare, int targetSquare, Board board)
+        private static void MakeMoveWithCapture(int startSquare, int targetSquare, ref Board board)
         {
             ulong startBit = 1Ul << startSquare;
             ulong targetBit = 1UL << targetSquare;
             if (board.IsWhiteTurn)
             {
-                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
+                if ((board.WhitePawns & startBit) != 0)PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
                 else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKnights, targetBit);
                 else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteBishops, targetBit);
                 else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteRooks, targetBit);

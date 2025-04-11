@@ -778,3 +778,16 @@ button.close {
   width: 80%;
   max-width: 500px;
 }
+
+.game-history {
+  list-style: none;
+  padding-inline: 20%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.game-history li {
+  font-size: var(--fs-400);
+}

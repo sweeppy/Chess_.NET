@@ -13,7 +13,17 @@ namespace Chess.Main.Core.Movement.Generator
         {
             InitializeDefaultMovesTable();
         }
-        public static ulong Generate(int squareIndex,  Board board, bool checkSafety = true)
+
+        public static bool IsKingUnderAttack(Board board)
+        {
+            // Get king bitboard
+            ulong kingBit = board.GetIsWhiteTurn() ? board.GetWhiteKing() : board.GetBlackKing();
+            // Get under attack squares
+            ulong attackedSquares = GetUnderAttackSquares(board);
+            
+            return (kingBit & attackedSquares) != 0;
+        }
+        public static ulong Generate(int squareIndex, Board board, bool checkSafety = true)
         {
             ulong result = lookUpDefaultMoves[squareIndex];
 
@@ -58,9 +68,11 @@ namespace Chess.Main.Core.Movement.Generator
 
         private static ulong GetUnderAttackSquares(Board board)
         {
-            //Get all enemy pieces bitboards
-            bool isWhite = board.GetIsWhiteTurn();
+            // Get all enemy pieces bitboards
+            bool isWhite = board.GetIsWhiteTurn(); //false
+            
             ulong enemyPawns = isWhite ? board.GetBlackPawns() : board.GetWhitePawns();
+            ulong enemyKnights = isWhite ? board.GetBlackKnights() : board.GetWhiteKnights();
             ulong enemyBishops = isWhite ? board.GetBlackBishops() : board.GetWhiteBishops();
             ulong enemyRooks = isWhite ? board.GetBlackRooks() : board.GetWhiteRooks();
             ulong enemyQueens = isWhite ? board.GetBlackQueens() : board.GetWhiteQueens();
@@ -74,11 +86,12 @@ namespace Chess.Main.Core.Movement.Generator
             : (enemyPawns & Masks.NotHFile) << 7 | (enemyPawns & Masks.NotAFile) << 9;
             attackedMask |= pawnsAttack;
 
-            ulong enemyKnights = isWhite ? board.GetBlackKnights() : board.GetWhiteKnights();
-            for (int i = 0; i < BitHelper.BitsCount(enemyKnights); i++)
+
+            int knightsCount = BitHelper.BitsCount(enemyKnights);
+            for (int i = 0; i < knightsCount; i++)
             {
                 int squareIndex = BitHelper.GetFirstBitIndex(enemyKnights);
-                attackedMask |= KnightMovement.Generate(squareIndex, board);
+                attackedMask |= KnightMovement.Generate(squareIndex, board, !isWhite);
                 enemyKnights &= enemyKnights - 1; // delete first bit
             }
 
@@ -87,7 +100,7 @@ namespace Chess.Main.Core.Movement.Generator
             while(bishopsAndQueens != 0)
             {
                 int squareindex = BitHelper.GetFirstBitIndex(bishopsAndQueens);
-                attackedMask |= BishopMovement.Generate(squareindex, board);
+                attackedMask |= BishopMovement.Generate(squareindex, board, !isWhite);
                 bishopsAndQueens &= bishopsAndQueens - 1; // delete first bit
             }
 
@@ -96,13 +109,13 @@ namespace Chess.Main.Core.Movement.Generator
             while(rooksAndQueens != 0)
             {
                 int squareIndex = BitHelper.GetFirstBitIndex(rooksAndQueens);
-                attackedMask |= RookMovement.Generate(squareIndex, board);
+                attackedMask |= RookMovement.Generate(squareIndex, board, !isWhite);
                 rooksAndQueens &= rooksAndQueens - 1;
             }
 
             // Add to attacked mask king attack
             int enemyKingSquareIndex = BitHelper.GetFirstBitIndex(enemyKing);
-            attackedMask |= Generate(enemyKingSquareIndex, board, false);
+            attackedMask |= KingMovement.Generate(enemyKingSquareIndex, board, false);
 
             // Return safety mask for king
             return attackedMask;

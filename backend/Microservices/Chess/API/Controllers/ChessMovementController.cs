@@ -1,15 +1,12 @@
-using System.Dynamic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Chess.API.Interfaces;
 using Chess.Data;
 using Chess.DTO.Requests;
+using Chess.DTO.Responses;
+using Chess.DTO.Responses.GameProcess;
 using Chess.Models;
-using Chess.Responses;
-using Chess.Responses.GameProcess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chess.API.Controllers
 {
@@ -33,8 +30,12 @@ namespace Chess.API.Controllers
         [Authorize]
         public async Task<IActionResult> MakeMove([FromBody] MoveRequest request)
         {
+            // Get player that playing current game from jwt token
             int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            string fenAfterMove = await _movement.OnMove(request, playerId);
+
+            // Get fen and moveNotations
+            OnMoveResponse moveResponse = await _movement.OnMove(request, playerId);
+
             // TODO make real computer move
             // Imitation computer move:
             {
@@ -42,14 +43,18 @@ namespace Chess.API.Controllers
                 {
                     TargetSquare = 32,
                     StartSquare = 48,
-                    FenBeforeMove = fenAfterMove,
+                    FenBeforeMove = moveResponse.Fen,
                 };
-                fenAfterMove = await _movement.OnMove(request1, playerId);
+                moveResponse = await _movement.OnMove(request1, playerId);
             }
-            var legalMoves = _movement.GetLegalMoves(fenAfterMove);
+            var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
 
-            GameResponse response = new(
-                    isSuccess: true, message: "Successful move", fen: fenAfterMove, legalMoves: legalMoves);
+            GameResponse response =
+            new(
+                    isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                    legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations
+                );
+
             return Ok(response);
         }
 
@@ -60,12 +65,16 @@ namespace Chess.API.Controllers
             try
             {
                 string fen;
+
+                List<string> moveNotations = [];
+
                 if (request.IsPlayerPlayWhite)
                     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
                 else
                 {
                     // TODO here will be a computer move and fen after this move will assign below
                     fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
+                    moveNotations.Add("Pe4");
                 }
                             
                 GameInfo newGame = new()
@@ -82,7 +91,7 @@ namespace Chess.API.Controllers
                 await _db.SaveChangesAsync();
 
                 GameResponse response = new(
-                    isSuccess: true, message: "Game successfully started", fen: fen, legalMoves: legalMoves);
+                    isSuccess: true, message: "Game successfully started", fen: fen, legalMoves: legalMoves, moveNotations);
 
                 return Ok(response);
             }

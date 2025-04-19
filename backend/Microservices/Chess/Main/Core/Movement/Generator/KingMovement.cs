@@ -1,3 +1,4 @@
+using Chess.Main.Core.FEN;
 using Chess.Main.Core.Helpers;
 using Chess.Main.Core.Helpers.BitOperation;
 using Chess.Main.Models;
@@ -30,23 +31,39 @@ namespace Chess.Main.Core.Movement.Generator
             // Get under attack squares
             ulong attackedSquares = GetUnderAttackSquares(board, board.GetIsWhiteTurn());
             
-            return (kingBit & attackedSquares) != 0;
+            return (kingBit & attackedSquares) == 0;
         }
 
         public static ulong Generate(int squareIndex, Board board, bool checkSafety = true)
         {
             ulong result = lookUpDefaultMoves[squareIndex];
+            bool isWhite = board.GetIsWhiteTurn();
+            ulong ourPieces = isWhite ? board.GetWhitePieces() : board.GetBlackPieces();
+            
+            result &= ~ourPieces;
 
+            if (!checkSafety) 
+                return result;
+            // ?
+            ulong attackedSquares = GetUnderAttackSquares(board, !isWhite);
+            ulong validMoves = GetCastlingMask(board, attackedSquares);
 
-            if (checkSafety)
+            // Check all potential moves for king
+            foreach (int targetSquare in BitHelper.SquareIndexesFromBitboard(result))
             {
-                ulong squaresUnderAttack = GetUnderAttackSquares(board, !board.GetIsWhiteTurn());
-                result |= GetCastlingMask(board, squaresUnderAttack);
-                result &= ~squaresUnderAttack;
-                result &= ~(board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces());
+                Board tempBoard = FenUtility.LoadBoardFromFen(FenUtility.GenerateFenFromBoard(board));
+                
+                // Imaginative move
+                tempBoard.MakeMove(squareIndex, targetSquare, ref tempBoard);
+                
+                // Check king safety in this move
+                if (WillKingBeInSafeAfterImagineMove(tempBoard))
+                {
+                    validMoves |= 1UL << targetSquare;
+                }
             }
 
-            return result;
+            return validMoves;
         }
 
         private static void InitializeDefaultMovesTable()

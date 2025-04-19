@@ -791,3 +791,8 @@ button.close {
 .game-history li {
   font-size: var(--fs-400);
 }
+
+.winner {
+  font-size: var(--fs-500);
+  color: var(--clr-select);
+}

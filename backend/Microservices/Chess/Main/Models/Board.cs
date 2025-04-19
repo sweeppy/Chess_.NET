@@ -167,7 +167,6 @@ namespace Chess.Main.Models
 
             board.IsWhiteTurn = !IsWhiteTurn;
 
-
         }
 
         private static void MakeMoveWithoutCapture(int startSquare, int targetSquare, ref Board board)
@@ -200,7 +199,7 @@ namespace Chess.Main.Models
                 board.allPieces &= ~startBit;
                 board.WhitePieces &= ~startBit;
 
-                board.allPieces |= targetBit;
+                board.allPieces |= startBit;
                 board.BlackPieces |= startBit;
 
                 if (isUnsetEnPassant) board.EnPassantTarget = null;
@@ -235,27 +234,29 @@ namespace Chess.Main.Models
         }
         private static void MakeMoveWithCapture(int startSquare, int targetSquare, ref Board board)
         {
-            ulong startBit = 1Ul << startSquare;
             ulong targetBit = 1UL << targetSquare;
+
+            MakeMoveWithoutCapture(startSquare, targetSquare, ref board);
+
             if (board.IsWhiteTurn)
             {
-                if ((board.BlackPawns & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackPawns, targetBit);
-                else if ((board.BlackKnights & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackKnights, targetBit);
-                else if ((board.BlackBishops & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackBishops, targetBit);
-                else if ((board.BlackRooks & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackRooks, targetBit);
-                else if ((board.BlackQueens & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackQueens, targetBit);
-                else if ((board.BlackKing & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackKing, targetBit);
+                if ((board.BlackPawns & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackPawns, targetBit);
+                else if ((board.BlackKnights & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackKnights, targetBit);
+                else if ((board.BlackBishops & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackBishops, targetBit);
+                else if ((board.BlackRooks & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackRooks, targetBit);
+                else if ((board.BlackQueens & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackQueens, targetBit);
+                board.BlackPieces &= ~targetBit; 
             }
             else
             {
-                if ((board.WhitePawns & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
-                else if ((board.WhiteKnights & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKnights, targetBit);
-                else if ((board.WhiteBishops & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteBishops, targetBit);
-                else if ((board.WhiteRooks & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteRooks, targetBit);
-                else if ((board.WhiteQueens & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteQueens, targetBit);
-                else if ((board.WhiteKing & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKing, targetBit);
+                if ((board.WhitePawns & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhitePawns, targetBit);
+                else if ((board.WhiteKnights & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteKnights, targetBit);
+                else if ((board.WhiteBishops & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteBishops, targetBit);
+                else if ((board.WhiteRooks & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteRooks, targetBit);
+                else if ((board.WhiteQueens & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteQueens, targetBit);
+
+                board.WhitePieces &= ~targetBit;
             }
-            MakeMoveWithoutCapture(startSquare, targetSquare, ref board);
         }
 
 

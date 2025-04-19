@@ -21,7 +21,7 @@ namespace Chess.Main.Core.Helpers.BitOperation
 
         public static List<int> SquareIndexesFromBitboard(ulong bitboard)
         {
-            List<int> indexes = new List<int>();
+            List<int> indexes = [];
             while(bitboard != 0)
             {
                 int index = GetFirstBitIndex(bitboard);

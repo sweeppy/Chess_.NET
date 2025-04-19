@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import GameHistory from '../../components/chess/game/GameHistory';
-import GameOptions from '../../components/chess/game/GameOptions';
+import GameHistory from '../../components/chess/pages/playWithComputer/GameHistory';
+import GameOptions from '../../components/chess/pages/playWithComputer/GameOptions';
 import Nav from '../../components/chess/Nav';
 
 import ErrorAlert from '../../components/alerts/ErrorAlert';
@@ -10,6 +10,7 @@ import { OnStartGame } from '../../services/Game/startGame';
 import { getPiecesFromFen } from '../../services/Game/GameProcess/fenUtility';
 import { MakeMove } from '../../services/Game/GameProcess/makeMove';
 import { MakeMoveRequest } from '../../models/Requests/Game/MakeMoveRequest';
+import Winner from '../../components/chess/pages/playWithComputer/Winner';
 
 const PlayWithComputerPage = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -37,6 +38,7 @@ const PlayWithComputerPage = () => {
   const [startSquare, setStartSquare] = useState<number | null>(null);
 
   const [moveNotations, setMoveNotations] = useState<string[] | null>(null);
+  const [winner, setWinner] = useState<string | null>(null);
 
   const handlePieceClick = (squareIndex: number) => {
     setCurrentLegalMoves(allLegalMoves?.[squareIndex]);
@@ -44,19 +46,28 @@ const PlayWithComputerPage = () => {
   };
 
   const handlePieceMove = async (targetSquare: number) => {
-    if (startSquare && targetSquare && currentFen) {
-      const request: MakeMoveRequest = {
-        startSquare: startSquare,
-        targetSquare: targetSquare,
-        fenBeforeMove: currentFen,
-      };
-      const response = await MakeMove(request);
-      setPieces(getPiecesFromFen(response.fen));
-      setAllLegalMoves(response.legalMoves);
-      setCurrentLegalMoves(undefined);
-      setCurrentFen(response.fen);
-      console.log(moveNotations);
-      setMoveNotations(response.moveNotations);
+    try {
+      if (startSquare && targetSquare && currentFen) {
+        const request: MakeMoveRequest = {
+          startSquare: startSquare,
+          targetSquare: targetSquare,
+          fenBeforeMove: currentFen,
+        };
+        const response = await MakeMove(request);
+
+        if (response.isGameEnded) {
+          setWinner(response.winner);
+        }
+
+        setPieces(getPiecesFromFen(response.fen));
+        setAllLegalMoves(response.legalMoves);
+        setCurrentLegalMoves(undefined);
+        setCurrentFen(response.fen);
+        // console.log(moveNotations);
+        setMoveNotations(response.moveNotations);
+      }
+    } catch (error: any) {
+      setErrorAlertMessage(error.message);
     }
   };
 
@@ -106,74 +117,82 @@ const PlayWithComputerPage = () => {
       <Nav />
       <div className="container nav-padding">
         <div className="even-columns padding-block-400 max-height">
-          <div className="chessboard-wrapper">
-            <div className="chessboard">
-              {[...Array(64)].map((_, i) => {
-                const squareIndex = playerColor == 'white' ? 63 - i : i;
-                const piece = pieces.find((p) => p.squareIndex === squareIndex);
+          <div>
+            {winner && <Winner winnerName={winner} />}
+            <div className="chessboard-wrapper">
+              <div className="chessboard">
+                {[...Array(64)].map((_, i) => {
+                  const squareIndex = playerColor == 'white' ? 63 - i : i;
+                  const piece = pieces.find(
+                    (p) => p.squareIndex === squareIndex
+                  );
 
-                return (
-                  <div
-                    key={i}
-                    className={`cell ${
-                      Math.floor(i / 8) % 2 === i % 2 ? 'white' : 'black'
-                    }`}
-                    onClick={
-                      isAlliedPiece(piece)
-                        ? () => handlePieceClick(squareIndex)
-                        : () => {}
-                    }
-                  >
-                    {i % 8 == 0 && (
-                      <span
-                        className={`cell-label row-label ${
-                          Math.floor(i / 8) % 2 === i % 2 ? 'black' : 'white'
-                        }`}
-                      >
-                        {playerColor === 'white'
-                          ? numbers[Math.floor(i / 8)]
-                          : numbers[Math.floor(7 - i / 8)]}
-                      </span>
-                    )}
-                    {i >= 56 && (
-                      <span
-                        className={`cell-label col-label ${
-                          Math.floor(i / 8) % 2 === i % 2 ? 'black' : 'white'
-                        }`}
-                      >
-                        {playerColor === 'white'
-                          ? letters[i - 56]
-                          : letters[63 - i]}
-                      </span>
-                    )}
-                    {piece && (
-                      <img
-                        src={piece.svg}
-                        alt={`${piece.type}`}
-                        className={`chess-piece ${
-                          isAlliedPiece(piece) ? 'allied' : ''
-                        }`}
-                      />
-                    )}
-                    {currentLegalMoves?.includes(squareIndex) && (
-                      <div
-                        onClick={() => handlePieceMove(squareIndex)}
-                        className="container-lm"
-                      >
+                  return (
+                    <div
+                      key={i}
+                      className={`cell ${
+                        Math.floor(i / 8) % 2 === i % 2 ? 'white' : 'black'
+                      }`}
+                      onClick={
+                        isAlliedPiece(piece)
+                          ? () => handlePieceClick(squareIndex)
+                          : () => {}
+                      }
+                    >
+                      {i % 8 == 0 && (
+                        <span
+                          className={`cell-label row-label ${
+                            Math.floor(i / 8) % 2 === i % 2 ? 'black' : 'white'
+                          }`}
+                        >
+                          {playerColor === 'white'
+                            ? numbers[Math.floor(i / 8)]
+                            : numbers[Math.floor(7 - i / 8)]}
+                        </span>
+                      )}
+                      {i >= 56 && (
+                        <span
+                          className={`cell-label col-label ${
+                            Math.floor(i / 8) % 2 === i % 2 ? 'black' : 'white'
+                          }`}
+                        >
+                          {playerColor === 'white'
+                            ? letters[i - 56]
+                            : letters[63 - i]}
+                        </span>
+                      )}
+                      {piece && (
                         <img
-                          className="img-lm"
-                          src={'/src/assets/game/moves/legal_move.svg'}
-                          alt={'Legal move'}
+                          src={piece.svg}
+                          alt={`${piece.type}`}
+                          className={`chess-piece ${
+                            isAlliedPiece(piece) ? 'allied' : ''
+                          }`}
                         />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                      {currentLegalMoves?.includes(squareIndex) && (
+                        <div
+                          onClick={() => handlePieceMove(squareIndex)}
+                          className="container-lm"
+                        >
+                          <img
+                            className="img-lm"
+                            src={'/src/assets/game/moves/legal_move.svg'}
+                            alt={'Legal move'}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
+
           {isGameStarted ? (
-            <GameHistory moveNotations={moveNotations} />
+            <>
+              <GameHistory moveNotations={moveNotations} />
+            </>
           ) : (
             <GameOptions
               OnGameStart={handleGameStart}

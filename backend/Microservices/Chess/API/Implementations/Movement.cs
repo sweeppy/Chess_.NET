@@ -49,8 +49,7 @@ namespace Chess.API.Implementations
                                 Board tempBoard = FenUtility.LoadBoardFromFen(fen);
                                 tempBoard.MakeMove(square, targetSquare, ref tempBoard);
                                 
-                                
-                                if (!KingMovement.WillKingBeInSafeAfterImagineMove(tempBoard))
+                                if (KingMovement.WillKingBeInSafeAfterImagineMove(tempBoard))
                                 {
                                     validMoves.Add(targetSquare);
                                 }

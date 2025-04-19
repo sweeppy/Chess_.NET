@@ -41,7 +41,7 @@ namespace Chess.API.Controllers
 
             // * Make computer move
             var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
-            var moveValues = SearchAlgorithm.Search(legalComputerMoves, true);
+            var moveValues = SearchAlgorithm.Search(legalComputerMoves);
 
             MoveRequest computerMoveRequest = new()
             {
@@ -87,7 +87,7 @@ namespace Chess.API.Controllers
                 if (!request.IsPlayerPlayWhite) // player plays black
                 {
                     var legalComputerMoves = _movement.GetLegalMoves(fen);
-                    var moveValues = SearchAlgorithm.Search(legalComputerMoves, true);
+                    var moveValues = SearchAlgorithm.Search(legalComputerMoves);
 
                     MoveRequest computerMoveRequest = new()
                     {

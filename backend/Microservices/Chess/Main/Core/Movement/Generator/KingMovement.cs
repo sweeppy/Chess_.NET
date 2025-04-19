@@ -19,10 +19,20 @@ namespace Chess.Main.Core.Movement.Generator
             // Get king bitboard
             ulong kingBit = board.GetIsWhiteTurn() ? board.GetWhiteKing() : board.GetBlackKing();
             // Get under attack squares
-            ulong attackedSquares = GetUnderAttackSquares(board);
+            ulong attackedSquares = GetUnderAttackSquares(board, board.GetIsWhiteTurn());
             
             return (kingBit & attackedSquares) != 0;
         }
+        public static bool WillKingBeInSafeAfterImagineMove(Board board)
+        {
+            // Get king bitboard
+            ulong kingBit = !board.GetIsWhiteTurn() ? board.GetWhiteKing() : board.GetBlackKing();
+            // Get under attack squares
+            ulong attackedSquares = GetUnderAttackSquares(board, board.GetIsWhiteTurn());
+            
+            return (kingBit & attackedSquares) != 0;
+        }
+
         public static ulong Generate(int squareIndex, Board board, bool checkSafety = true)
         {
             ulong result = lookUpDefaultMoves[squareIndex];
@@ -30,10 +40,10 @@ namespace Chess.Main.Core.Movement.Generator
 
             if (checkSafety)
             {
-                ulong squaresUnderAttack = GetUnderAttackSquares(board);
+                ulong squaresUnderAttack = GetUnderAttackSquares(board, !board.GetIsWhiteTurn());
                 result |= GetCastlingMask(board, squaresUnderAttack);
                 result &= ~squaresUnderAttack;
-                result &= ~board.GetAllPieces();
+                result &= ~(board.GetIsWhiteTurn() ? board.GetWhitePieces() : board.GetBlackPieces());
             }
 
             return result;
@@ -66,24 +76,22 @@ namespace Chess.Main.Core.Movement.Generator
             }
         }
 
-        private static ulong GetUnderAttackSquares(Board board)
-        {
+        private static ulong GetUnderAttackSquares(Board board, bool isWhiteAttack)
+        {            
             // Get all enemy pieces bitboards
-            bool isWhite = board.GetIsWhiteTurn(); //false
-            
-            ulong enemyPawns = isWhite ? board.GetBlackPawns() : board.GetWhitePawns();
-            ulong enemyKnights = isWhite ? board.GetBlackKnights() : board.GetWhiteKnights();
-            ulong enemyBishops = isWhite ? board.GetBlackBishops() : board.GetWhiteBishops();
-            ulong enemyRooks = isWhite ? board.GetBlackRooks() : board.GetWhiteRooks();
-            ulong enemyQueens = isWhite ? board.GetBlackQueens() : board.GetWhiteQueens();
-            ulong enemyKing = isWhite ? board.GetBlackKing() : board.GetWhiteKing();
+            ulong enemyPawns = isWhiteAttack ? board.GetWhitePawns() : board.GetBlackPawns();
+            ulong enemyKnights = isWhiteAttack ? board.GetWhiteKnights() : board.GetBlackKnights();
+            ulong enemyBishops = isWhiteAttack ? board.GetWhiteBishops() : board.GetBlackBishops();
+            ulong enemyRooks = isWhiteAttack ? board.GetWhiteRooks() : board.GetBlackRooks();
+            ulong enemyQueens = isWhiteAttack ? board.GetWhiteQueens() : board.GetBlackQueens();
+            ulong enemyKing = isWhiteAttack ? board.GetWhiteKing() : board.GetBlackKing();
 
             ulong attackedMask = 0UL;
 
             // Add to attacked mask pawns attack
-            ulong pawnsAttack = isWhite
-            ? (enemyPawns & Masks.NotAFile) >> 7 | (enemyPawns & Masks.NotHFile)    >> 9
-            : (enemyPawns & Masks.NotHFile) << 7 | (enemyPawns & Masks.NotAFile) << 9;
+            ulong pawnsAttack = isWhiteAttack
+            ? (enemyPawns & Masks.NotHFile) << 7 | (enemyPawns & Masks.NotAFile) << 9
+            : (enemyPawns & Masks.NotAFile) >> 7 | (enemyPawns & Masks.NotHFile) >> 9;
             attackedMask |= pawnsAttack;
 
 
@@ -91,7 +99,7 @@ namespace Chess.Main.Core.Movement.Generator
             for (int i = 0; i < knightsCount; i++)
             {
                 int squareIndex = BitHelper.GetFirstBitIndex(enemyKnights);
-                attackedMask |= KnightMovement.Generate(squareIndex, board, !isWhite);
+                attackedMask |= KnightMovement.Generate(squareIndex, board, isWhiteAttack);
                 enemyKnights &= enemyKnights - 1; // delete first bit
             }
 
@@ -100,7 +108,7 @@ namespace Chess.Main.Core.Movement.Generator
             while(bishopsAndQueens != 0)
             {
                 int squareindex = BitHelper.GetFirstBitIndex(bishopsAndQueens);
-                attackedMask |= BishopMovement.Generate(squareindex, board, !isWhite);
+                attackedMask |= BishopMovement.Generate(squareindex, board, isWhiteAttack);
                 bishopsAndQueens &= bishopsAndQueens - 1; // delete first bit
             }
 
@@ -109,7 +117,7 @@ namespace Chess.Main.Core.Movement.Generator
             while(rooksAndQueens != 0)
             {
                 int squareIndex = BitHelper.GetFirstBitIndex(rooksAndQueens);
-                attackedMask |= RookMovement.Generate(squareIndex, board, !isWhite);
+                attackedMask |= RookMovement.Generate(squareIndex, board, isWhiteAttack);
                 rooksAndQueens &= rooksAndQueens - 1;
             }
 
@@ -133,8 +141,8 @@ namespace Chess.Main.Core.Movement.Generator
             int kingSquareIndex = isWhiteTurn ? 3 : 59;
 
             // The squares that the king must pass through
-            ulong kingCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_03UL : 0x03_00_00_00_00_00_00_00UL;
-            ulong queenCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_03UL : 0x03_00_00_00_00_00_00_00UL;
+            ulong kingCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_06UL : 0x06_00_00_00_00_00_00_00UL;
+            ulong queenCastleSquares = isWhiteTurn ? 0x00_00_00_00_00_00_00_70UL : 0x70_00_00_00_00_00_00_00UL;
 
             // Check if the king is under attack now
             bool isKingUnderAttack = (attackedSquares & (1UL << kingSquareIndex)) != 0;
@@ -147,12 +155,22 @@ namespace Chess.Main.Core.Movement.Generator
             bool isKingCastleFree = (blockers & kingCastleSquares) == 0;
             bool isQueenCastleFree = (blockers & queenCastleSquares) == 0;
 
-            if(!isKingUnderAttack)
+            if (!isKingUnderAttack)
             {
-                if (board.GetCanWhiteKingCastle() && isKingCastleNotUnderAttack && isKingCastleFree)
+                if (isWhiteTurn)
+                {
+                    if (board.GetCanWhiteKingCastle() && isKingCastleNotUnderAttack && isKingCastleFree)
                     result |= Masks.WhiteKingCastleMask;
-                if (board.GetCanWhiteQueenCastle() && isQueenCastleNotUnderAttack && isQueenCastleFree)
+                    if (board.GetCanWhiteQueenCastle() && isQueenCastleNotUnderAttack && isQueenCastleFree)
                     result |= Masks.WhiteQueenCastleMask;
+                }
+                else
+                {
+                    if (board.GetCanBlackKingCastle() && isKingCastleNotUnderAttack && isKingCastleFree)
+                    result |= Masks.BlackKingCastleMask;
+                    if (board.GetCanBlackQueenCastle() && isQueenCastleNotUnderAttack && isQueenCastleFree)
+                    result |= Masks.BlackQueenCastleMask;
+                }
             }
 
             return result;

@@ -151,9 +151,9 @@ namespace Chess.Main.Models
         public void MakeMove(int startSquare, int targetSquare, ref Board board)
         {
             bool isKingCastle = CastleHelper.IsKingCastle(startSquare, targetSquare);
-            if (CastleHelper.IsCastleMove(startSquare, targetSquare, board) && isKingCastle)
+            if (CastleHelper.IsCastleMove(startSquare, targetSquare, board))
             {
-                MakeCastleMove(board, isKingCastle);
+                MakeCastleMove(ref board, isKingCastle);
             }
             else
             {
@@ -162,22 +162,36 @@ namespace Chess.Main.Models
                 {
                     MakeMoveWithCapture(startSquare, targetSquare, ref board);
                 }
-                else MakeMoveWithoutCapture(startSquare, targetSquare, board);
-
-                board.IsWhiteTurn = !IsWhiteTurn;
+                else MakeMoveWithoutCapture(startSquare, targetSquare, ref board);
             }
+
+            board.IsWhiteTurn = !IsWhiteTurn;
 
 
         }
 
-        private static void MakeMoveWithoutCapture(int startSquare, int targetSquare, Board board)
+        private static void MakeMoveWithoutCapture(int startSquare, int targetSquare, ref Board board)
         {
             ulong startBit = 1Ul << startSquare;
             ulong targetBit = 1UL << targetSquare;
 
+            bool isUnsetEnPassant = true;
+
             if (board.IsWhiteTurn)
             {
-                if ((board.WhitePawns & startBit) != 0) PieceMovement.PieceMove(ref board.WhitePawns, startBit, targetBit);
+                if ((board.WhitePawns & startBit) != 0)
+                {
+                    bool isEnPassantMove = (targetBit >> 8) == board.EnPassantTarget;
+                    if (isEnPassantMove && board.EnPassantTarget.HasValue)
+                        PieceMovement.EnPassantMove(ref board.WhitePawns, startBit, targetBit,
+                        ref board.BlackPawns, ref board.BlackPieces, ref board.allPieces, board.EnPassantTarget.Value);
+                    else
+                    {
+                        PieceMovement.PieceMove(ref board.WhitePawns, startBit, targetBit);
+                        if ((startSquare + 16) == targetSquare) board.EnPassantTarget = targetBit;
+                        isUnsetEnPassant = false;
+                    }
+                }
                 else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKnights, startBit, targetBit);
                 else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteBishops, startBit, targetBit);
                 else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteRooks, startBit, targetBit);
@@ -185,23 +199,37 @@ namespace Chess.Main.Models
                 else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKing, startBit, targetBit);
                 board.allPieces &= ~startBit;
                 board.WhitePieces &= ~startBit;
-                
+
                 board.allPieces |= targetBit;
                 board.BlackPieces |= startBit;
+
+                if (isUnsetEnPassant) board.EnPassantTarget = null;
             }
             else
             {
-                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceMove(ref board.BlackPawns, startBit, targetBit);
+                if ((board.BlackPawns & startBit) != 0)
+                {
+                    bool isEnPassantMove = (targetBit << 8) == board.EnPassantTarget;
+                    if (isEnPassantMove && board.EnPassantTarget.HasValue)
+                        PieceMovement.EnPassantMove(ref board.BlackPawns, startBit, targetBit,
+                        ref board.WhitePawns, ref board.WhitePieces, ref board.allPieces, board.EnPassantTarget.Value);
+                    else
+                    {
+                        PieceMovement.PieceMove(ref board.BlackPawns, startBit, targetBit);
+                        if ((startSquare - 16) == targetSquare) board.EnPassantTarget = targetBit;
+                        isUnsetEnPassant = false;
+                    }
+                }
                 else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKnights, startBit, targetBit);
                 else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref board.BlackBishops, startBit, targetBit);
                 else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref board.BlackRooks, startBit, targetBit);
                 else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref board.BlackQueens, startBit, targetBit);
                 else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKing, startBit, targetBit);
-                board.allPieces &= ~startBit;
-                board.BlackPieces &= ~startBit;
 
-                board.allPieces |= targetBit;
-                board.BlackPieces |= startBit;
+                board.allPieces = (board.allPieces & ~startBit) | targetBit;
+                board.BlackPieces = (board.BlackPieces & ~startBit) | targetBit;
+
+                if (isUnsetEnPassant) board.EnPassantTarget = null;
             }
         
         }
@@ -211,40 +239,50 @@ namespace Chess.Main.Models
             ulong targetBit = 1UL << targetSquare;
             if (board.IsWhiteTurn)
             {
-                if ((board.WhitePawns & startBit) != 0)PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
-                else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKnights, targetBit);
-                else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteBishops, targetBit);
-                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteRooks, targetBit);
-                else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteQueens, targetBit);
-                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKing, targetBit);
+                if ((board.BlackPawns & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackPawns, targetBit);
+                else if ((board.BlackKnights & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackKnights, targetBit);
+                else if ((board.BlackBishops & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackBishops, targetBit);
+                else if ((board.BlackRooks & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackRooks, targetBit);
+                else if ((board.BlackQueens & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackQueens, targetBit);
+                else if ((board.BlackKing & targetBit) != 0) PieceMovement.PieceCapture(ref board.BlackKing, targetBit);
             }
             else
             {
-                if ((board.BlackPawns & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackPawns, targetBit);
-                else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackKnights, targetBit);
-                else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackBishops, targetBit);
-                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackRooks, targetBit);
-                else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackQueens, targetBit);
-                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceCapture(ref board.BlackKing, targetBit);
+                if ((board.WhitePawns & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhitePawns, targetBit);
+                else if ((board.WhiteKnights & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKnights, targetBit);
+                else if ((board.WhiteBishops & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteBishops, targetBit);
+                else if ((board.WhiteRooks & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteRooks, targetBit);
+                else if ((board.WhiteQueens & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteQueens, targetBit);
+                else if ((board.WhiteKing & targetBit) != 0) PieceMovement.PieceCapture(ref board.WhiteKing, targetBit);
             }
-            MakeMoveWithoutCapture(startSquare, targetSquare, board);
+            MakeMoveWithoutCapture(startSquare, targetSquare, ref board);
         }
 
 
-        private static void MakeCastleMove(Board board, bool isKingCastle)
+        private static void MakeCastleMove(ref Board board, bool isKingCastle)
         {
             if (board.IsWhiteTurn) // White castle
             {
-                ulong kingStartBit = 1UL << 3;
+                ulong kingStartBit = board.WhiteKing;
                 ulong kingTargetBit = isKingCastle ? 1UL << 1 : 1UL << 5;
 
                 ulong rookStartBit = isKingCastle ? 1UL : 1UL << 7;
                 ulong rookTargetBit = isKingCastle ? 1UL << 2 : 1UL << 4;
 
+                PieceMovement.PieceMove(ref board.WhiteKing, kingStartBit, kingTargetBit);
+                PieceMovement.PieceMove(ref board.WhiteRooks, rookStartBit, rookTargetBit);
 
+                // Delete castling pieces in all pieces and <color>Pieces in bitboards
+                board.allPieces &= ~kingStartBit;
+                board.WhitePieces &= ~kingStartBit;
+                board.allPieces &= ~rookStartBit;
+                board.WhitePieces &= ~rookStartBit;
 
-                PieceMovement.PieceMove(ref board.allPieces, kingStartBit, kingTargetBit);
-                PieceMovement.PieceMove(ref board.allPieces, rookStartBit, rookTargetBit);
+                // Add castling pieces in all pieces and <color>Pieces in bitboards
+                board.allPieces |= kingTargetBit;
+                board.WhitePieces |= kingTargetBit;
+                board.allPieces |= rookTargetBit;
+                board.WhitePieces |= rookTargetBit;
 
                 board.CanWhiteKingCastle = false;
                 board.CanWhiteQueenCastle = false;
@@ -256,12 +294,26 @@ namespace Chess.Main.Models
 
                 ulong rookStartBit = isKingCastle ? 1UL << 56 : 1UL << 63;
                 ulong rookTargetBit = isKingCastle ? 1UL << 58 : 1UL << 60;
-                
-                PieceMovement.PieceMove(ref board.allPieces, kingStartBit, kingTargetBit);
-                PieceMovement.PieceMove(ref board.allPieces, rookStartBit, rookTargetBit);
+
+                PieceMovement.PieceMove(ref board.BlackKing, kingStartBit, kingTargetBit);
+                PieceMovement.PieceMove(ref board.BlackRooks, rookStartBit, rookTargetBit);
+
+                // Delete castling pieces in all pieces and <color>Pieces in bitboards
+                board.allPieces &= ~kingStartBit;
+                board.BlackPieces &= ~kingStartBit;
+                board.allPieces &= ~rookStartBit;
+                board.BlackPieces &= ~rookStartBit;
+
+                // Add castling pieces in all pieces and <color>Pieces in bitboards
+                board.allPieces |= kingTargetBit;
+                board.BlackPieces |= kingTargetBit;
+                board.allPieces |= rookTargetBit;
+                board.BlackPieces |= rookTargetBit;
 
                 board.CanBlackKingCastle = false;
                 board.CanBlackQueenCastle = false;
+
+                board.EnPassantTarget = 0UL;
             }
         }
     }

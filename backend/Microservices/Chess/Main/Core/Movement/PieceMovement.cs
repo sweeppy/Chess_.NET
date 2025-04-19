@@ -1,16 +1,30 @@
+using Chess.Main.Models;
+
 namespace Chess.Main.Core.Movement
 {
     public static class PieceMovement
     {
-        public static void PieceMove(ref ulong moveBitBoard, ulong startBit, ulong targetBit)
+        public static void PieceMove(ref ulong moveBitboard, ulong startBit, ulong targetBit)
         {
-            moveBitBoard &= ~startBit;
-            moveBitBoard |= targetBit; 
+            moveBitboard &= ~startBit;
+            moveBitboard |= targetBit;
         }
 
         public static void PieceCapture(ref ulong captureBitboard, ulong targetBit)
         {
             captureBitboard &= ~targetBit;
+        }
+
+
+        public static void EnPassantMove(ref ulong moveBitboard, ulong startBit, ulong targetBit,
+            ref ulong enemyPawnsBitboard, ref ulong enemyPieces, ref ulong allPieces, ulong enPassantBitboard)
+        {
+            moveBitboard &= ~startBit;
+            moveBitboard |= targetBit;
+
+            enemyPawnsBitboard &= ~enPassantBitboard;
+            enemyPieces &= ~enPassantBitboard;
+            allPieces &= ~enPassantBitboard;
         }
 
     }

@@ -13,11 +13,11 @@ namespace Chess.Main.Core.Movement.Generator
             ulong bitboardPosition = 1UL << squareIndex;
 
             ulong singlePush = (bitboardPosition << 8) & ~allPieces;
-            ulong doublePush = ((singlePush << 8) & ~allPieces) &
-            ((Masks.WhitePawnsStartingPosition & bitboardPosition) << 16);
+            ulong doublePush = (singlePush << 8) & ~allPieces &
+                ((Masks.WhitePawnsStartingPosition & bitboardPosition) << 16);
 
-            ulong leftCapture = ((bitboardPosition & Masks.NotHFile) << 9) & blackPieces;
-            ulong rightCapture = ((bitboardPosition & Masks.NotAFile) << 7) & blackPieces;
+            ulong leftCapture = (bitboardPosition << 9) & Masks.NotHFile & blackPieces;
+            ulong rightCapture = (bitboardPosition << 7) & Masks.NotAFile & blackPieces;
 
             ulong enPassantMove = 0UL;
 
@@ -51,11 +51,11 @@ namespace Chess.Main.Core.Movement.Generator
             ulong bitboardPosition = 1UL << squareIndex;
 
             ulong singlePush = (bitboardPosition >> 8) & ~allPieces;
-            ulong doublePush = ((singlePush >> 8) & ~allPieces) &
+            ulong doublePush = (singlePush >> 8) & ~allPieces &
             ((Masks.BlackPawnsStartingPosition & bitboardPosition) >> 16);
 
-            ulong rightCapture = ((bitboardPosition & Masks.NotAFile) >> 9) & whitePieces;
-            ulong leftCapture = ((bitboardPosition & Masks.NotHFile) >> 7) & whitePieces;
+            ulong rightCapture = (bitboardPosition >> 7) & Masks.NotHFile & whitePieces;
+            ulong leftCapture = (bitboardPosition >> 9) & Masks.NotAFile & whitePieces;
 
             ulong enPassantMove = 0UL;
             ulong? enPassantTarget = board.GetEnPassantTarget();
@@ -66,8 +66,8 @@ namespace Chess.Main.Core.Movement.Generator
                 if (isOnEnPassantRank)
                 {
                     ulong enPassantBitboard = enPassantTarget.Value;
-                    ulong leftEnPassantCandidate = (enPassantBitboard << 1) & Masks.NotAFile;
-                    ulong rightEnPassantCandidate = (enPassantBitboard >> 1) & Masks.NotHFile;
+                    ulong leftEnPassantCandidate = (enPassantBitboard << 1) & Masks.NotHFile;
+                    ulong rightEnPassantCandidate = (enPassantBitboard >> 1) & Masks.NotAFile;
 
                     if ((bitboardPosition == leftEnPassantCandidate) ||
                         (bitboardPosition == rightEnPassantCandidate))

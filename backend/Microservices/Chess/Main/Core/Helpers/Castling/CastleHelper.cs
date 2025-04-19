@@ -5,28 +5,22 @@ namespace Chess.Main.Core.Helpers.Castling
 {
     public static class CastleHelper
     {
-        public static bool IsCastleMove(int startSquare, int TargetSquare, Board board)
+        public static bool IsCastleMove(int startSquare, int targetSquare, Board board)
         {
 
-            bool isTwoSquaresMove = Math.Abs(TargetSquare - startSquare) == 2; // piece moved 2 squares
-            if (isTwoSquaresMove == false) return false; // return false if piece haven't been moved 2 squares
+            bool isWhiteTurn = board.GetIsWhiteTurn();
+            ulong kingBit = isWhiteTurn ? board.GetWhiteKing() : board.GetBlackKing();
+            bool isKingMoving = (kingBit & (1UL << startSquare)) != 0;
 
-            if (board.GetIsWhiteTurn()) // checking if the white king is moving
-            {
-                bool isWhiteKingMoved = BitHelper.SquareIndexesFromBitboard(board.GetWhiteKing())[0] == startSquare;
-                if (!isWhiteKingMoved) return false;
-                return true;
-            }
-            else // checking is the black king is moving
-            {
-                bool isBlackKingMoved = BitHelper.SquareIndexesFromBitboard(board.GetBlackKing())[0] == startSquare;
-                if (!isBlackKingMoved) return false;
-                return true;
-            }
+            if (!isKingMoving) return false; // not king move
+
+            bool isTwoSquaresMove = Math.Abs(startSquare - targetSquare) == 2;
+
+            return isTwoSquaresMove; // king moved only 1 square => it's not castle move
         }
-        public static bool IsKingCastle(int startSquare, int TargetSquare)
+        public static bool IsKingCastle(int startSquare, int targetSquare)
         {
-            return startSquare > TargetSquare;
+            return startSquare > targetSquare;
         }
     }
 }

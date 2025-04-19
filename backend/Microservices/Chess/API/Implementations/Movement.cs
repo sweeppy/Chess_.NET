@@ -28,22 +28,41 @@ namespace Chess.API.Implementations
 
             Board board = FenUtility.LoadBoardFromFen(fen);
 
+            // TODO Use it in future for mate flag
+            // bool isInCheck = KingMovement.IsKingUnderAttack(board);
+
             Dictionary<char, ulong> piecesCollections = GetActivePieces(board);
 
             for (int square = 0; square < 64; square++)
-            {
-                foreach (ulong pieces in piecesCollections.Values)
                 {
-                    if ((pieces & (1UL << square)) != 0)
+                    foreach (ulong pieces in piecesCollections.Values)
                     {
-                        char pieceSymbol = piecesCollections.FirstOrDefault(x => (x.Value & (1UL << square)) != 0).Key;
+                        if ((pieces & (1UL << square)) != 0)
+                        {
+                            char pieceSymbol = piecesCollections.FirstOrDefault(x => (x.Value & (1UL << square)) != 0).Key;
 
-                        ulong legalMovesForSquare = GetMovesByPieceSymbol(square, pieceSymbol, board);
-                        
-                        legalMoves.Add(square, BitHelper.SquareIndexesFromBitboard(legalMovesForSquare));
+                            ulong rawMoves = GetMovesByPieceSymbol(square, pieceSymbol, board);
+
+                            List<int> validMoves = [];
+                            foreach (int targetSquare in BitHelper.SquareIndexesFromBitboard(rawMoves))
+                            {
+                                Board tempBoard = FenUtility.LoadBoardFromFen(fen);
+                                tempBoard.MakeMove(square, targetSquare, ref tempBoard);
+                                
+                                
+                                if (!KingMovement.WillKingBeInSafeAfterImagineMove(tempBoard))
+                                {
+                                    validMoves.Add(targetSquare);
+                                }
+                            }
+                            
+                            if (validMoves.Count > 0)
+                            {
+                                legalMoves[square] = validMoves;
+                            }
+                        }
                     }
                 }
-            }
 
             return legalMoves;
         }

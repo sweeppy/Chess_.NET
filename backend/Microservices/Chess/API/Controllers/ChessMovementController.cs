@@ -4,6 +4,8 @@ using Chess.Data;
 using Chess.DTO.Requests;
 using Chess.DTO.Responses;
 using Chess.DTO.Responses.GameProcess;
+using Chess.Main.Models;
+using Chess.Main.Search;
 using Chess.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,17 +38,20 @@ namespace Chess.API.Controllers
             // Get fen and moveNotations
             OnMoveResponse moveResponse = await _movement.OnMove(request, playerId);
 
-            // TODO make real computer move
-            // Imitation computer move:
+
+            // * Make computer move
+            var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
+            var moveValues = SearchAlgorithm.Search(legalComputerMoves, true);
+
+            MoveRequest computerMoveRequest = new()
             {
-                MoveRequest request1 = new()
-                {
-                    TargetSquare = 32,
-                    StartSquare = 48,
-                    FenBeforeMove = moveResponse.Fen,
-                };
-                moveResponse = await _movement.OnMove(request1, playerId);
-            }
+                StartSquare = moveValues.StartSquare,
+                TargetSquare = moveValues.TargetSquare,
+                FenBeforeMove = moveResponse.Fen
+            };
+            // Update moveResponse after computer move
+            moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+
             var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
 
             GameResponse response =
@@ -64,19 +69,8 @@ namespace Chess.API.Controllers
         {
             try
             {
-                string fen;
+                string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-                List<string> moveNotations = [];
-
-                if (request.IsPlayerPlayWhite)
-                    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-                else
-                {
-                    // TODO here will be a computer move and fen after this move will assign below
-                    fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
-                    moveNotations.Add("Pe4");
-                }
-                            
                 GameInfo newGame = new()
                 {
                     Fens = [fen],
@@ -85,10 +79,29 @@ namespace Chess.API.Controllers
                     FirstPlayerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value),
                     SecondPlayerId = 0
                 };
-                var legalMoves = _movement.GetLegalMoves(fen);
-                
                 _db.Games.Add(newGame);
                 await _db.SaveChangesAsync();
+
+                List<string> moveNotations = [];
+
+                if (!request.IsPlayerPlayWhite) // player plays black
+                {
+                    var legalComputerMoves = _movement.GetLegalMoves(fen);
+                    var moveValues = SearchAlgorithm.Search(legalComputerMoves, true);
+
+                    MoveRequest computerMoveRequest = new()
+                    {
+                        StartSquare = moveValues.StartSquare,
+                        TargetSquare = moveValues.TargetSquare,
+                        FenBeforeMove = fen
+                    };
+
+                    OnMoveResponse moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+                    fen = moveResponse.Fen;
+                }
+                            
+
+                var legalMoves = _movement.GetLegalMoves(fen);
 
                 GameResponse response = new(
                     isSuccess: true, message: "Game successfully started", fen: fen, legalMoves: legalMoves, moveNotations);

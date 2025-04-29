@@ -61,7 +61,7 @@ namespace Chess.Main.Core.FEN
             else fenBuilder.Append(" -");
 
             // Moves without capture
-            fenBuilder.Append(' ').Append(board.GetMovesWithoutCapture());
+            fenBuilder.Append(' ').Append(board.GetDrawMoves());
 
             // Coming move count
             fenBuilder.Append(' ').Append(board.GetComingMoveCount());

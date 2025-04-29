@@ -13,7 +13,7 @@ namespace Chess.Main.Models
         private ulong WhiteQueens;
         private ulong WhiteKing;
 
-        private ulong BlackPawns ;
+        private ulong BlackPawns;
         private ulong BlackKnights;
         private ulong BlackBishops;
         private ulong BlackRooks;
@@ -34,7 +34,7 @@ namespace Chess.Main.Models
 
         private ulong? EnPassantTarget;
 
-        private int MovesWithoutCapture;
+        private int DrawMoves;
 
         private int ComingMoveCount;
 
@@ -48,8 +48,8 @@ namespace Chess.Main.Models
 
                      ulong blackPawns, ulong blackKnights, ulong blackBishops, ulong blackRooks,
                      ulong blackQueens, ulong blackKing, bool canBlackKingCastle, bool canBlackQueenCastle,
-                     
-                     bool isWhiteTurn, int? enPassantSquare, int movesWithoutCapture, int comingMoveCount)
+
+                     bool isWhiteTurn, int? enPassantSquare, int drawMoves, int comingMoveCount)
         {
             WhitePawns = whitePawns;
             WhiteKnights = whiteKnights;
@@ -74,10 +74,10 @@ namespace Chess.Main.Models
             allPieces = WhitePieces | BlackPieces;
 
             IsWhiteTurn = isWhiteTurn;
-            MovesWithoutCapture = movesWithoutCapture;
+            DrawMoves = drawMoves;
             ComingMoveCount = comingMoveCount;
-            
-            if(enPassantSquare.HasValue)
+
+            if (enPassantSquare.HasValue)
             {
                 EnPassantTarget = 1UL << enPassantSquare.Value;
             }
@@ -111,7 +111,7 @@ namespace Chess.Main.Models
             CanBlackKingCastle = true;
             CanBlackQueenCastle = true;
             EnPassantTarget = null;
-            MovesWithoutCapture = 0;
+            DrawMoves = 0;
             ComingMoveCount = 1;
         }
 
@@ -144,12 +144,19 @@ namespace Chess.Main.Models
 
         public ulong? GetEnPassantTarget() => EnPassantTarget;
 
-        public int GetMovesWithoutCapture() => MovesWithoutCapture;
+        public int GetDrawMoves() => DrawMoves;
 
         public int GetComingMoveCount() => ComingMoveCount;
 
         public void MakeMove(int startSquare, int targetSquare, ref Board board)
         {
+            // For FEN
+            board.ComingMoveCount++;
+            if (IsItMoveForDraw(startSquare, targetSquare, ref board))
+                board.DrawMoves++;
+            else
+                board.DrawMoves = 0;
+
             bool isKingCastle = CastleHelper.IsKingCastle(startSquare, targetSquare);
             if (CastleHelper.IsCastleMove(startSquare, targetSquare, board))
             {
@@ -230,7 +237,7 @@ namespace Chess.Main.Models
 
                 if (isUnsetEnPassant) board.EnPassantTarget = null;
             }
-        
+
         }
         private static void MakeMoveWithCapture(int startSquare, int targetSquare, ref Board board)
         {
@@ -245,7 +252,7 @@ namespace Chess.Main.Models
                 else if ((board.BlackBishops & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackBishops, targetBit);
                 else if ((board.BlackRooks & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackRooks, targetBit);
                 else if ((board.BlackQueens & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackQueens, targetBit);
-                board.BlackPieces &= ~targetBit; 
+                board.BlackPieces &= ~targetBit;
             }
             else
             {
@@ -316,6 +323,29 @@ namespace Chess.Main.Models
 
                 board.EnPassantTarget = 0UL;
             }
+        }
+        private static bool IsItMoveForDraw(int startSquare, int targetSquare, ref Board board)
+        {
+            ulong startBit = 1UL << startSquare;
+            ulong targetBit = 1UL << targetSquare;
+            
+            // If it's a pawn move, it's NOT a draw move
+            if (board.IsWhiteTurn)
+            {
+                if ((startBit & board.WhitePawns) != 0) return false;
+            }
+            else
+            {
+                if ((startBit & board.BlackPawns) != 0) return false;
+            }
+            
+            // If it's a capture, it's NOT a draw move
+            if ((targetBit & (board.IsWhiteTurn ? board.BlackPieces : board.WhitePieces)) != 0)
+                return false;
+            
+            // Otherwise, it's a draw move
+            return true;
+            
         }
     }
 }

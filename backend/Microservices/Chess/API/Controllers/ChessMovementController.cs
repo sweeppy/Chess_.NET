@@ -4,6 +4,7 @@ using Chess.Data;
 using Chess.DTO.Requests;
 using Chess.DTO.Responses;
 using Chess.DTO.Responses.GameProcess;
+using Chess.Main.Core.FEN;
 using Chess.Main.Models;
 using Chess.Main.Search;
 using Chess.Models;
@@ -44,7 +45,9 @@ namespace Chess.API.Controllers
 
                 // * Make computer move
                 var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
-                if (legalComputerMoves.Count == 0)
+                Board board = FenUtility.LoadBoardFromFen(moveResponse.Fen);
+                IMovement.GameCondition? gameCondition = _movement.GetGameCondition(board, legalComputerMoves);
+                if (gameCondition.HasValue)
                 {
                     GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
                     if (endedGame != null)
@@ -54,14 +57,14 @@ namespace Chess.API.Controllers
                         GameResponse endGameResponse = new(
                                 isSuccess: true, message: "Game ended", fen: moveResponse.Fen,
                                 legalMoves: null, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
-                                winner: User.FindFirst(ClaimTypes.Name)?.Value
+                                winner: gameCondition.Value == IMovement.GameCondition.LOSE ? User.FindFirst(ClaimTypes.Name)?.Value : "DRAW"
                             );
 
                         return Ok(endGameResponse);
-                        
                     }
                     return NotFound("Game was not found");
                 }
+
                 var moveValues = SearchAlgorithm.Search(legalComputerMoves);
 
                 MoveRequest computerMoveRequest = new()
@@ -74,13 +77,33 @@ namespace Chess.API.Controllers
                 moveResponse = await _movement.OnMove(computerMoveRequest, 0);
 
                 var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
+                
+                gameCondition = _movement.GetGameCondition(board, legalMoves);
 
-                GameResponse response =
-                new(
-                        isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
-                        legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
-                        winner: null
-                    );
+                GameResponse response;
+
+                if (gameCondition.HasValue)
+                {
+                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
+                    if (endedGame != null)
+                    {
+                        endedGame.IsActiveGame = false;
+                        await _db.SaveChangesAsync();
+                        response = new(
+                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
+                            winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
+
+                        return Ok(response);
+                    }
+                    return NotFound("Game was not found");
+                }
+
+                response = new(
+                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
+                            winner: null
+                        );
 
                 return Ok(response);
             }
@@ -103,6 +126,9 @@ namespace Chess.API.Controllers
             {
                 int firstPlayerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 GameInfo? activeGame = await _db.Games.FirstOrDefaultAsync(x => x.FirstPlayerId == firstPlayerId && x.IsActiveGame);
+
+                Board board;
+
                 if (activeGame != null)
                 {
                     string lastFenOfActiveGame = activeGame.Fens[^1];

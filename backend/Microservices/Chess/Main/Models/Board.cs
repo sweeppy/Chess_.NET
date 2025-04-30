@@ -82,6 +82,39 @@ namespace Chess.Main.Models
                 EnPassantTarget = 1UL << enPassantSquare.Value;
             }
         }
+        public Board(Board board)
+        {
+            // Copy bitboards
+            WhitePawns = board.WhitePawns;
+            WhiteKnights = board.WhiteKnights;
+            WhiteBishops = board.WhiteBishops;
+            WhiteRooks = board.WhiteRooks;
+            WhiteQueens = board.WhiteQueens;
+            WhiteKing = board.WhiteKing;
+            WhitePieces = board.WhitePieces;
+
+            BlackPawns = board.BlackPawns;
+            BlackKnights = board.BlackKnights;
+            BlackBishops = board.BlackBishops;
+            BlackRooks = board.BlackRooks;
+            BlackQueens = board.BlackQueens;
+            BlackKing = board.BlackKing;
+            BlackPieces = board.BlackPieces;
+
+            allPieces = board.allPieces;
+
+            // Copy castling rights
+            CanWhiteKingCastle = board.CanWhiteKingCastle;
+            CanWhiteQueenCastle = board.CanWhiteQueenCastle;
+            CanBlackKingCastle = board.CanBlackKingCastle;
+            CanBlackQueenCastle = board.CanBlackQueenCastle;
+
+            // Copy game state
+            IsWhiteTurn = board.IsWhiteTurn;
+            EnPassantTarget = board.EnPassantTarget;
+            DrawMoves = board.DrawMoves;
+            ComingMoveCount = board.ComingMoveCount;
+        }
 
         // Initial position
         public void InitializeBoard()

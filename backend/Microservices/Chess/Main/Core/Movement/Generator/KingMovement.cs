@@ -17,10 +17,11 @@ namespace Chess.Main.Core.Movement.Generator
 
         public static bool IsKingUnderAttack(Board board)
         {
+            bool isWhiteTurn = board.GetIsWhiteTurn();
             // Get king bitboard
-            ulong kingBit = board.GetIsWhiteTurn() ? board.GetWhiteKing() : board.GetBlackKing();
+            ulong kingBit = isWhiteTurn ? board.GetWhiteKing() : board.GetBlackKing();
             // Get under attack squares
-            ulong attackedSquares = GetUnderAttackSquares(board, board.GetIsWhiteTurn());
+            ulong attackedSquares = GetUnderAttackSquares(board, !isWhiteTurn);
             
             return (kingBit & attackedSquares) != 0;
         }

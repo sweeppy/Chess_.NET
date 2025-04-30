@@ -47,12 +47,13 @@ const PlayWithComputerPage = () => {
 
   const handlePieceMove = async (targetSquare: number) => {
     try {
-      if (startSquare && targetSquare && currentFen) {
+      if (startSquare != undefined && targetSquare != undefined && currentFen) {
         const request: MakeMoveRequest = {
           startSquare: startSquare,
           targetSquare: targetSquare,
           fenBeforeMove: currentFen,
         };
+
         const response = await MakeMove(request);
 
         if (response.isGameEnded) {

@@ -5,7 +5,11 @@ interface WinnerProps {
 }
 
 const Winner: React.FC<WinnerProps> = ({ winnerName }) => {
-  return <div className="winner">Winner: {winnerName}</div>;
+  return (
+    <div className="winner">
+      {winnerName == 'DRAW' ? 'Draw' : `Winner: ${winnerName}`}{' '}
+    </div>
+  );
 };
 
 export default Winner;

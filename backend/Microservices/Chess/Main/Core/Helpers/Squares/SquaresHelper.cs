@@ -47,8 +47,8 @@ namespace Chess.Main.Core.Helpers.Squares
         public static bool IsPieceOnSquare(Board board, int squareIndex)
         {
             ulong bitIndex = 1UL << squareIndex;
-
-            return (board.GetAllPieces() & (1UL << squareIndex)) != 0UL;
+            ulong opponentPieces = board.GetIsWhiteTurn() ? board.GetBlackPieces() : board.GetWhitePieces();
+            return (opponentPieces & bitIndex) != 0UL;
         }
     }
 

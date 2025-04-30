@@ -120,16 +120,15 @@ namespace Chess.API.Implementations
             // Append piece symbol
             moveNotation.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
 
+            // If it capture move append 'x'
+            if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
+                moveNotation.Append('x');
+
             // Make move (change board bitboards)
             board.MakeMove(request.StartSquare, request.TargetSquare, ref board);
 
             // Find current game in db
             GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
-
-            // Create move notation
-            // If it capture move append 'x'
-            if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
-                moveNotation.Append('x');
 
             // Append target square
             if (SquaresHelper.SquareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
@@ -159,6 +158,20 @@ namespace Chess.API.Implementations
             }
             // ? Maybe change this response
             return new OnMoveResponse(null, null);
+        }
+
+        public IMovement.GameCondition? GetGameCondition(Board board, Dictionary<int, List<int>> legalMoves)
+        {
+            if (legalMoves.Count == 0)
+            {
+                if (KingMovement.IsKingUnderAttack(board)) // here board after move
+                {
+                    return IMovement.GameCondition.LOSE;
+                }
+                return IMovement.GameCondition.DRAW;
+            }
+
+            return null;
         }
     }
 }

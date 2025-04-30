@@ -9,6 +9,7 @@ using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
 using Chess.DTO.Responses.GameProcess;
+using Chess.Main.Core.Helpers.Castling;
 
 
 namespace Chess.API.Implementations
@@ -117,12 +118,20 @@ namespace Chess.API.Implementations
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
             StringBuilder moveNotation = new();
+            bool isCastlingMove = CastleHelper.IsCastleMove(request.StartSquare, request.TargetSquare, board);
             // Append piece symbol
-            moveNotation.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
-
-            // If it capture move append 'x'
-            if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
-                moveNotation.Append('x');
+            if (isCastlingMove)
+            {
+                moveNotation.Append(CastleHelper.IsKingCastle(request.StartSquare, request.TargetSquare)
+                ? "O-O" : "O-O-O");
+            }
+            else
+            {
+                moveNotation.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
+                // If it capture move append 'x'
+                if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
+                    moveNotation.Append('x');
+            }
 
             // Make move (change board bitboards)
             board.MakeMove(request.StartSquare, request.TargetSquare, ref board);
@@ -131,15 +140,17 @@ namespace Chess.API.Implementations
             GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
 
             // Append target square
-            if (SquaresHelper.SquareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
-                moveNotation.Append(value);
-            else
-                moveNotation.Append("[unknown_square]");
-
-            // Append '+' if king under attack
-            if (KingMovement.IsKingUnderAttack(board))
+            if (!isCastlingMove)
             {
-                moveNotation.Append('+');
+                if (SquaresHelper.SquareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
+                    moveNotation.Append(value);
+                else moveNotation.Append("[unknown_square]");
+
+                // Append '+' if king under attack
+                if (KingMovement.IsKingUnderAttack(board))
+                {
+                    moveNotation.Append('+');
+                }
             }
 
             // Generate fen from updated board

@@ -185,7 +185,7 @@ namespace Chess.Main.Models
         {
             // For FEN
             board.ComingMoveCount++;
-            if (IsItMoveForDraw(startSquare, targetSquare, ref board))
+            if (IsItMoveForDraw(startSquare, targetSquare, board))
                 board.DrawMoves++;
             else
                 board.DrawMoves = 0;
@@ -233,9 +233,19 @@ namespace Chess.Main.Models
                 }
                 else if ((board.WhiteKnights & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKnights, startBit, targetBit);
                 else if ((board.WhiteBishops & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteBishops, startBit, targetBit);
-                else if ((board.WhiteRooks & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteRooks, startBit, targetBit);
+                else if ((board.WhiteRooks & startBit) != 0)
+                {
+                    PieceMovement.PieceMove(ref board.WhiteRooks, startBit, targetBit);
+                    if (startSquare == 0) board.CanWhiteKingCastle = false;
+                    else if (startSquare == 7) board.CanWhiteQueenCastle = false;
+                }
                 else if ((board.WhiteQueens & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteQueens, startBit, targetBit);
-                else if ((board.WhiteKing & startBit) != 0) PieceMovement.PieceMove(ref board.WhiteKing, startBit, targetBit);
+                else if ((board.WhiteKing & startBit) != 0)
+                {
+                    PieceMovement.PieceMove(ref board.WhiteKing, startBit, targetBit);
+                    board.CanWhiteKingCastle = false;
+                    board.CanWhiteQueenCastle = false;
+                }
                 board.allPieces &= ~startBit;
                 board.WhitePieces &= ~startBit;
 
@@ -261,9 +271,19 @@ namespace Chess.Main.Models
                 }
                 else if ((board.BlackKnights & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKnights, startBit, targetBit);
                 else if ((board.BlackBishops & startBit) != 0) PieceMovement.PieceMove(ref board.BlackBishops, startBit, targetBit);
-                else if ((board.BlackRooks & startBit) != 0) PieceMovement.PieceMove(ref board.BlackRooks, startBit, targetBit);
+                else if ((board.BlackRooks & startBit) != 0)
+                {
+                    PieceMovement.PieceMove(ref board.BlackRooks, startBit, targetBit);
+                    if (startSquare == 56) board.CanBlackKingCastle = false;
+                    else if (startSquare == 63) board.CanBlackQueenCastle = false;
+                }
                 else if ((board.BlackQueens & startBit) != 0) PieceMovement.PieceMove(ref board.BlackQueens, startBit, targetBit);
-                else if ((board.BlackKing & startBit) != 0) PieceMovement.PieceMove(ref board.BlackKing, startBit, targetBit);
+                else if ((board.BlackKing & startBit) != 0)
+                {
+                    PieceMovement.PieceMove(ref board.BlackKing, startBit, targetBit);
+                    board.CanBlackKingCastle = false;
+                    board.CanBlackQueenCastle = false;
+                }    
 
                 board.allPieces = (board.allPieces & ~startBit) | targetBit;
                 board.BlackPieces = (board.BlackPieces & ~startBit) | targetBit;
@@ -357,7 +377,7 @@ namespace Chess.Main.Models
                 board.EnPassantTarget = 0UL;
             }
         }
-        private static bool IsItMoveForDraw(int startSquare, int targetSquare, ref Board board)
+        private static bool IsItMoveForDraw(int startSquare, int targetSquare, Board board)
         {
             ulong startBit = 1UL << startSquare;
             ulong targetBit = 1UL << targetSquare;

@@ -91,7 +91,7 @@ namespace Chess.API.Controllers
                         await _db.SaveChangesAsync();
                         response = new(
                             isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
-                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
+                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
                             winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
 
                         return Ok(response);

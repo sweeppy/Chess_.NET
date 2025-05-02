@@ -31,93 +31,6 @@ namespace Chess.API.Controllers
             _logger = logger;
         }
 
-        [HttpPost("MakeMove")]
-        [Authorize]
-        public async Task<IActionResult> MakeMove([FromBody] MoveRequest request)
-        {
-            try
-            {
-                // Get player that playing current game from jwt token
-                int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-                // Get fen and moveNotations
-                OnMoveResponse moveResponse = await _movement.OnMove(request, playerId);
-
-                // * Make computer move
-                var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
-                Board board = FenUtility.LoadBoardFromFen(moveResponse.Fen);
-                IMovement.GameCondition? gameCondition = _movement.GetGameCondition(board, legalComputerMoves);
-                if (gameCondition.HasValue)
-                {
-                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
-                    if (endedGame != null)
-                    {
-                        endedGame.IsActiveGame = false;
-                        await _db.SaveChangesAsync();
-                        GameResponse endGameResponse = new(
-                                isSuccess: true, message: "Game ended", fen: moveResponse.Fen,
-                                legalMoves: null, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
-                                winner: gameCondition.Value == IMovement.GameCondition.LOSE ? User.FindFirst(ClaimTypes.Name)?.Value : "DRAW"
-                            );
-
-                        return Ok(endGameResponse);
-                    }
-                    return NotFound("Game was not found");
-                }
-
-                var moveValues = SearchAlgorithm.Search(legalComputerMoves);
-
-                MoveRequest computerMoveRequest = new()
-                {
-                    StartSquare = moveValues.StartSquare,
-                    TargetSquare = moveValues.TargetSquare,
-                    FenBeforeMove = moveResponse.Fen
-                };
-                // Update moveResponse after computer move
-                moveResponse = await _movement.OnMove(computerMoveRequest, 0);
-
-                var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
-                
-                gameCondition = _movement.GetGameCondition(board, legalMoves);
-
-                GameResponse response;
-
-                if (gameCondition.HasValue)
-                {
-                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
-                    if (endedGame != null)
-                    {
-                        endedGame.IsActiveGame = false;
-                        await _db.SaveChangesAsync();
-                        response = new(
-                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
-                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
-                            winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
-
-                        return Ok(response);
-                    }
-                    return NotFound("Game was not found");
-                }
-
-                response = new(
-                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
-                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
-                            winner: null
-                        );
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical($"Exception was occurred while trying to make move: {ex.Message}");
-                GameResponse badResponse = new(isSuccess: false,
-                        message: "An error occurred on your move", fen: request.FenBeforeMove,
-                        legalMoves: null, moveNotations: null, isGameEnded: false, winner: null
-                    );
-                return BadRequest(badResponse);
-            }
-        }
-
         [HttpPost("OnGameStart")]
         [Authorize]
         public async Task<IActionResult> OnGameStart([FromBody] GameStartRequest request)
@@ -172,7 +85,7 @@ namespace Chess.API.Controllers
                     OnMoveResponse moveResponse = await _movement.OnMove(computerMoveRequest, 0);
                     fen = moveResponse.Fen;
                 }
-                            
+
 
                 var legalMoves = _movement.GetLegalMoves(fen);
 
@@ -189,6 +102,100 @@ namespace Chess.API.Controllers
                     isSuccess: false, "Something went wrong while trying to create the game");
                 return BadRequest(response);
             }
+        }
+
+        [HttpPost("MakeMove")]
+        [Authorize]
+        public async Task<IActionResult> MakeMove([FromBody] MoveRequest request)
+        {
+            try
+            {
+                // Get player that playing current game from jwt token
+                int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                // Get fen and moveNotations
+                OnMoveResponse moveResponse = await _movement.OnMove(request, playerId);
+
+                // * Make computer move
+                var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
+                Board board = FenUtility.LoadBoardFromFen(moveResponse.Fen);
+                IMovement.GameCondition? gameCondition = _movement.GetGameCondition(board, legalComputerMoves);
+                if (gameCondition.HasValue)
+                {
+                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
+                    if (endedGame != null)
+                    {
+                        endedGame.IsActiveGame = false;
+                        await _db.SaveChangesAsync();
+                        GameResponse endGameResponse = new(
+                                isSuccess: true, message: "Game ended", fen: moveResponse.Fen,
+                                legalMoves: null, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
+                                winner: gameCondition.Value == IMovement.GameCondition.LOSE ? User.FindFirst(ClaimTypes.Name)?.Value : "DRAW"
+                            );
+
+                        return Ok(endGameResponse);
+                    }
+                    return NotFound("Game was not found");
+                }
+
+                var moveValues = SearchAlgorithm.Search(legalComputerMoves);
+
+                MoveRequest computerMoveRequest = new()
+                {
+                    StartSquare = moveValues.StartSquare,
+                    TargetSquare = moveValues.TargetSquare,
+                    FenBeforeMove = moveResponse.Fen
+                };
+                // Update moveResponse after computer move
+                moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+
+                var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
+
+                gameCondition = _movement.GetGameCondition(board, legalMoves);
+
+                GameResponse response;
+
+                if (gameCondition.HasValue)
+                {
+                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
+                    if (endedGame != null)
+                    {
+                        endedGame.IsActiveGame = false;
+                        await _db.SaveChangesAsync();
+                        response = new(
+                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
+                            winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
+
+                        return Ok(response);
+                    }
+                    return NotFound("Game was not found");
+                }
+
+                response = new(
+                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                            legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: false,
+                            winner: null
+                        );
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception was occurred while trying to make move: {ex.Message}");
+                GameResponse badResponse = new(isSuccess: false,
+                        message: "An error occurred on your move", fen: request.FenBeforeMove,
+                        legalMoves: null, moveNotations: null, isGameEnded: false, winner: null
+                    );
+                return BadRequest(badResponse);
+            }
+        }
+
+        [HttpPost("PromotePawn")]
+        [Authorize]
+        public async Task<IActionResult> PromotePawn([FromBody] PawnPromotionRequest request)
+        {
+            
         } 
     }
 }

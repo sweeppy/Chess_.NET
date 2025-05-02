@@ -184,5 +184,12 @@ namespace Chess.API.Implementations
 
             return null;
         }
+
+        public Task<OnMoveResponse> PromotePawn(PawnPromotionRequest request, int playerId)
+        {
+            Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
+
+            
+        }
     }
 }

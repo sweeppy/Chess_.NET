@@ -12,9 +12,11 @@ namespace Chess.API.Interfaces
             LOSE = -1,
             DRAW = 0,
         }
-        
+
         public Task<OnMoveResponse> OnMove(MoveRequest request, int playerId);
         public Dictionary<int, List<int>> GetLegalMoves(string fen);
         public GameCondition? GetGameCondition(Board board, Dictionary<int, List<int>> legalMoves);
+
+        public Task<OnMoveResponse> PromotePawn(PawnPromotionRequest request, int playerId);
     }
 }

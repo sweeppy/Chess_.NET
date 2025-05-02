@@ -1,3 +1,4 @@
+using Chess.DTO.Requests;
 using Chess.Main.Core.Helpers.Castling;
 using Chess.Main.Core.Movement;
 
@@ -377,11 +378,29 @@ namespace Chess.Main.Models
                 board.EnPassantTarget = 0UL;
             }
         }
+
+        public void PromotePawn(PawnPromotionRequest request, ref Board board)
+        {
+            if (board.IsWhiteTurn)
+            {
+                board.WhitePawns ^= 1UL << request.StartSquare;
+                board.WhitePieces ^= 1UL << request.StartSquare;
+            }
+            else
+            {
+                board.BlackPawns ^= 1UL << request.TargetSquare;
+                board.BlackPieces ^= 1UL << request.StartSquare;
+            }
+            board.allPieces ^= 1UL << request.StartSquare;
+
+
+        }
+
         private static bool IsItMoveForDraw(int startSquare, int targetSquare, Board board)
         {
             ulong startBit = 1UL << startSquare;
             ulong targetBit = 1UL << targetSquare;
-            
+
             // If it's a pawn move, it's NOT a draw move
             if (board.IsWhiteTurn)
             {
@@ -391,14 +410,14 @@ namespace Chess.Main.Models
             {
                 if ((startBit & board.BlackPawns) != 0) return false;
             }
-            
+
             // If it's a capture, it's NOT a draw move
             if ((targetBit & (board.IsWhiteTurn ? board.BlackPieces : board.WhitePieces)) != 0)
                 return false;
-            
+
             // Otherwise, it's a draw move
             return true;
-            
+
         }
     }
 }

@@ -379,21 +379,51 @@ namespace Chess.Main.Models
             }
         }
 
-        public void PromotePawn(PawnPromotionRequest request, ref Board board)
+        public void PromotePawn(int startSquare, int targetSquare, char chosenPiece, ref Board board)
         {
             if (board.IsWhiteTurn)
             {
-                board.WhitePawns ^= 1UL << request.StartSquare;
-                board.WhitePieces ^= 1UL << request.StartSquare;
+                board.WhitePawns ^= 1UL << startSquare;
+                board.WhitePieces ^= 1UL << startSquare;
+
+                switch (chosenPiece)
+                {
+                    case 'Q':
+                        board.WhiteQueens |= 1UL << targetSquare;
+                        break;
+                    case 'R':
+                        board.WhiteRooks |= 1UL << targetSquare;
+                        break;
+                    case 'B':
+                        board.WhiteBishops |= 1UL << targetSquare;
+                        break;
+                    case 'N':
+                        board.WhiteKnights |= 1UL << targetSquare;
+                        break;
+                }
             }
             else
             {
-                board.BlackPawns ^= 1UL << request.TargetSquare;
-                board.BlackPieces ^= 1UL << request.StartSquare;
+                board.BlackPawns ^= 1UL << targetSquare;
+                board.BlackPieces ^= 1UL << startSquare;
+                
+                switch (chosenPiece)
+                {
+                    case 'q':
+                        board.BlackQueens |= 1UL << targetSquare;
+                        break;
+                    case 'r':
+                        board.BlackRooks |= 1UL << targetSquare;
+                        break;
+                    case 'b':
+                        board.BlackBishops |= 1UL << targetSquare;
+                        break;
+                    case 'n':
+                        board.BlackKnights |= 1UL << targetSquare;
+                        break;
+                }
             }
-            board.allPieces ^= 1UL << request.StartSquare;
-
-
+            board.allPieces ^= 1UL << startSquare;
         }
 
         private static bool IsItMoveForDraw(int startSquare, int targetSquare, Board board)

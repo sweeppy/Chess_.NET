@@ -195,7 +195,53 @@ namespace Chess.API.Controllers
         [Authorize]
         public async Task<IActionResult> PromotePawn([FromBody] PawnPromotionRequest request)
         {
-            
+            try
+            {
+                int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                OnMoveResponse data = await _movement.PromotePawn(request, playerId);
+
+                Board board = FenUtility.LoadBoardFromFen(data.Fen);
+
+                var legalMoves = _movement.GetLegalMoves(data.Fen);
+
+                var gameCondition = _movement.GetGameCondition(board, legalMoves);
+
+                GameResponse response;
+
+                if (gameCondition.HasValue)
+                {
+                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
+                    if (endedGame != null)
+                    {
+                        endedGame.IsActiveGame = false;
+                        await _db.SaveChangesAsync();
+                        response = new(
+                            isSuccess: true, message: "Successful move", fen: data.Fen,
+                            legalMoves: legalMoves, moveNotations: data.MoveNotations, isGameEnded: true,
+                            winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
+
+                        return Ok(response);
+                    }
+                    return NotFound("Game was not found");
+                }
+
+                response = new(
+                            isSuccess: true, message: "Successful move", fen: data.Fen,
+                            legalMoves: legalMoves, moveNotations: data.MoveNotations, isGameEnded: false,
+                            winner: null
+                        );
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception in PromotePawn: {ex.Message}");
+                GameResponse response = new(isSuccess: false, message: "Something went wrong while processing this move",
+                    fen: null, legalMoves: null, null, false, null);
+                return BadRequest(response);
+            }
+
         } 
     }
 }

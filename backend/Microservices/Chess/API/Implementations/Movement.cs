@@ -138,6 +138,8 @@ namespace Chess.API.Implementations
 
             // Find current game in db
             GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
+            if (game == null)
+                return new OnMoveResponse(null, null); // ? Maybe change this response
 
             // Append target square
             if (!isCastlingMove)
@@ -156,19 +158,15 @@ namespace Chess.API.Implementations
             // Generate fen from updated board
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-            if (game != null) // update game info
-            {
-                game.Fens.Add(fenAfterMove);
-                game.Moves.Add(moveNotation.ToString());
-                await _db.SaveChangesAsync();
+            // Update game info
+            game.Fens.Add(fenAfterMove);
+            game.Moves.Add(moveNotation.ToString());
+            await _db.SaveChangesAsync();
 
-                List<string> moveNotations = game.Moves;
-                var response = new OnMoveResponse(fenAfterMove, moveNotations);
+            List<string> moveNotations = game.Moves;
+            var response = new OnMoveResponse(fenAfterMove, moveNotations);
 
-                return response;
-            }
-            // ? Maybe change this response
-            return new OnMoveResponse(null, null);
+            return response;
         }
 
         public IMovement.GameCondition? GetGameCondition(Board board, Dictionary<int, List<int>> legalMoves)
@@ -185,11 +183,35 @@ namespace Chess.API.Implementations
             return null;
         }
 
-        public Task<OnMoveResponse> PromotePawn(PawnPromotionRequest request, int playerId)
+        public async Task<OnMoveResponse> PromotePawn(PawnPromotionRequest request, int playerId)
         {
+
+            GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
+            if (game == null)
+                return new OnMoveResponse(null, null); // ? Maybe change this response
+
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
-            
+            StringBuilder moveNotation = new();
+
+            if ((board.GetAllPieces() & (1UL << request.TargetSquare)) != 0)
+            {
+                char pawnFile = SquaresHelper.SquareIndexToStringSquare[request.StartSquare][0];
+                moveNotation.Append($"{pawnFile}x");
+            }
+
+            moveNotation.Append(SquaresHelper.SquareIndexToStringSquare[request.TargetSquare]);
+            moveNotation.Append($"={request.ChosenPiece}");
+
+
+            board.PromotePawn(request.StartSquare, request.TargetSquare, request.ChosenPiece, ref board);
+
+            string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
+            game.Fens.Add(fenAfterMove);
+            game.Moves.Add(moveNotation.ToString());
+            await _db.SaveChangesAsync();
+
+            return new OnMoveResponse(fenAfterMove, game.Moves);
         }
     }
 }

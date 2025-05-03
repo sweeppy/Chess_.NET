@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import GameHistory from '../../components/chess/pages/playWithComputer/GameHistory';
-import GameOptions from '../../components/chess/pages/playWithComputer/GameOptions';
+import GameHistory from '../../components/chess/pages/play/GameHistory';
+import GameOptions from '../../components/chess/pages/play/GameOptions';
 import Nav from '../../components/chess/Nav';
 
 import ErrorAlert from '../../components/alerts/ErrorAlert';
@@ -10,7 +10,9 @@ import { OnStartGame } from '../../services/Game/startGame';
 import { getPiecesFromFen } from '../../services/Game/GameProcess/fenUtility';
 import { MakeMove } from '../../services/Game/GameProcess/makeMove';
 import { MakeMoveRequest } from '../../models/Requests/Game/MakeMoveRequest';
-import Winner from '../../components/chess/pages/playWithComputer/Winner';
+import Winner from '../../components/chess/pages/play/Winner';
+import Promotion from '../../components/chess/pages/play/Promotion';
+import { handlePawnPromotion } from '../../services/Game/GameProcess/PawnPromotion';
 
 const PlayWithComputerPage = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -38,7 +40,13 @@ const PlayWithComputerPage = () => {
   const [startSquare, setStartSquare] = useState<number | null>(null);
 
   const [moveNotations, setMoveNotations] = useState<string[] | null>(null);
+
   const [winner, setWinner] = useState<string | null>(null);
+
+  const [promotionData, setPromotionData] = useState<{
+    isOpen: boolean;
+    squareIndex: number | null;
+  }>({ isOpen: false, squareIndex: null });
 
   const handlePieceClick = (squareIndex: number) => {
     setCurrentLegalMoves(allLegalMoves?.[squareIndex]);
@@ -48,6 +56,18 @@ const PlayWithComputerPage = () => {
   const handlePieceMove = async (targetSquare: number) => {
     try {
       if (startSquare != undefined && targetSquare != undefined && currentFen) {
+        const piece = pieces.find((p) => p.squareIndex === startSquare);
+
+        if (piece && (piece.type === 'P' || piece.type === 'p')) {
+          const isWhitePromotion = piece.type === 'P' && targetSquare >= 56;
+          const isBlackPromotion = piece.type === 'p' && targetSquare <= 7;
+
+          if (isWhitePromotion || isBlackPromotion) {
+            setPromotionData({ isOpen: true, squareIndex: targetSquare });
+            return;
+          }
+        }
+
         const request: MakeMoveRequest = {
           startSquare: startSquare,
           targetSquare: targetSquare,
@@ -105,6 +125,12 @@ const PlayWithComputerPage = () => {
       setIsErrorAlertClosing(false);
     }, 500);
   };
+  const handlePromotionSelect = (pieceType: string) => {
+    if (promotionData.squareIndex !== null && startSquare !== null) {
+      const response = handlePawnPromotion();
+      setPromotionData({ isOpen: false, squareIndex: null });
+    }
+  };
 
   return (
     <>
@@ -115,6 +141,12 @@ const PlayWithComputerPage = () => {
           closeAlert={handleErrorAlertClose}
         />
       )}
+      <Promotion
+        isOpen={promotionData.isOpen}
+        playerColor={playerColor}
+        onSelect={handlePromotionSelect}
+        onClose={() => setPromotionData({ isOpen: false, squareIndex: null })}
+      />
       <Nav />
       <div className="container nav-padding">
         <div className="even-columns padding-block-400 max-height">

@@ -15,7 +15,10 @@ const Promotion: React.FC<PromotionProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const promotionPieces =
+  const pieceSymbols =
+    playerColor === 'white' ? ['Q', 'R', 'B', 'N'] : ['q', 'r', 'b', 'n'];
+
+  const piecesSvg =
     playerColor === 'white'
       ? ['W_Queen', 'W_Rook', 'W_Bishop', 'W_Knight']
       : ['B_Queen', 'B_Rook', 'B_Bishop', 'B_Knight'];
@@ -24,14 +27,16 @@ const Promotion: React.FC<PromotionProps> = ({
     <div className="promotion-modal">
       <div className="promotion-backdrop" onClick={onClose} />
       <div className="promotion-options">
-        {promotionPieces.map((piece) => (
+        {pieceSymbols.map((piece) => (
           <div
             key={piece}
             className="promotion-option"
             onClick={() => onSelect(piece)}
           >
             <img
-              src={`/src/assets/game/chess_pieces/${piece}.svg`}
+              src={`/src/assets/game/chess_pieces/${
+                piecesSvg[pieceSymbols.indexOf(piece)]
+              }.svg`}
               alt={piece}
               className="promotion-piece"
             />

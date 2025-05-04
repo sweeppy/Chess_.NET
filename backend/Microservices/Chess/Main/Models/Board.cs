@@ -406,7 +406,7 @@ namespace Chess.Main.Models
             {
                 board.BlackPawns ^= 1UL << targetSquare;
                 board.BlackPieces ^= 1UL << startSquare;
-                
+
                 switch (chosenPiece)
                 {
                     case 'q':
@@ -424,6 +424,8 @@ namespace Chess.Main.Models
                 }
             }
             board.allPieces ^= 1UL << startSquare;
+
+            board.IsWhiteTurn = !board.IsWhiteTurn;
         }
 
         private static bool IsItMoveForDraw(int startSquare, int targetSquare, Board board)

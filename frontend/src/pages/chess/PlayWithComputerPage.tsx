@@ -12,7 +12,8 @@ import { MakeMove } from '../../services/Game/GameProcess/makeMove';
 import { MakeMoveRequest } from '../../models/Requests/Game/MakeMoveRequest';
 import Winner from '../../components/chess/pages/play/Winner';
 import Promotion from '../../components/chess/pages/play/Promotion';
-import { handlePawnPromotion } from '../../services/Game/GameProcess/PawnPromotion';
+import { PromotePawn } from '../../services/Game/GameProcess/PawnPromotion';
+import { PawnPromotionRequest } from '../../models/Requests/Game/PawnPromotionRequest';
 
 const PlayWithComputerPage = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -125,9 +126,29 @@ const PlayWithComputerPage = () => {
       setIsErrorAlertClosing(false);
     }, 500);
   };
-  const handlePromotionSelect = (pieceType: string) => {
-    if (promotionData.squareIndex !== null && startSquare !== null) {
-      const response = handlePawnPromotion();
+  const handlePromotionSelect = async (pieceType: string) => {
+    if (
+      promotionData.squareIndex !== null &&
+      startSquare !== null &&
+      currentFen
+    ) {
+      const promoteRequest: PawnPromotionRequest = {
+        startSquare: startSquare,
+        targetSquare: promotionData.squareIndex,
+        fenBeforeMove: currentFen,
+        chosenPiece: pieceType,
+      };
+      const data = await PromotePawn(promoteRequest);
+      if (data.isGameEnded) {
+        setWinner(data.winner);
+      }
+
+      setCurrentFen(data.fen);
+      setMoveNotations(data.moveNotations);
+      setAllLegalMoves(data.legalMoves);
+      setCurrentLegalMoves(undefined);
+      setPieces(getPiecesFromFen(data.fen));
+
       setPromotionData({ isOpen: false, squareIndex: null });
     }
   };

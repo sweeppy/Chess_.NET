@@ -250,8 +250,8 @@ namespace Chess.Main.Models
                 board.allPieces &= ~startBit;
                 board.WhitePieces &= ~startBit;
 
-                board.allPieces |= startBit;
-                board.BlackPieces |= startBit;
+                board.allPieces |= targetBit;
+                board.WhitePieces |= targetBit;
 
                 if (isUnsetEnPassant) board.EnPassantTarget = null;
             }
@@ -301,20 +301,20 @@ namespace Chess.Main.Models
 
             if (board.IsWhiteTurn)
             {
-                if ((board.BlackPawns & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackPawns, targetBit);
-                else if ((board.BlackKnights & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackKnights, targetBit);
-                else if ((board.BlackBishops & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackBishops, targetBit);
-                else if ((board.BlackRooks & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackRooks, targetBit);
-                else if ((board.BlackQueens & targetBit) != 0) PieceMovement.PieceCaptured(ref board.BlackQueens, targetBit);
+                if ((board.BlackPawns & targetBit) != 0) PieceMovement.CapturePiece(ref board.BlackPawns, targetBit);
+                else if ((board.BlackKnights & targetBit) != 0) PieceMovement.CapturePiece(ref board.BlackKnights, targetBit);
+                else if ((board.BlackBishops & targetBit) != 0) PieceMovement.CapturePiece(ref board.BlackBishops, targetBit);
+                else if ((board.BlackRooks & targetBit) != 0) PieceMovement.CapturePiece(ref board.BlackRooks, targetBit);
+                else if ((board.BlackQueens & targetBit) != 0) PieceMovement.CapturePiece(ref board.BlackQueens, targetBit);
                 board.BlackPieces &= ~targetBit;
             }
             else
             {
-                if ((board.WhitePawns & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhitePawns, targetBit);
-                else if ((board.WhiteKnights & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteKnights, targetBit);
-                else if ((board.WhiteBishops & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteBishops, targetBit);
-                else if ((board.WhiteRooks & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteRooks, targetBit);
-                else if ((board.WhiteQueens & targetBit) != 0) PieceMovement.PieceCaptured(ref board.WhiteQueens, targetBit);
+                if ((board.WhitePawns & targetBit) != 0) PieceMovement.CapturePiece(ref board.WhitePawns, targetBit);
+                else if ((board.WhiteKnights & targetBit) != 0) PieceMovement.CapturePiece(ref board.WhiteKnights, targetBit);
+                else if ((board.WhiteBishops & targetBit) != 0) PieceMovement.CapturePiece(ref board.WhiteBishops, targetBit);
+                else if ((board.WhiteRooks & targetBit) != 0) PieceMovement.CapturePiece(ref board.WhiteRooks, targetBit);
+                else if ((board.WhiteQueens & targetBit) != 0) PieceMovement.CapturePiece(ref board.WhiteQueens, targetBit);
 
                 board.WhitePieces &= ~targetBit;
             }
@@ -375,7 +375,7 @@ namespace Chess.Main.Models
                 board.CanBlackKingCastle = false;
                 board.CanBlackQueenCastle = false;
 
-                board.EnPassantTarget = 0UL;
+                board.EnPassantTarget = null;
             }
         }
 
@@ -385,6 +385,7 @@ namespace Chess.Main.Models
             {
                 board.WhitePawns ^= 1UL << startSquare;
                 board.WhitePieces ^= 1UL << startSquare;
+                board.WhitePieces |= 1UL << targetSquare;
 
                 switch (chosenPiece)
                 {
@@ -406,6 +407,7 @@ namespace Chess.Main.Models
             {
                 board.BlackPawns ^= 1UL << startSquare;
                 board.BlackPieces ^= 1UL << startSquare;
+                board.BlackPieces |= 1UL << targetSquare;
 
                 switch (chosenPiece)
                 {
@@ -424,6 +426,7 @@ namespace Chess.Main.Models
                 }
             }
             board.allPieces ^= 1UL << startSquare;
+            board.allPieces |= 1UL << targetSquare;
 
             board.IsWhiteTurn = !board.IsWhiteTurn;
         }

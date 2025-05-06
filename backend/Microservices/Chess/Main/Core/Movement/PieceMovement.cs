@@ -10,7 +10,7 @@ namespace Chess.Main.Core.Movement
             moveBitboard |= targetBit;
         }
 
-        public static void PieceCaptured(ref ulong captureBitboard, ulong targetBit)
+        public static void CapturePiece(ref ulong captureBitboard, ulong targetBit)
         {
             captureBitboard &= ~targetBit;
         }

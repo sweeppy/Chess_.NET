@@ -40,8 +40,6 @@ namespace Chess.API.Controllers
                 int firstPlayerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 GameInfo? activeGame = await _db.Games.FirstOrDefaultAsync(x => x.FirstPlayerId == firstPlayerId && x.IsActiveGame);
 
-                Board board;
-
                 if (activeGame != null)
                 {
                     string lastFenOfActiveGame = activeGame.Fens[^1];
@@ -73,7 +71,8 @@ namespace Chess.API.Controllers
                 if (!request.IsPlayerPlayWhite) // player plays black
                 {
                     var legalComputerMoves = _movement.GetLegalMoves(fen);
-                    var moveValues = SearchAlgorithm.Search(legalComputerMoves);
+                    Board board = FenUtility.LoadBoardFromFen(fen);
+                    var moveValues = SearchAlgorithm.Search(legalComputerMoves, board);
 
                     MoveRequest computerMoveRequest = new()
                     {
@@ -138,16 +137,31 @@ namespace Chess.API.Controllers
                     return NotFound("Game was not found");
                 }
 
-                var moveValues = SearchAlgorithm.Search(legalComputerMoves);
+                var moveValues = SearchAlgorithm.Search(legalComputerMoves, board);
 
-                MoveRequest computerMoveRequest = new()
+                if (moveValues.IsItPromotionPawnMove && moveValues.PromotionPiece.HasValue)
                 {
-                    StartSquare = moveValues.StartSquare,
-                    TargetSquare = moveValues.TargetSquare,
-                    FenBeforeMove = moveResponse.Fen
-                };
-                // Update moveResponse after computer move
-                moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+                    PawnPromotionRequest promotionRequest = new()
+                    {
+                        StartSquare = moveValues.StartSquare,
+                        TargetSquare = moveValues.TargetSquare,
+                        FenBeforeMove = moveResponse.Fen,
+                        ChosenPiece = moveValues.PromotionPiece.Value
+                    };
+                    Console.WriteLine(moveValues.PromotionPiece);
+                    moveResponse = await _movement.PromotePawn(promotionRequest, playerId);
+                }
+                else
+                {
+                    MoveRequest computerMoveRequest = new()
+                    {
+                        StartSquare = moveValues.StartSquare,
+                        TargetSquare = moveValues.TargetSquare,
+                        FenBeforeMove = moveResponse.Fen
+                    };
+                    // Update moveResponse after computer move
+                    moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+                }
 
                 var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
 
@@ -223,7 +237,7 @@ namespace Chess.API.Controllers
                     return NotFound("Game was not found");
                 }
 
-                var moveValues = SearchAlgorithm.Search(legalComputerMoves);
+                var moveValues = SearchAlgorithm.Search(legalComputerMoves, board);
 
                 MoveRequest computerMoveRequest = new()
                 {

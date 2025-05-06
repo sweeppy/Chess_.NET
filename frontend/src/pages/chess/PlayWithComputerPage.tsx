@@ -85,7 +85,7 @@ const PlayWithComputerPage = () => {
         setAllLegalMoves(response.legalMoves);
         setCurrentLegalMoves(undefined);
         setCurrentFen(response.fen);
-        // console.log(moveNotations);
+        console.log(response);
         setMoveNotations(response.moveNotations);
       }
     } catch (error: any) {

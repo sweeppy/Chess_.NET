@@ -4,18 +4,42 @@ namespace Chess.Main.Search
 {
     public static class SearchAlgorithm
     {
-        public static MoveValues Search(Dictionary<int, List<int>> moves)
+        private static readonly char[,] promotePieces = {{'Q', 'R', 'B', 'N'}, {'q', 'r', 'b', 'n'}};
+        public static ComputerMoveValues Search(Dictionary<int, List<int>> moves, Board board)
         {
-            int squaresWithMoves = Math.Max(moves.Count - 1, 0);
+            if (moves.Count == 0)
+                throw new ArgumentException("No moves available");
 
             Random rand = new();
-            int startSquare = moves.Keys.ElementAt(rand.Next(0, squaresWithMoves));
-            List<int> movesOnChosenSquare = moves[startSquare];
-            int movesCount = movesOnChosenSquare.Count - 1;
+            int startSquareIndex = moves.Keys.ElementAt(rand.Next(0, moves.Count));
+            List<int> movesOnChosenSquare = moves[startSquareIndex];
+            int targetSquareIndex = rand.Next(0, movesOnChosenSquare.Count);
+            int targetSquare = movesOnChosenSquare[targetSquareIndex];
 
+            bool isWhiteTurn = board.GetIsWhiteTurn();
+            bool isItPawnMove = isWhiteTurn ? 
+                                (board.GetWhitePawns() & (1UL << startSquareIndex)) != 0 :
+                                (board.GetBlackPawns() & (1UL << startSquareIndex)) != 0;
 
-            int moveIndex = rand.Next(0, movesCount);
-            return new MoveValues(startSquare, movesOnChosenSquare[moveIndex]);
+            char? promotionPiece = null;
+            bool isItPromotionPawnMove = IsItPromotionPawnMove(isWhiteTurn, targetSquare, isItPawnMove);
+            if (isItPromotionPawnMove)
+            {
+                promotionPiece = isWhiteTurn ? promotePieces[0, 0] : promotePieces[1, 0];
+            }
+
+            return new ComputerMoveValues(startSquareIndex, targetSquare, isItPromotionPawnMove, promotionPiece);
+        }
+
+        private static bool IsItPromotionPawnMove(bool IsPlayerPlayWhite, int targetSquare, bool isPawnMove)
+        {
+            if (!isPawnMove)
+                return false;
+            ulong promotionRank = IsPlayerPlayWhite ? 0xff_00_00_00_00_00_00_00 : 0x00_00_00_00_00_00_00_ff;
+            if ((promotionRank & (1UL << targetSquare)) == 0)
+                return false;
+
+            return true;
         }
     }
 }

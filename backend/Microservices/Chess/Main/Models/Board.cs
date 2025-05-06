@@ -404,7 +404,7 @@ namespace Chess.Main.Models
             }
             else
             {
-                board.BlackPawns ^= 1UL << targetSquare;
+                board.BlackPawns ^= 1UL << startSquare;
                 board.BlackPieces ^= 1UL << startSquare;
 
                 switch (chosenPiece)

@@ -205,7 +205,6 @@ namespace Chess.API.Implementations
 
 
             board.PromotePawn(request.StartSquare, request.TargetSquare, request.ChosenPiece, ref board);
-
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
             game.Fens.Add(fenAfterMove);
             game.Moves.Add(moveNotation.ToString());

@@ -18,7 +18,6 @@ export const MakeMove = async (
         },
       }
     );
-    console.log(response.data);
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {

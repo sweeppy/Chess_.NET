@@ -81,7 +81,7 @@ namespace Chess.API.Controllers
                         FenBeforeMove = fen
                     };
 
-                    OnMoveResponse moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+                    OnMoveResponse moveResponse = await _movement.HandleMove(computerMoveRequest, 0);
                     fen = moveResponse.Fen;
                 }
 
@@ -113,7 +113,7 @@ namespace Chess.API.Controllers
                 int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 // Make player move
-                OnMoveResponse moveResponse = await _movement.OnMove(request, playerId);
+                OnMoveResponse moveResponse = await _movement.HandleMove(request, playerId);
 
                 // * Make computer move
                 var legalComputerMoves = _movement.GetLegalMoves(moveResponse.Fen);
@@ -149,7 +149,7 @@ namespace Chess.API.Controllers
                         ChosenPiece = moveValues.PromotionPiece.Value
                     };
                     Console.WriteLine(moveValues.PromotionPiece);
-                    moveResponse = await _movement.PromotePawn(promotionRequest, playerId);
+                    moveResponse = await _movement.HandlePawnPromotion(promotionRequest, playerId);
                 }
                 else
                 {
@@ -160,7 +160,7 @@ namespace Chess.API.Controllers
                         FenBeforeMove = moveResponse.Fen
                     };
                     // Update moveResponse after computer move
-                    moveResponse = await _movement.OnMove(computerMoveRequest, 0);
+                    moveResponse = await _movement.HandleMove(computerMoveRequest, 0);
                 }
 
                 var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
@@ -213,7 +213,7 @@ namespace Chess.API.Controllers
             {
                 int playerId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                OnMoveResponse promoteResponse = await _movement.PromotePawn(request, playerId);
+                OnMoveResponse promoteResponse = await _movement.HandlePawnPromotion(request, playerId);
 
                 // * Make computer move
                 var legalComputerMoves = _movement.GetLegalMoves(promoteResponse.Fen);
@@ -246,7 +246,7 @@ namespace Chess.API.Controllers
                     FenBeforeMove = promoteResponse.Fen
                 };
                 // Update promoteResponse after computer move
-                promoteResponse = await _movement.OnMove(computerMoveRequest, 0);
+                promoteResponse = await _movement.HandleMove(computerMoveRequest, 0);
 
                 var legalMoves = _movement.GetLegalMoves(promoteResponse.Fen);
 

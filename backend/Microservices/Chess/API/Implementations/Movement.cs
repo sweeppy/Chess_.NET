@@ -10,18 +10,14 @@ using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
 using Chess.DTO.Responses.GameProcess;
 using Chess.Main.Core.Helpers.Castling;
+using Chess.Main.Core.MoveNotation;
 
 
 namespace Chess.API.Implementations
 {
-    public class Movement : IMovement
+    public class Movement(GamesDbContext db) : IMovement
     {
-        private readonly GamesDbContext _db;
-
-        public Movement(GamesDbContext db)
-        {
-            _db = db;
-        }
+        private readonly GamesDbContext _db = db;
 
         public Dictionary<int, List<int>> GetLegalMoves(string fen)
         {
@@ -29,10 +25,7 @@ namespace Chess.API.Implementations
 
             Board board = FenUtility.LoadBoardFromFen(fen);
 
-            // TODO Use it in future for mate flag
-            // bool isInCheck = KingMovement.IsKingUnderAttack(board);
-
-            Dictionary<char, ulong> piecesCollections = GetActivePieces(board);
+            Dictionary<char, ulong> piecesCollections = GetAlliedPieces(board);
 
             for (int square = 0; square < 64; square++)
                 {
@@ -42,7 +35,7 @@ namespace Chess.API.Implementations
                         {
                             char pieceSymbol = piecesCollections.FirstOrDefault(x => (x.Value & (1UL << square)) != 0).Key;
 
-                            ulong rawMoves = GetMovesByPieceSymbol(square, pieceSymbol, board);
+                            ulong rawMoves = GetLegalMovesByPieceSymbol(square, pieceSymbol, board);
 
                             List<int> validMoves = [];
                             foreach (int targetSquare in BitHelper.SquareIndexesFromBitboard(rawMoves))
@@ -67,7 +60,7 @@ namespace Chess.API.Implementations
             return legalMoves;
         }
 
-        private static Dictionary<char, ulong> GetActivePieces(Board board)
+        private static Dictionary<char, ulong> GetAlliedPieces(Board board)
         {
             Dictionary<char, ulong> pieces = [];
 
@@ -93,7 +86,7 @@ namespace Chess.API.Implementations
             return pieces;
         }
 
-        private static ulong GetMovesByPieceSymbol(int squareIndex, char pieceSymbol, Board board)
+        private static ulong GetLegalMovesByPieceSymbol(int squareIndex, char pieceSymbol, Board board)
         {
             return pieceSymbol switch
             {
@@ -113,27 +106,15 @@ namespace Chess.API.Implementations
             };
         }
 
-        public async Task<OnMoveResponse> OnMove(MoveRequest request, int playerId)
+        public async Task<OnMoveResponse> HandleMove(MoveRequest request, int playerId)
         {
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
+            char movingPieceSymbol = SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare).GetValueOrDefault();
 
-            StringBuilder moveNotation = new();
-            bool isCastlingMove = CastleHelper.IsCastleMove(request.StartSquare, request.TargetSquare, board);
-            // Append piece symbol
-            if (isCastlingMove)
-            {
-                moveNotation.Append(CastleHelper.IsKingCastle(request.StartSquare, request.TargetSquare)
-                ? "O-O" : "O-O-O");
-            }
-            else
-            {
-                moveNotation.Append(SquaresHelper.GetPieceSymbolFromSquare(board, request.StartSquare));
-                // If it capture move append 'x'
-                if (SquaresHelper.IsPieceOnSquare(board, request.TargetSquare))
-                    moveNotation.Append('x');
-            }
+            // For move notation (must be checked before the move)
+            bool isCaptureMove = SquaresHelper.IsPieceOnSquare(board, request.TargetSquare);
 
-            // Make move (change board bitboards)
+            // Make move (update board)
             board.MakeMove(request.StartSquare, request.TargetSquare, ref board);
 
             // Find current game in db
@@ -141,26 +122,20 @@ namespace Chess.API.Implementations
             if (game == null)
                 return new OnMoveResponse(null, null); // ? Maybe change this response
 
-            // Append target square
-            if (!isCastlingMove)
-            {
-                if (SquaresHelper.SquareIndexToStringSquare.TryGetValue(request.TargetSquare, out var value))
-                    moveNotation.Append(value);
-                else moveNotation.Append("[unknown_square]");
-
-                // Append '+' if king under attack
-                if (KingMovement.IsKingUnderAttack(board))
-                {
-                    moveNotation.Append('+');
-                }
-            }
-
-            // Generate fen from updated board
+            // Generate FEN from updated board
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
 
-            // Update game info
+            // Generate move notation
+            GenerateMoveNotationRequest moveNotationRequest = new(request.StartSquare,
+                                                                  request.TargetSquare,
+                                                                  board,
+                                                                  isCaptureMove,
+                                                                  movingPieceSymbol);
+            string moveNotation = MoveNotation.Generate(moveNotationRequest);
+
+            // Update game info in database
             game.Fens.Add(fenAfterMove);
-            game.Moves.Add(moveNotation.ToString());
+            game.Moves.Add(moveNotation);
             await _db.SaveChangesAsync();
 
             List<string> moveNotations = game.Moves;
@@ -183,34 +158,43 @@ namespace Chess.API.Implementations
             return null;
         }
 
-        public async Task<OnMoveResponse> PromotePawn(PawnPromotionRequest request, int playerId)
+        public async Task<OnMoveResponse> HandlePawnPromotion(PawnPromotionRequest request, int playerId)
         {
-
             GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
             if (game == null)
                 return new OnMoveResponse(null, null); // ? Maybe change this response
 
             Board board = FenUtility.LoadBoardFromFen(request.FenBeforeMove);
 
-            StringBuilder moveNotation = new();
+            bool isCaptureMove = SquaresHelper.IsPieceOnSquare(board, request.TargetSquare);
 
-            if ((board.GetAllPieces() & (1UL << request.TargetSquare)) != 0)
-            {
-                char pawnFile = SquaresHelper.SquareIndexToStringSquare[request.StartSquare][0];
-                moveNotation.Append($"{pawnFile}x");
-            }
-
-            moveNotation.Append(SquaresHelper.SquareIndexToStringSquare[request.TargetSquare]);
-            moveNotation.Append($"={request.ChosenPiece}");
-
-
+            // Make promotion move (update board)
             board.PromotePawn(request.StartSquare, request.TargetSquare, request.ChosenPiece, ref board);
+
+            // Generate FEN from updated board
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);
+
+            GenerateMoveNotationRequest moveNotationRequest = new(request.StartSquare,
+                                                                  request.TargetSquare,
+                                                                  board,
+                                                                  isCaptureMove,
+                                                                  null,
+                                                                  request.ChosenPiece,
+                                                                  isItPromotionPawnMove: true
+                                                                  );
+            string moveNotation = MoveNotation.Generate(moveNotationRequest);
+
+            // Update game info in database
             game.Fens.Add(fenAfterMove);
             game.Moves.Add(moveNotation.ToString());
             await _db.SaveChangesAsync();
 
             return new OnMoveResponse(fenAfterMove, game.Moves);
+        }
+
+        public Task<OnMoveResponse> OnMove(MoveRequest request, int playerId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

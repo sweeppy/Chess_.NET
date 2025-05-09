@@ -1,5 +1,3 @@
-using Chess.Main.Models;
-
 namespace Chess.Main.Core.Movement
 {
     public static class PieceMovement

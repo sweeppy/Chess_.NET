@@ -40,7 +40,7 @@ namespace Chess.API.Implementations
                             foreach (int targetSquare in BitHelper.SquareIndexesFromBitboard(rawMoves))
                             {
                                 Board tempBoard = FenUtility.LoadBoardFromFen(fen);
-                                tempBoard.MakeMove(square, targetSquare, ref tempBoard);
+                                tempBoard.MakeRegularMove(square, targetSquare, ref tempBoard);
                                 
                                 if (KingMovement.WillKingBeInSafeAfterImagineMove(tempBoard))
                                 {
@@ -114,7 +114,7 @@ namespace Chess.API.Implementations
             bool isCaptureMove = SquaresHelper.IsPieceOnSquare(board, request.TargetSquare);
 
             // Make move (update board)
-            board.MakeMove(request.StartSquare, request.TargetSquare, ref board);
+            board.MakeRegularMove(request.StartSquare, request.TargetSquare, ref board);
 
             // Find current game in db
             GameInfo? game = _db.Games.FirstOrDefault(g => g.FirstPlayerId == playerId || g.SecondPlayerId == playerId && g.IsActiveGame);
@@ -168,7 +168,9 @@ namespace Chess.API.Implementations
             bool isCaptureMove = SquaresHelper.IsPieceOnSquare(board, request.TargetSquare);
 
             // Make promotion move (update board)
-            board.PromotePawn(request.StartSquare, request.TargetSquare, request.ChosenPiece, ref board);
+            ulong startBit = 1Ul << request.StartSquare;
+            ulong targetBit = 1UL << request.TargetSquare;
+            board.PromotePawn(startBit, targetBit, request.ChosenPiece, ref board);
 
             // Generate FEN from updated board
             string fenAfterMove = FenUtility.GenerateFenFromBoard(board);

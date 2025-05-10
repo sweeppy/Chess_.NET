@@ -55,7 +55,7 @@ namespace Chess.Main.Core.Movement.Generator
                 Board tempBoard = FenUtility.LoadBoardFromFen(FenUtility.GenerateFenFromBoard(board));
                 
                 // Imaginative move
-                tempBoard.MakeMove(squareIndex, targetSquare, ref tempBoard);
+                tempBoard.MakeRegularMove(squareIndex, targetSquare, ref tempBoard);
                 
                 // Check king safety in this move
                 if (WillKingBeInSafeAfterImagineMove(tempBoard))

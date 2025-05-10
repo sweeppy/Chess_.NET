@@ -2,7 +2,6 @@ namespace Chess.Main.Core.Helpers.BitOperation
 {
     public static class BitHelper
     {
-        private static readonly Random rnd = new Random();
         public static int BitsCount(ulong value)
         {
             int count = 0;

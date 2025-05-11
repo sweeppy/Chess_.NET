@@ -25,22 +25,21 @@ This is a web-based chess game for my personal improvement built with .NET for t
 
 #### Docker
 
-In work directory:
-
-`docker compose up -d`
+In work directory: `docker compose up -d`
 
 #### Frontend
 
 ```
 cd frontend
 npm i
+npm run dev
 ```
 
 #### Backend
 
 ##### Account service:
 
-1.  **User-secrets set up**
+1. User-secrets set up
 
 Explanation of each one:
 
@@ -56,7 +55,7 @@ Explanation of each one:
     dotnet user-secrets set "EncryptionIV" "Your16SymbolsSecretIV"
 ```
 
-2. **Apply migrations in account service:**
+2. Apply migrations in account service:
 
 ```
 dotnet ef migrations add "Initial"
@@ -77,11 +76,12 @@ dotnet ef database update
 
 1. Go to /backend/Microservices/Chess
 2. Copy .env file from account service and paste into chess service (JWT secret keys must be the same)
-3. **Apply migrations in chess service:**
+3. Apply migrations in chess service:
 
-`dotnet ef migrations add "Initial"`
-
-`dotnet ef database update`
+```
+dotnet ef migrations add "Initial"
+dotnet ef database update
+```
 
 4. Run chess service:
 

@@ -1,4 +1,4 @@
 namespace Account.DTO.JwtRequests
 {
-    public record GenerateTokenRequest(int UserId, string Username, string Email);
+    public record GenerateAccessTokenRequest(int UserId, string Username, string Email);
 }

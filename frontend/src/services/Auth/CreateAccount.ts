@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { accountClient } from '../apiClient';
 
 export const createAccountAsync = async (
   username: string,
@@ -20,16 +20,11 @@ export const createAccountAsync = async (
       throw new Error('Invalid image format. Please upload a valid image.');
     }
 
-    await axios.post(
-      'http://localhost:5096/api/Account/CreateAccount',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${localStorage.getItem('jwtToken')}`,
-        },
-      }
-    );
+    await accountClient.post('/Account/CreateAccount', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   } catch (error: any) {
     console.error(error);
     throw new Error(

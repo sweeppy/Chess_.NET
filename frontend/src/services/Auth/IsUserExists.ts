@@ -1,27 +1,27 @@
-import axios from 'axios';
-import { IsUserExistsAndEmailConfirmedResponse } from '../../models/Account/Responses/Account/IsUserExistsRequest';
+import { IsUserExistsAndEmailConfirmedResponse } from '../../models/Responses/Account/IsUserExistsRequest';
+import { accountClient } from '../apiClient';
 
 export const isUserExistsAndEmailConfirmedAsync = async (
-    email: string
+  email: string
 ): Promise<IsUserExistsAndEmailConfirmedResponse> => {
-    try {
-        const response =
-            await axios.post<IsUserExistsAndEmailConfirmedResponse>(
-                'http://localhost:5096/api/Account/IsUserExistsAndEmailConfirmed',
-                email,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-        const data = response.data;
+  try {
+    const response =
+      await accountClient.post<IsUserExistsAndEmailConfirmedResponse>(
+        '/Account/IsUserExistsAndEmailConfirmed',
+        email,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    const data = response.data;
 
-        return data;
-    } catch (error: any) {
-        console.error(error);
-        throw new Error(
-            'En error occurred while checking your account. Please try again or contact support.'
-        );
-    }
+    return data;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(
+      'En error occurred while checking your account. Please try again or contact support.'
+    );
+  }
 };

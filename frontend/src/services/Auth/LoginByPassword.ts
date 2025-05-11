@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { LoginRequest } from '../../models/Account/Requests/LoginRequest';
-import { LoginResponse } from '../../models/Account/Responses/Account/LoginResponse';
+import { LoginResponse } from '../../models/Responses/Account/LoginResponse';
+import { LoginRequest } from '../../models/Requests/Account/LoginRequest';
+import { accountClient } from '../apiClient';
 
 export const LoginByPasswordAsync = async (
   request: LoginRequest
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post<LoginResponse>(
-      'http://localhost:5096/api/Account/LoginByPassword',
+    const response = await accountClient.post<LoginResponse>(
+      '/Account/LoginByPassword',
       request,
       {
         headers: {
@@ -18,11 +19,10 @@ export const LoginByPasswordAsync = async (
     const data = response.data;
     if (data.jwtToken !== undefined && data.isSuccess) {
       localStorage.setItem('jwtToken', data.jwtToken);
-      return response.data;
+      return data;
     }
-    console.error(
-      'An error occurred while trying to get jwtToken from loginResponse'
-    );
+
+    console.error('Failed to get jwtToken from loginResponse');
     throw new Error(data.message);
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -120,7 +120,7 @@ namespace Account.API_controllers
             }
             catch (ArgumentException ArgEx) // Exception with encrypting code
             {
-                _logger.LogCritical($"Exception in AccountController HttpPost(AddNewUser). {ArgEx.Message}");
+                _logger.LogCritical($"ArgumentException in AccountController HttpPost(AddNewUser). {ArgEx.Message}");
             }
             catch (InvalidOperationException operationException) // Player with this email not found
             {
@@ -155,7 +155,14 @@ namespace Account.API_controllers
                 await _db.SaveChangesAsync();
 
                 // Generate JWT token
-                string jwtToken = _jwtService.GenerateToken(new GenerateTokenRequest(player.Id, "", player.Email));
+                string jwtToken = _jwtService.GenerateAccessToken(
+                    new GenerateAccessTokenRequest(player.Id, "", player.Email));
+
+                // Generate refresh token
+                string refreshToken = _jwtService.GenerateRefreshToken();
+                await _jwtService.SaveRefreshTokenAsync(player.Id.ToString(), refreshToken);
+
+                SetRefreshTokenCookie(refreshToken);
 
                 return Ok(new VerifyResponse(true, "Email successfully confirmed", true, jwtToken));
             }
@@ -176,7 +183,17 @@ namespace Account.API_controllers
             try
             {
                 LoginResponse response = await _userService.LoginByPassword(request);
-                return Ok(response);
+
+                string refreshToken = _jwtService.GenerateRefreshToken();
+                await _jwtService.SaveRefreshTokenAsync(response.UserId.ToString(), refreshToken);
+
+                SetRefreshTokenCookie(refreshToken);
+                return Ok(new
+                {
+                    response.IsSuccess,
+                    response.ResponseMessage,
+                    response.JwtToken,
+                });
             }
             catch (Exception ex)
             {
@@ -212,6 +229,51 @@ namespace Account.API_controllers
 
             return Ok(new BaseResponse(true, "Account was successfully created"));
         }
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            try
+            {
+                // Get Refresh Token from cookies
+                var refreshToken = Request.Cookies["refreshToken"];
+                if (string.IsNullOrEmpty(refreshToken))
+                    return Unauthorized(new { Message = "Refresh token is missing" });
+
+                // Check refresh token on valid
+                var storedToken = await _jwtService.GetRefreshToken(refreshToken);
+                if (storedToken == null || !storedToken.IsActive)
+                    return Unauthorized(new { Message = "Invalid refresh token" });
+
+                // Get user
+                var player = await _db.Players.FindAsync(storedToken.UserId);
+                if (player == null || player.Username == null)
+                    return Unauthorized(new { Message = "User not found" });
+
+                // Generate new access token
+                var newAccessToken = _jwtService.GenerateAccessToken(
+                    new GenerateAccessTokenRequest(player.Id, player.Username, player.Email));
+
+                // Generate new refresh token
+                var newRefreshToken = _jwtService.GenerateRefreshToken();
+
+                // Удаляем старый и сохраняем новый Refresh Token
+                await _jwtService.RevokeRefreshToken(refreshToken);
+                await _jwtService.SaveRefreshTokenAsync(player.Id.ToString(), newRefreshToken);
+
+                // Set new refresh token in cookies
+                SetRefreshTokenCookie(newRefreshToken);
+
+                return Ok(new
+                {
+                    AccessToken = newAccessToken
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Refresh token failed: {ex.Message}");
+                return StatusCode(500, new { Message = "Internal server error" });
+            }
+        }
 
         [HttpGet("GetUserData")]
         [Authorize]
@@ -244,6 +306,19 @@ namespace Account.API_controllers
         public IActionResult ValidateToken()
         {
             return Ok(new { isValid = true });
+        }
+
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(14)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
     }
 }

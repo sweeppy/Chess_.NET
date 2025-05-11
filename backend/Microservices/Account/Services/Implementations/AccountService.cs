@@ -23,10 +23,10 @@ namespace Account.Services.Implementations
 
         public async Task CreateAccount(CreateAccountRequest request, ClaimsPrincipal user)
         {
-            var isPasswordValidResponse = PasswordValidator.ValidatePassword(request.Password, request.ConfirmPassword);
-            if (!isPasswordValidResponse.IsValid)
+            var (IsValid, Message) = PasswordValidator.ValidatePassword(request.Password, request.ConfirmPassword);
+            if (!IsValid)
             {
-                throw new ArgumentException(isPasswordValidResponse.Message);
+                throw new ArgumentException(Message);
             }
 
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -121,7 +121,7 @@ namespace Account.Services.Implementations
             }
 
             Player? player = await _db.Players.FirstOrDefaultAsync(p => p.Email == request.Email);
-            if (player == null)
+            if (player == null || player.Password == null || player.Username == null)
             {
                 throw new KeyNotFoundException("Account with this email was not found");
             }
@@ -132,10 +132,13 @@ namespace Account.Services.Implementations
             if (!isPasswordCorrect)
                 throw new ArgumentException("Wrong password.");
 
-            string jwtToken = _jwtService.GenerateToken(new GenerateTokenRequest
+            string jwtToken = _jwtService.GenerateAccessToken(new GenerateAccessTokenRequest
             (UserId: player.Id, Username: player.Username, Email: player.Email));
 
-            return new LoginResponse(isSuccess: true, message: "Successfully login", jwtToken: jwtToken);
+            return new LoginResponse(isSuccess: true,
+                                     message: "Successfully login",
+                                     jwtToken: jwtToken,
+                                     userId: player.Id);
         }
     }
 }

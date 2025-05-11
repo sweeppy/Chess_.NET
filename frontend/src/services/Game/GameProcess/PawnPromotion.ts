@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { PawnPromotionRequest } from '../../../models/Requests/Game/PawnPromotionRequest';
 import { GameResponse } from '../../../models/Responses/Chess/GameStartResponse';
+import { chessClient } from '../../apiClient';
 
 export const PromotePawn = async (
   request: PawnPromotionRequest
@@ -9,14 +10,9 @@ export const PromotePawn = async (
     const token = localStorage.getItem('jwtToken');
     if (!token) throw Error('Jwt token was not found');
 
-    const response = await axios.post(
-      'http://localhost:5011/api/ChessMovement/PromotePawn',
-      request,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const response = await chessClient.post(
+      '/ChessMovement/PromotePawn',
+      request
     );
     return response.data;
   } catch (error) {

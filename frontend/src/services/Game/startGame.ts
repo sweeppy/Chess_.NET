@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GameResponse } from '../../models/Responses/Chess/GameStartResponse';
+import { chessClient } from '../apiClient';
 
 export const OnStartGame = async (
   isPlayerPlayWhite: boolean
@@ -8,15 +9,9 @@ export const OnStartGame = async (
     const token = localStorage.getItem('jwtToken');
     if (!token) throw new Error('Login again');
 
-    const response = await axios.post(
-      'http://localhost:5011/api/ChessMovement/OnGameStart',
-      { isPlayerPlayWhite },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await chessClient.post('/ChessMovement/OnGameStart', {
+      isPlayerPlayWhite,
+    });
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {

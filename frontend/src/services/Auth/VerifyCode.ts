@@ -1,13 +1,13 @@
-import axios from 'axios';
-import { VerifyResponse } from '../../models/Account/Responses/Account/VerifyResponse';
+import { VerifyResponse } from '../../models/Responses/Account/VerifyResponse';
+import { accountClient } from '../apiClient';
 
 export const VerifyCodeAsync = async (
   email: string,
   code: string
 ): Promise<VerifyResponse> => {
   try {
-    const response = await axios.put<VerifyResponse>(
-      'http://localhost:5096/api/Account/VerifyCode',
+    const response = await accountClient.put<VerifyResponse>(
+      '/Account/VerifyCode',
       {
         email,
         code,

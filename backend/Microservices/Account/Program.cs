@@ -49,7 +49,8 @@ builder.Services.AddCors(options =>
         options.WithOrigins("http://localhost:5173")
             .SetIsOriginAllowedToAllowWildcardSubdomains()
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 

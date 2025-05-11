@@ -20,13 +20,14 @@ namespace Account.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Database relations
-            
+
             modelBuilder.Entity<Player>() // Player-Friends relations
             .HasMany(p => p.Friends)
             .WithMany()
             .UsingEntity(j => j.ToTable("PlayerFriends"));
-            
+
         }
         public DbSet<Player> Players { get; set; }
+        public DbSet<RefreshToken> RefreshTokens {get; set;}
     }
 }

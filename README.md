@@ -26,50 +26,66 @@ This is a web-based chess game for my personal improvement built with .NET for t
 #### Docker
 
 In work directory:
+
 `docker compose up -d`
 
-- #### Frontend
-  ```
-  cd fronted
-  npm i
-  ```
-- #### Backend
-- ##### Account service:
+#### Frontend
 
-  **User-secrets set up**
-  Explanation of each one:
+```
+cd frontend
+npm i
+```
 
-  - 1. SenderPassword: your google app password.
-  - 2. EncryptionKey: using for encryption service (the length must be 32 symbols); it's just a random string.
-  - 3. EncryptionIV: using for encryption service (the length must be 16 symbols)' it's just a random string.
+#### Backend
 
-  ```
-      cd backend/Microservices/Account
-      dotnet user-secrets init
-      dotnet user-secrets set "SenderPassword" "aaaa bbbb cccc dddd"
-      dotnet user-secrets set "EncryptionKey" "Your32SymbolsSecretString"
-      dotnet user-secrets set "EncryptionIV" "Your16SymbolsSecretIV"
-  ```
+##### Account service:
 
-  - **Apply migrations**
-    `dotnet ef migrations add "Initial"`
-    `dotnet ef database update`
+1.  **User-secrets set up**
 
-- **Create .env file**
-  Create .env file in /backend/Microservices/Account
-  Copy data from example.env and paste into .env (you must change JWT secret with 256 bit string)
-- **Run Account service**
-  Now you can run account service:
-  `dotnet run`
+Explanation of each one:
 
-- **Chess service**
-- Go to /backend/Microservices/Chess
-- Copy .env file from account service and paste into chess service (JWT secret keys must be the same)
-- **Apply migrations**
-  `dotnet ef migrations add "Initial"`
-  `dotnet ef database update`
-- Run chess service:
-  `dotnet run`
+- SenderPassword: your google app password.
+- EncryptionKey: using for encryption service (the length must be 32 symbols); it's just a random string.
+- EncryptionIV: using for encryption service (the length must be 16 symbols)' it's just a random string.
+
+```
+    cd backend/Microservices/Account
+    dotnet user-secrets init
+    dotnet user-secrets set "SenderPassword" "aaaa bbbb cccc dddd"
+    dotnet user-secrets set "EncryptionKey" "Your32SymbolsSecretString"
+    dotnet user-secrets set "EncryptionIV" "Your16SymbolsSecretIV"
+```
+
+2. **Apply migrations in account service:**
+
+```
+dotnet ef migrations add "Initial"
+dotnet ef database update
+```
+
+3. **Create .env file**
+
+   Create .env file in /backend/Microservices/Account
+
+   Copy data from example.env and paste into .env (you must change JWT secret with 256 bit string)
+
+4. **Run Account service**
+
+   `dotnet run`
+
+###### Chess service
+
+1. Go to /backend/Microservices/Chess
+2. Copy .env file from account service and paste into chess service (JWT secret keys must be the same)
+3. **Apply migrations in chess service:**
+
+`dotnet ef migrations add "Initial"`
+
+`dotnet ef database update`
+
+4. Run chess service:
+
+`dotnet run`
 
 ## Useful information, that I have used:
 

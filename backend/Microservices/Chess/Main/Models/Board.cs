@@ -225,9 +225,24 @@ namespace Chess.Main.Models
                 }
                 if ((board.WhiteKnights & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.WhiteKnights, startBit: startBit, targetBit: targetBit);
                 if ((board.WhiteBishops & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.WhiteBishops, startBit: startBit, targetBit: targetBit);
-                if ((board.WhiteRooks & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.WhiteRooks, startBit: startBit, targetBit: targetBit);
+                if ((board.WhiteRooks & startBit) != 0)
+                {
+                    BitMovement.MoveBit(moveBitboard: ref board.WhiteRooks, startBit: startBit, targetBit: targetBit);
+                    if (startBit == (1UL << 0)) // a1 left rook
+                    {
+                        board.CanWhiteQueenCastle = false;
+                    }
+                    else if (startBit == (1UL << 7)) // h1 right rook
+                    {
+                        board.CanWhiteKingCastle = false;
+                    }
+                }
                 if ((board.WhiteQueens & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.WhiteQueens, startBit: startBit, targetBit: targetBit);
-                if ((board.WhiteKing & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.WhiteKing, startBit: startBit, targetBit: targetBit);
+                if ((board.WhiteKing & startBit) != 0)
+                {
+                    BitMovement.MoveBit(moveBitboard: ref board.WhiteKing, startBit: startBit, targetBit: targetBit);
+                    BanWhiteCastling(ref board);
+                }
 
 
                 BitMovement.Update_AllPieces_And_ColorPieces_Bitboards(allPiecesBitboard: ref board.allPieces,
@@ -244,9 +259,24 @@ namespace Chess.Main.Models
                 }
                 if ((board.BlackKnights & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.BlackKnights, startBit: startBit, targetBit: targetBit);
                 if ((board.BlackBishops & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.BlackBishops, startBit: startBit, targetBit: targetBit);
-                if ((board.BlackRooks & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.BlackRooks, startBit: startBit, targetBit: targetBit);
+                if ((board.BlackRooks & startBit) != 0)
+                {
+                    BitMovement.MoveBit(moveBitboard: ref board.BlackRooks, startBit: startBit, targetBit: targetBit);
+                    if (startBit == (1UL << 56)) // a8 left rook
+                    {
+                        board.CanBlackQueenCastle = false;
+                    }
+                    else if (startBit == (1UL << 63)) // h8 right rook
+                    {
+                        board.CanBlackKingCastle = false;
+                    }
+                }
                 if ((board.BlackQueens & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.BlackQueens, startBit: startBit, targetBit: targetBit);
-                if ((board.BlackKing & startBit) != 0) BitMovement.MoveBit(moveBitboard: ref board.BlackKing, startBit: startBit, targetBit: targetBit);
+                if ((board.BlackKing & startBit) != 0)
+                {
+                    BitMovement.MoveBit(moveBitboard: ref board.BlackKing, startBit: startBit, targetBit: targetBit);
+                    BanBlackCastling(ref board);
+                }
 
                 BitMovement.Update_AllPieces_And_ColorPieces_Bitboards(allPiecesBitboard: ref board.allPieces,
                                                                        colorPiecesBitboard: ref board.BlackPieces,
@@ -326,7 +356,7 @@ namespace Chess.Main.Models
             ulong targetEnPassantPawnBit;
             if (board.IsWhiteTurn)
             {
-                targetEnPassantPawnBit = targetBit >> 8; // Get bit of opponent en passant pawn
+                targetEnPassantPawnBit = targetBit >> 8; // Get bit of the opponent en passant pawn
 
                 // Delete this pawn from board
                 BitMovement.DeleteBit(ref board.BlackPawns, targetEnPassantPawnBit);
@@ -342,7 +372,7 @@ namespace Chess.Main.Models
             }
             else
             {
-                targetEnPassantPawnBit = targetBit << 8; // Get bit of opponent en passant pawn
+                targetEnPassantPawnBit = targetBit << 8; // Get bit of the opponent en passant pawn
 
                 // Delete this pawn from board
                 BitMovement.DeleteBit(ref board.WhitePawns, targetEnPassantPawnBit);
@@ -441,6 +471,16 @@ namespace Chess.Main.Models
                 board.DrawMoves++;
             else
                 board.DrawMoves = 0;
+        }
+        private static void BanBlackCastling(ref Board board)
+        {
+            board.CanBlackKingCastle = false;
+            board.CanBlackQueenCastle = false;
+        }
+        private static void BanWhiteCastling(ref Board board)
+        {
+            board.CanWhiteKingCastle = false;
+            board.CanWhiteQueenCastle = false;
         }
 
         private static bool IsCaptureMove(ulong targetBit, ulong whitePieces, ulong blackPieces)

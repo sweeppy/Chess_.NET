@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Chess_bots API", Version = "v1.0" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Chess game API", Version = "v1.0" });
 });
 
 DotNetEnv.Env.Load();
@@ -34,7 +34,8 @@ builder.Services.AddCors(options =>
         options.WithOrigins("http://localhost:5173")
         .SetIsOriginAllowedToAllowWildcardSubdomains()
         .AllowAnyHeader()
-        .AllowAnyMethod();
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
@@ -45,7 +46,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Chess_bots API v1.0.0");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Chess game API v1.0.0");
     });
 }
 

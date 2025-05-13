@@ -163,7 +163,7 @@ namespace Chess.API.Controllers
                 }
 
                 var legalMoves = _movement.GetLegalMoves(moveResponse.Fen);
-
+                board = FenUtility.LoadBoardFromFen(moveResponse.Fen); // Get updated board state
                 gameCondition = _movement.GetGameCondition(board, legalMoves);
 
                 GameResponse response;
@@ -176,9 +176,9 @@ namespace Chess.API.Controllers
                         endedGame.IsActiveGame = false;
                         await _db.SaveChangesAsync();
                         response = new(
-                            isSuccess: true, message: "Successful move", fen: moveResponse.Fen,
+                            isSuccess: true, message: "Game ended", fen: moveResponse.Fen,
                             legalMoves: legalMoves, moveNotations: moveResponse.MoveNotations, isGameEnded: true,
-                            winner: gameCondition == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
+                            winner: gameCondition.Value == IMovement.GameCondition.DRAW ? "DRAW" : "Computer");
 
                         return Ok(response);
                     }
@@ -255,7 +255,7 @@ namespace Chess.API.Controllers
 
                 if (gameCondition.HasValue)
                 {
-                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId);
+                    GameInfo? endedGame = await _db.Games.FirstOrDefaultAsync(g => g.FirstPlayerId == playerId && g.IsActiveGame == true);
                     if (endedGame != null)
                     {
                         endedGame.IsActiveGame = false;

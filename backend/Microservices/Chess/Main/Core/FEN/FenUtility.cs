@@ -138,8 +138,11 @@ namespace Chess.Main.Core.FEN
             bool canBlackKingCastle = castling.Contains('k');
             bool canBlackQueenCastle = castling.Contains('q');
 
-
-            int? enPassantSquare = SquaresHelper.StringSquareToSquareIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
+            int? enPassantSquare = null;
+            if (strEnPassantSquare != "-")
+            {
+                enPassantSquare = SquaresHelper.StringSquareToSquareIndex.TryGetValue(strEnPassantSquare, out int value) ? value : null;
+            }
 
             _ = int.TryParse(strMovesWithoutCapture, out int movesWithoutCapture);
             _ = int.TryParse(strComingMoveCount, out int comingMoveCount);

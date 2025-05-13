@@ -290,9 +290,9 @@ namespace Chess.Main.Models
 
         private static void MakeMoveWithCapture(ulong startBit, ulong targetBit, ref Board board)
         {
-            MakeMoveWithoutCapture(startBit, targetBit, ref board);
-
             DeletePieceOnTargetBit(targetBit, ref board);
+
+            MakeMoveWithoutCapture(startBit, targetBit, ref board);
         }
 
 

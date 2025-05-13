@@ -19,7 +19,7 @@ namespace Chess.Main.Core.Movement.Generator
 
             ulong index = (blockers * magic) >> (64 - relevantBits);
 
-            // Bishop can capture allied pieces
+            // Bishop can't capture allied pieces
             return MagicBitboards.MagicBishopTable[squareIndex].AttackTable[index] & ~alliedPieces;
         }
     }

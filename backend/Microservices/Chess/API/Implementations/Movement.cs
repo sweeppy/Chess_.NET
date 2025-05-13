@@ -8,7 +8,6 @@ using Chess.Main.Core.Helpers.Squares;
 using Chess.Main.Core.Movement.Generator;
 using Chess.Main.Models;
 using Chess.DTO.Responses.GameProcess;
-using Chess.Main.Core.Helpers.Castling;
 using Chess.Main.Core.MoveNotation;
 
 
